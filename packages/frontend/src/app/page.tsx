@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PetViewer } from '@/components/three/PetViewer';
+import { PetSprite } from '@/components/pet/PetSprite';
 import { PetStats } from '@/components/pet/PetStats';
 import { PetActions } from '@/components/pet/PetActions';
 import { PetSelector } from '@/components/pet/PetSelector';
@@ -104,8 +104,8 @@ export default function HomePage() {
       {pet && (
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
-            <div className="aspect-square bg-slate-800 rounded-2xl overflow-hidden max-h-[500px]">
-              <PetViewer modelUrl={pet.modelUrl} mood={pet.mood} species={pet.species} />
+            <div className="aspect-square bg-slate-800 rounded-2xl flex items-center justify-center max-h-[500px]">
+              <PetSprite species={pet.species} mood={pet.mood} isSleeping={pet.isSleeping} size={300} />
             </div>
             <Wardrobe
               petId={pet.id}
