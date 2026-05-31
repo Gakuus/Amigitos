@@ -4,7 +4,7 @@ import { api } from '@/lib/api';
 interface GameStore {
   cooldowns: Record<string, number>;
   claiming: string | null;
-  claimReward: (gameType: string, score: number) => Promise<{ coins: number; totalCoins: number; won: boolean } | null>;
+  claimReward: (gameType: string, score: number) => Promise<{ coins: number; totalCoins: number; won: boolean } | { error: string }>;
   fetchCooldowns: () => Promise<void>;
 }
 
@@ -21,9 +21,10 @@ export const useGameStore = create<GameStore>((set) => ({
         claiming: null,
       }));
       return result;
-    } catch {
+    } catch (err) {
       set({ claiming: null });
-      return null;
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      return { error: message };
     }
   },
 

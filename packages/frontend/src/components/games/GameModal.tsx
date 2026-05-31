@@ -24,7 +24,6 @@ export function GameModal({ onClose }: GameModalProps) {
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null);
   const [gameResult, setGameResult] = useState<{ score: number; coins: number; won: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [errorCount, setErrorCount] = useState(0);
   const { claimReward, cooldowns, fetchCooldowns } = useGameStore();
   const { fetchBalance } = useShopStore();
   const updateCoins = useAuthStore(s => s.updateCoins);
@@ -37,15 +36,12 @@ export function GameModal({ onClose }: GameModalProps) {
     if (!selectedGame) return;
     setError(null);
     const data = await claimReward(selectedGame, Math.round(score));
-    if (data !== null) {
+    if (data !== null && !('error' in data)) {
       setGameResult({ score: Math.round(score), coins: data.coins, won: data.won });
       fetchBalance();
       updateCoins(data.totalCoins);
-    } else {
-      setErrorCount(c => c + 1);
-      setError(errorCount > 0
-        ? 'El servidor no responde. Asegurate de tener el backend corriendo.'
-        : 'Error al reclamar recompensa. ¿El backend está funcionando?');
+    } else if (data !== null && 'error' in data) {
+      setError(data.error);
     }
   };
 
