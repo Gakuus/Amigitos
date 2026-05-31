@@ -1,50 +1,34 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
-const GRID = 3;
-const TILES = GRID * GRID;
+const SIZE = 3;
+const MAX_MOVES = 30;
+const TIMER = 90;
 
-function createPuzzle(): number[] {
-  const arr: (number | undefined)[] = Array.from({ length: TILES }, (_, i) => i);
-  do {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const temp = arr[i]!;
-      arr[i] = arr[j];
-      arr[j] = temp;
-    }
-  } while (!isSolvable(arr) || isSolved(arr));
-  return arr.map(v => v!);
-}
-
-function isSolvable(arr: (number | undefined)[]): boolean {
-  let inv = 0;
-  for (let i = 0; i < arr.length; i++) {
-    for (let j = i + 1; j < arr.length; j++) {
-      if (arr[i]! && arr[j]! && arr[i]! > arr[j]!) inv++;
+function isSolvable(grid: number[]): boolean {
+  let inversions = 0;
+  const flat = grid.filter(n => n !== 0);
+  for (let i = 0; i < flat.length; i++) {
+    for (let j = i + 1; j < flat.length; j++) {
+      if (flat[i]! > flat[j]!) inversions++;
     }
   }
-  return inv % 2 === 0;
+  const blankRow = Math.floor(grid.indexOf(0) / SIZE);
+  if (SIZE % 2 === 1) return inversions % 2 === 0;
+  return (inversions + blankRow) % 2 === 1;
 }
 
-function isSolved(arr: (number | undefined)[]): boolean {
-  return arr.every((v, i) => v === i);
-}
-
-const BG_EMOJIS = ['🐱', '🐶', '🐰', '🐹', '🦊', '🐼', '🐧', '🐉', ' '];
-
-const EMOJI_GRID = [
-  ['🐱', '🐶', '🐰'],
-  ['🐹', '🦊', '🐼'],
-  ['🐧', '🐉', ' '],
-];
-
-function getTileEmoji(index: number): string {
-  if (index === 8) return ' ';
-  const row = Math.floor(index / GRID);
-  const col = index % GRID;
-  return EMOJI_GRID[row]![col]!;
+function createPuzzle(): number[] {
+  let grid = Array.from({ length: SIZE * SIZE - 1 }, (_, i) => i + 1);
+  grid.push(0);
+  do {
+    for (let i = grid.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [grid[i], grid[j]] = [grid[j]!, grid[i]!];
+    }
+  } while (!isSolvable(grid));
+  return grid;
 }
 
 interface PetPuzzleProps {
@@ -52,102 +36,163 @@ interface PetPuzzleProps {
 }
 
 export function PetPuzzle({ onFinish }: PetPuzzleProps) {
-  const [tiles, setTiles] = useState<number[]>(createPuzzle);
+  const [grid, setGrid] = useState<number[]>(createPuzzle());
   const [moves, setMoves] = useState(0);
-  const [startTime] = useState(Date.now());
-  const [finished, setFinished] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(TIMER);
   const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [won, setWon] = useState(false);
+  const [lastMoved, setLastMoved] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const emptyIndex = tiles.indexOf(TILES - 1);
+  const isComplete = grid.every((n, i) => n === (i + 1) % (SIZE * SIZE));
+  const lost = (timeLeft <= 0 || moves >= MAX_MOVES) && !isComplete && !finished;
 
-  const canMove = useCallback((idx: number) => {
-    const emptyRow = Math.floor(emptyIndex / GRID);
-    const emptyCol = emptyIndex % GRID;
-    const tileRow = Math.floor(idx / GRID);
-    const tileCol = idx % GRID;
-    const dr = Math.abs(emptyRow - tileRow);
-    const dc = Math.abs(emptyCol - tileCol);
-    return (dr === 1 && dc === 0) || (dr === 0 && dc === 1);
-  }, [emptyIndex]);
-
-  const handleMove = useCallback((idx: number) => {
-    if (finished || !started) return;
-    if (!canMove(idx)) return;
-
-    setTiles(prev => {
-      const next: number[] = [...prev];
-      const temp = next[idx]!;
-      next[idx] = next[emptyIndex]!;
-      next[emptyIndex] = temp;
-      return next;
-    });
-    setMoves(m => m + 1);
-  }, [finished, started, canMove, emptyIndex]);
+  const finish = useCallback((win: boolean) => {
+    setFinished(true);
+    setWon(win);
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (win) {
+      const score = Math.max(0, Math.min(100, 100 - moves * 2 - (TIMER - timeLeft)));
+      setTimeout(() => onFinish(score), 600);
+    } else {
+      setTimeout(() => onFinish(0), 600);
+    }
+  }, [moves, timeLeft, onFinish]);
 
   useEffect(() => {
-    if (started && isSolved(tiles) && !finished) {
-      setFinished(true);
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const score = Math.max(0, 100 - moves * 2 - elapsed);
-      setTimeout(() => onFinish(score), 500);
-    }
-  }, [tiles, finished, moves, startTime, started, onFinish]);
+    if (isComplete && !finished) finish(true);
+  }, [isComplete, finished, finish]);
+
+  useEffect(() => {
+    if (lost) finish(false);
+  }, [lost, finish]);
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
+
+  const handleStart = () => {
+    setStarted(true);
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) return 0;
+        return t - 1;
+      });
+    }, 1000);
+  };
+
+  const moveTile = (index: number) => {
+    if (finished || lost) return;
+    const tile = grid[index]!;
+    if (tile === 0) return;
+
+    const blank = grid.indexOf(0);
+    const row = Math.floor(index / SIZE);
+    const col = index % SIZE;
+    const blankRow = Math.floor(blank / SIZE);
+    const blankCol = blank % SIZE;
+
+    if (Math.abs(row - blankRow) + Math.abs(col - blankCol) !== 1) return;
+
+    const next = [...grid];
+    [next[index], next[blank]] = [next[blank]!, next[index]!];
+    setGrid(next);
+    setMoves(m => m + 1);
+    setLastMoved(tile);
+  };
 
   const reset = () => {
-    setTiles(createPuzzle());
+    if (timerRef.current) clearInterval(timerRef.current);
+    setGrid(createPuzzle());
     setMoves(0);
+    setTimeLeft(TIMER);
+    setStarted(false);
     setFinished(false);
+    setWon(false);
+    setLastMoved(null);
   };
+
+  const remainingMoves = MAX_MOVES - moves;
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="flex items-center justify-between w-full">
-        <span className="text-sm text-slate-400">Movimientos: {moves}</span>
-        <button
-          onClick={reset}
-          className="text-xs px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
-        >
-          🔄 Reiniciar
-        </button>
+      {/* HUD */}
+      <div className="flex items-center justify-between w-full text-xs">
+        <span className={`font-medium ${remainingMoves <= 5 ? 'text-red-400' : 'text-slate-400'}`}>
+          Mov: {moves}/{MAX_MOVES}
+        </span>
+        <span className={`font-bold ${timeLeft <= 15 ? 'text-red-400 animate-pulse' : 'text-slate-400'}`}>
+          ⏱ {timeLeft}s
+        </span>
+        <div className="flex gap-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className={`w-1.5 h-1.5 rounded-full ${
+                remainingMoves > (i + 1) * 6 ? 'bg-green-500' : remainingMoves > 0 ? 'bg-yellow-500' : 'bg-red-500'
+              }`}
+            />
+          ))}
+        </div>
       </div>
 
       {!started ? (
         <div className="flex flex-col items-center gap-4 py-8">
           <span className="text-5xl">🧩</span>
-          <p className="text-slate-400 text-sm text-center">Ordena las mascotas en el menor tiempo posible</p>
+          <p className="text-slate-400 text-sm text-center max-w-xs">
+            Ordena las piezas del 1 al 8 ({SIZE}x{SIZE}).
+            Tienes {MAX_MOVES} movimientos y {TIMER} segundos.
+          </p>
           <button
-            onClick={() => setStarted(true)}
+            onClick={handleStart}
             className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-xl font-medium transition-colors"
           >
             ¡Comenzar!
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-1.5 bg-slate-700/50 p-2 rounded-xl">
-          {tiles.map((tile, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleMove(idx)}
-              disabled={tile === TILES - 1}
-              className={`w-16 h-16 md:w-20 md:h-20 rounded-lg text-2xl md:text-3xl flex items-center justify-center font-bold transition-all ${
-                tile === TILES - 1
-                  ? 'bg-transparent'
-                  : canMove(idx)
-                    ? 'bg-gradient-to-br from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 cursor-pointer scale-100 hover:scale-105'
-                    : 'bg-slate-600 cursor-pointer'
-              } ${isSolved(tiles) ? 'ring-2 ring-yellow-400/50' : ''}`}
-            >
-              {tile !== TILES - 1 && (
-                <span>{getTileEmoji(tile)}</span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+        <div className="flex flex-col items-center gap-3">
+          <div
+            className="grid gap-1.5 bg-slate-800/50 p-2 rounded-xl"
+            style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}
+          >
+            {grid.map((n, i) => {
+              const isLast = n !== 0 && n === lastMoved;
+              return (
+                <button
+                  key={i}
+                  onClick={() => moveTile(i)}
+                  disabled={finished || n === 0}
+                  className={`w-14 h-14 md:w-16 md:h-16 rounded-lg flex items-center justify-center text-lg font-bold transition-all duration-200 ${
+                    n === 0
+                      ? 'bg-slate-900/50'
+                      : isLast
+                        ? 'bg-green-600 scale-95 ring-2 ring-green-400 animate-bounce-in'
+                        : finished && won
+                          ? 'bg-green-600/80'
+                          : 'bg-slate-700 hover:bg-slate-600 hover:scale-105 active:scale-95'
+                  }`}
+                >
+                  {n !== 0 && n}
+                </button>
+              );
+            })}
+          </div>
 
-      {finished && (
-        <div className="text-center space-y-1">
-          <p className="text-yellow-400 font-medium text-sm">🏆 ¡Completado en {moves} movimientos!</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={reset}
+              className="text-xs px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+            >
+              🔄 Reiniciar
+            </button>
+            {finished && (
+              <span className={`text-sm font-bold ${won ? 'text-green-400' : 'text-red-400'}`}>
+                {won ? '🎉 ¡Completado!' : '💔 Has perdido'}
+              </span>
+            )}
+          </div>
         </div>
       )}
     </div>

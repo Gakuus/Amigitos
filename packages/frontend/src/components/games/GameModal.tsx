@@ -21,7 +21,7 @@ const GAMES: { id: GameType; name: string; icon: string; description: string; co
 
 export function GameModal({ onClose }: GameModalProps) {
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null);
-  const [gameResult, setGameResult] = useState<{ score: number; coins: number } | null>(null);
+  const [gameResult, setGameResult] = useState<{ score: number; coins: number; won: boolean } | null>(null);
   const { claimReward, cooldowns, fetchCooldowns } = useGameStore();
   const { fetchBalance } = useShopStore();
 
@@ -31,9 +31,9 @@ export function GameModal({ onClose }: GameModalProps) {
 
   const handleFinish = async (score: number) => {
     if (!selectedGame) return;
-    const coins = await claimReward(selectedGame, Math.round(score));
-    if (coins !== null) {
-      setGameResult({ score: Math.round(score), coins });
+    const data = await claimReward(selectedGame, Math.round(score));
+    if (data !== null) {
+      setGameResult({ score: Math.round(score), coins: data.coins, won: data.won });
       fetchBalance();
     }
   };
@@ -64,13 +64,25 @@ export function GameModal({ onClose }: GameModalProps) {
           {gameResult ? (
             /* Result screen */
             <div className="flex flex-col items-center gap-4 py-8 text-center">
-              <span className="text-6xl">🎉</span>
-              <h3 className="text-xl font-bold">¡Juego completado!</h3>
-              <div className="space-y-1">
+              <span className="text-6xl animate-bounce-in">{gameResult.won ? '🎉' : '💔'}</span>
+              <h3 className={`text-xl font-bold ${gameResult.won ? 'text-green-400' : 'text-red-400'}`}>
+                {gameResult.won ? '¡Victoria!' : 'Has perdido'}
+              </h3>
+              {gameResult.won ? (
                 <p className="text-slate-400">Puntuación: <span className="text-white font-medium">{gameResult.score}</span></p>
-                <p className="text-yellow-400 text-lg font-bold flex items-center gap-2 justify-center">
-                  🪙 +{gameResult.coins}
-                </p>
+              ) : (
+                <p className="text-slate-400">Sigue intentando, ¡la próxima será!</p>
+              )}
+              <div className="flex items-center gap-2">
+                {gameResult.won && gameResult.coins > 0 ? (
+                  <>
+                    <span className="text-yellow-400 text-lg font-bold flex items-center gap-2 justify-center">
+                      🪙 +{gameResult.coins}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-slate-500 text-sm">🪙 +0 monedas</span>
+                )}
               </div>
               <button
                 onClick={handleBack}

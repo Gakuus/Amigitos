@@ -2,11 +2,11 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/persistence/prisma.service';
 import { PrismaUserRepository } from '../../infrastructure/persistence/prisma-user.repository';
 
-type GameConfig = { minScore: number; maxScore: number; coinPerPoint: number; maxCoins: number; cooldownMs: number };
+type GameConfig = { minScore: number; maxScore: number; coinPerPoint: number; maxCoins: number; cooldownMs: number; minWinScore: number };
 const GAME_CONFIGS: Record<string, GameConfig> = {
-  memory:    { minScore: 0, maxScore: 100, coinPerPoint: 2,  maxCoins: 50,  cooldownMs: 30_000 },
-  catch:     { minScore: 0, maxScore: 200, coinPerPoint: 1,  maxCoins: 60,  cooldownMs: 20_000 },
-  puzzle:    { minScore: 0, maxScore: 100, coinPerPoint: 2,  maxCoins: 50,  cooldownMs: 30_000 },
+  memory:    { minScore: 0, maxScore: 100, coinPerPoint: 2,  maxCoins: 50,  cooldownMs: 30_000, minWinScore: 20 },
+  catch:     { minScore: 0, maxScore: 200, coinPerPoint: 1,  maxCoins: 60,  cooldownMs: 20_000, minWinScore: 30 },
+  puzzle:    { minScore: 0, maxScore: 100, coinPerPoint: 2,  maxCoins: 50,  cooldownMs: 30_000, minWinScore: 20 },
 };
 
 @Injectable()
@@ -21,7 +21,8 @@ export class GameService {
     if (!config) throw new BadRequestException('Invalid game type');
 
     const clamped = Math.max(config.minScore, Math.min(config.maxScore, score));
-    const coins = Math.min(clamped * config.coinPerPoint, config.maxCoins);
+    const won = clamped >= config.minWinScore;
+    const coins = won ? Math.min(clamped * config.coinPerPoint, config.maxCoins) : 0;
 
     const user = await this.userRepo.findById(userId);
     if (!user) throw new BadRequestException('User not found');
@@ -46,7 +47,7 @@ export class GameService {
       data: { userId, gameType, score, coinsEarned: coins },
     });
 
-    return { coins, totalCoins: user.coins, gameType };
+    return { coins, totalCoins: user.coins, gameType, won };
   }
 
   async getStats(userId: string) {

@@ -136,7 +136,7 @@ export const api = {
 
   // Games
   claimGameReward: (gameType: string, score: number) =>
-    request<{ coins: number; totalCoins: number; gameType: string }>('/games/claim', {
+    request<{ coins: number; totalCoins: number; gameType: string; won: boolean }>('/games/claim', {
       method: 'POST',
       body: JSON.stringify({ gameType, score }),
     }),
