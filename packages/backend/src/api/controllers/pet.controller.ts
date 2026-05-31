@@ -22,9 +22,16 @@ export class PetController {
     const pet = await this.petService.adoptPet(
       dto.name,
       dto.species as PetSpecies,
+      user.userId,
       userEntity?.coupleId ?? undefined,
     );
     return pet.toJSON();
+  }
+
+  @Get('mine')
+  async getMine(@CurrentUser() user: { userId: string }) {
+    const pets = await this.petService.getMyPets(user.userId);
+    return pets.map((p) => p.toJSON());
   }
 
   @Get(':id')

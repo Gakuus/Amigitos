@@ -14,6 +14,7 @@ interface PetProps {
   id: PetId;
   name: string;
   species: PetSpecies;
+  userId?: string;
   coupleId?: string;
   level?: PetLevel;
   experience?: Experience;
@@ -42,6 +43,7 @@ export class Pet {
   private readonly _id: PetId;
   private _name: string;
   private readonly _species: PetSpecies;
+  private readonly _userId: string | null;
   private readonly _coupleId: string | null;
   private _level: PetLevel;
   private _experience: Experience;
@@ -61,6 +63,7 @@ export class Pet {
     this._id = props.id;
     this._name = props.name;
     this._species = props.species;
+    this._userId = props.userId ?? null;
     this._coupleId = props.coupleId ?? null;
     this._level = props.level ?? PetLevel.create(1);
     this._experience = props.experience ?? Experience.create(0);
@@ -80,6 +83,7 @@ export class Pet {
   get id(): PetId { return this._id; }
   get name(): string { return this._name; }
   get species(): PetSpecies { return this._species; }
+  get userId(): string | null { return this._userId; }
   get coupleId(): string | null { return this._coupleId; }
   get level(): PetLevel { return this._level; }
   get experience(): Experience { return this._experience; }
@@ -237,6 +241,7 @@ export class Pet {
       id: this._id.value,
       name: this._name,
       species: this._species,
+      userId: this._userId,
       coupleId: this._coupleId,
       level: this._level.value,
       experience: this._experience.value,

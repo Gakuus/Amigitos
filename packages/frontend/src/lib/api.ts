@@ -1,4 +1,4 @@
-import type { PetState, UserProfile, CoupleInfo, WardrobeItemInfo, PetOutfitInfo } from '@amigitos/shared';
+import type { PetState, UserProfile, CoupleInfo, WardrobeItemInfo, PetOutfitInfo, ShopItemInfo, InventoryItem, UserBalance } from '@amigitos/shared';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 
@@ -105,6 +105,26 @@ export const api = {
 
   getMyCouple: () => request<CoupleInfo>('/couples/mine'),
 
+  getPendingInvitations: () =>
+    request<CoupleInfo[]>('/couples/pending'),
+
+  dissolveCouple: (id: string) =>
+    request<{ success: boolean }>(`/couples/${id}/dissolve`, { method: 'POST' }),
+
   // Users
+  getMyPets: () => request<PetState[]>('/pets/mine'),
+
   getMe: () => request<UserProfile>('/auth/me'),
+
+  // Shop
+  getShopItems: () => request<ShopItemInfo[]>('/shop/items'),
+
+  buyShopItem: (itemType: string, itemId: string) =>
+    request<{ success: boolean; name: string; price: number; coins: number }>(`/shop/buy/${itemType}/${itemId}`, {
+      method: 'POST',
+    }),
+
+  getInventory: () => request<InventoryItem[]>('/shop/inventory'),
+
+  getBalance: () => request<UserBalance>('/shop/balance'),
 };

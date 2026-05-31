@@ -80,4 +80,8 @@ export class CoupleService {
   async getCoupleByUser(userId: string): Promise<Couple | null> {
     return this.coupleRepo.findByUserId(userId);
   }
+
+  async getPendingByUser(userId: string): Promise<Couple[]> {
+    return this.coupleRepo.findPendingByUserId(userId);
+  }
 }

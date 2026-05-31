@@ -3,28 +3,36 @@ import type { PetState, PetSummary, PetOutfitInfo } from '@amigitos/shared';
 import { api } from '@/lib/api';
 import { connectToPetRoom, disconnectFromPetRoom, getSocket } from '@/lib/socket';
 
+type PetAction = 'feed' | 'play' | 'bathe' | 'sleep' | 'wake';
+
 interface PetStore {
   pets: PetSummary[];
   pet: PetState | null;
+  petMap: Record<string, PetState>;
   outfit: PetOutfitInfo | null;
+  outfitMap: Record<string, PetOutfitInfo>;
   activePetId: string | null;
   loading: boolean;
   error: string | null;
   fetchPets: () => Promise<void>;
   selectPet: (petId: string) => Promise<void>;
   adoptPet: (name: string, species: string) => Promise<string | null>;
+  performAction: (petId: string, action: PetAction) => Promise<void>;
   feed: () => Promise<void>;
   play: () => Promise<void>;
   bathe: () => Promise<void>;
   sleep: () => Promise<void>;
   wake: () => Promise<void>;
   refreshOutfit: () => Promise<void>;
+  refreshOutfitForPet: (petId: string) => Promise<void>;
 }
 
 export const usePetStore = create<PetStore>((set, get) => ({
   pets: [],
   pet: null,
+  petMap: {},
   outfit: null,
+  outfitMap: {},
   activePetId: null,
   loading: false,
   error: null,
@@ -32,14 +40,17 @@ export const usePetStore = create<PetStore>((set, get) => ({
   fetchPets: async () => {
     set({ loading: true, error: null });
     try {
+      let petList: PetState[];
       const couple = await api.getMyCouple().catch(() => null);
-      if (!couple) {
-        set({ pets: [], loading: false });
-        return;
+      if (couple) {
+        petList = await api.getPetsByCouple(couple.id);
+      } else {
+        petList = await api.getMyPets();
       }
-      const pets = await api.getPetsByCouple(couple.id);
-      set({
-        pets: pets.map((p: PetState) => ({
+      const petMap: Record<string, PetState> = {};
+      const summaries: PetSummary[] = petList.map((p: PetState) => {
+        petMap[p.id] = p;
+        return {
           id: p.id,
           name: p.name,
           species: p.species,
@@ -47,9 +58,9 @@ export const usePetStore = create<PetStore>((set, get) => ({
           mood: p.mood,
           thumbnail: p.thumbnail,
           isSleeping: p.isSleeping,
-        })),
-        loading: false,
+        };
       });
+      set({ pets: summaries, petMap, loading: false });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to fetch pets', loading: false });
     }
@@ -63,22 +74,37 @@ export const usePetStore = create<PetStore>((set, get) => ({
 
     set({ activePetId: petId, loading: true });
     try {
-      const [pet, outfit] = await Promise.all([
+      const [petData, outfitData] = await Promise.all([
         api.getPet(petId),
         api.getPetOutfit(petId),
       ]);
       connectToPetRoom(petId);
 
       const socket = getSocket();
-      socket.on('pet:state', (data: Record<string, unknown>) => {
-        if (data.petId === petId) {
-          set((state) => ({
-            pet: state.pet ? { ...state.pet, ...data } : state.pet,
-          }));
+      socket.on('pet:state', (eventData: Record<string, unknown>) => {
+        if (eventData.petId === petId) {
+          set((state) => {
+            const updatedPet = state.pet ? { ...state.pet, ...eventData } as PetState : state.pet;
+            const updatedPetFromMap = state.petMap[petId]
+              ? { ...state.petMap[petId], ...eventData } as PetState
+              : state.petMap[petId];
+            return {
+              pet: updatedPet,
+              petMap: updatedPetFromMap
+                ? { ...state.petMap, [petId]: updatedPetFromMap }
+                : state.petMap,
+            };
+          });
         }
       });
 
-      set({ pet, outfit, loading: false });
+      set({
+        pet: petData,
+        outfit: outfitData,
+        petMap: { ...get().petMap, [petId]: petData },
+        outfitMap: { ...get().outfitMap, [petId]: outfitData },
+        loading: false,
+      });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to select pet', loading: false });
     }
@@ -86,76 +112,83 @@ export const usePetStore = create<PetStore>((set, get) => ({
 
   adoptPet: async (name: string, species: string) => {
     try {
-      const pet = await api.adoptPet(name, species);
+      const newPet = await api.adoptPet(name, species);
       await get().fetchPets();
-      return pet.id;
+      return newPet.id;
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to adopt' });
       return null;
     }
   },
 
+  performAction: async (petId: string, action: PetAction) => {
+    try {
+      let updated: PetState;
+      switch (action) {
+        case 'feed': updated = await api.feedPet(petId); break;
+        case 'play': updated = await api.playWithPet(petId); break;
+        case 'bathe': updated = await api.bathePet(petId); break;
+        case 'sleep': updated = await api.sleepPet(petId); break;
+        case 'wake': updated = await api.wakePet(petId); break;
+      }
+      set((state) => ({
+        petMap: { ...state.petMap, [petId]: updated },
+        pets: state.pets.map((p) =>
+          p.id === petId
+            ? { ...p, mood: updated.mood, level: updated.level, isSleeping: updated.isSleeping }
+            : p,
+        ),
+        pet: state.pet?.id === petId ? updated : state.pet,
+        outfitMap: state.activePetId === petId ? state.outfitMap : state.outfitMap,
+      }));
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : `Failed to ${action}` });
+    }
+  },
+
   feed: async () => {
     const pet = get().pet;
     if (!pet) return;
-    try {
-      const updated = await api.feedPet(pet.id);
-      set({ pet: updated });
-    } catch (err) {
-      set({ error: err instanceof Error ? err.message : 'Failed to feed' });
-    }
+    await get().performAction(pet.id, 'feed');
   },
 
   play: async () => {
     const pet = get().pet;
     if (!pet) return;
-    try {
-      const updated = await api.playWithPet(pet.id);
-      set({ pet: updated });
-    } catch (err) {
-      set({ error: err instanceof Error ? err.message : 'Failed to play' });
-    }
+    await get().performAction(pet.id, 'play');
   },
 
   bathe: async () => {
     const pet = get().pet;
     if (!pet) return;
-    try {
-      const updated = await api.bathePet(pet.id);
-      set({ pet: updated });
-    } catch (err) {
-      set({ error: err instanceof Error ? err.message : 'Failed to bathe' });
-    }
+    await get().performAction(pet.id, 'bathe');
   },
 
   sleep: async () => {
     const pet = get().pet;
     if (!pet) return;
-    try {
-      const updated = await api.sleepPet(pet.id);
-      set({ pet: updated });
-    } catch (err) {
-      set({ error: err instanceof Error ? err.message : 'Failed to sleep' });
-    }
+    await get().performAction(pet.id, 'sleep');
   },
 
   wake: async () => {
     const pet = get().pet;
     if (!pet) return;
-    try {
-      const updated = await api.wakePet(pet.id);
-      set({ pet: updated });
-    } catch (err) {
-      set({ error: err instanceof Error ? err.message : 'Failed to wake' });
-    }
+    await get().performAction(pet.id, 'wake');
   },
 
   refreshOutfit: async () => {
     const petId = get().activePetId;
     if (!petId) return;
+    await get().refreshOutfitForPet(petId);
+  },
+
+  refreshOutfitForPet: async (petId: string) => {
     try {
-      const outfit = await api.getPetOutfit(petId);
-      set({ outfit });
+      const outfitData = await api.getPetOutfit(petId);
+      set((state) => ({
+        outfit: state.activePetId === petId ? outfitData : state.outfit,
+        outfitMap: { ...state.outfitMap, [petId]: outfitData },
+      }));
     } catch (err) {
       console.error('Failed to refresh outfit:', err);
     }

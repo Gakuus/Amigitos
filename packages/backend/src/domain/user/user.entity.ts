@@ -30,6 +30,7 @@ export class User {
   private _name: string;
   private _avatarUrl: string | null;
   private _coupleId: string | null;
+  private _coins: number;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -39,6 +40,7 @@ export class User {
     name: string;
     avatarUrl?: string | null;
     coupleId?: string | null;
+    coins?: number;
     createdAt?: Date;
     updatedAt?: Date;
   }) {
@@ -50,6 +52,7 @@ export class User {
     this._name = props.name.trim();
     this._avatarUrl = props.avatarUrl ?? null;
     this._coupleId = props.coupleId ?? null;
+    this._coins = props.coins ?? 0;
     this._createdAt = props.createdAt ?? new Date();
     this._updatedAt = props.updatedAt ?? new Date();
   }
@@ -59,10 +62,24 @@ export class User {
   get name(): string { return this._name; }
   get avatarUrl(): string | null { return this._avatarUrl; }
   get coupleId(): string | null { return this._coupleId; }
+  get coins(): number { return this._coins; }
   get createdAt(): Date { return this._createdAt; }
   get updatedAt(): Date { return this._updatedAt; }
 
   isInCouple(): boolean { return this._coupleId !== null; }
+
+  addCoins(amount: number): void {
+    this._coins += amount;
+    this._updatedAt = new Date();
+  }
+
+  spendCoins(amount: number): void {
+    if (this._coins < amount) {
+      throw new Error('INSUFFICIENT_COINS');
+    }
+    this._coins -= amount;
+    this._updatedAt = new Date();
+  }
 
   joinCouple(coupleId: string): void {
     if (this._coupleId) {
@@ -92,6 +109,7 @@ export class User {
       name: this._name,
       avatarUrl: this._avatarUrl,
       coupleId: this._coupleId,
+      coins: this._coins,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
     };

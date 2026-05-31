@@ -1,4 +1,8 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Inject } from '@nestjs/common';
+import {
+  Controller, Post, Get, Body, Param, UseGuards, Inject,
+  NotFoundException, ConflictException, BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CoupleService } from '../../application/services/couple.service';
 import { InvitePartnerDto } from '../dto/couple.dto';
 import { JwtGuard } from '../../infrastructure/auth/jwt.guard';
@@ -18,14 +22,13 @@ export class CoupleController {
       return couple.toJSON();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'UNKNOWN';
-      const statusMap: Record<string, number> = {
-        USER_NOT_FOUND: 404,
-        PARTNER_NOT_FOUND: 404,
-        USER_ALREADY_IN_COUPLE: 409,
-        PARTNER_ALREADY_IN_COUPLE: 409,
-        COUPLE_ALREADY_EXISTS: 409,
-      };
-      return { statusCode: statusMap[message] ?? 500, code: message };
+      throw this.toHttpException(message, {
+        USER_NOT_FOUND: NotFoundException,
+        PARTNER_NOT_FOUND: NotFoundException,
+        USER_ALREADY_IN_COUPLE: ConflictException,
+        PARTNER_ALREADY_IN_COUPLE: ConflictException,
+        COUPLE_ALREADY_EXISTS: ConflictException,
+      });
     }
   }
 
@@ -36,11 +39,10 @@ export class CoupleController {
       return couple.toJSON();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'UNKNOWN';
-      const statusMap: Record<string, number> = {
-        COUPLE_NOT_FOUND: 404,
-        USER_NOT_FOUND: 404,
-      };
-      return { statusCode: statusMap[message] ?? 500, code: message };
+      throw this.toHttpException(message, {
+        COUPLE_NOT_FOUND: NotFoundException,
+        USER_NOT_FOUND: NotFoundException,
+      });
     }
   }
 
@@ -51,25 +53,44 @@ export class CoupleController {
       return { success: true };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'UNKNOWN';
-      return { statusCode: message === 'COUPLE_NOT_FOUND' ? 404 : 500, code: message };
+      throw this.toHttpException(message, {
+        COUPLE_NOT_FOUND: NotFoundException,
+      });
     }
   }
 
-  @Get(':id')
-  async getCouple(@Param('id') id: string) {
-    const couple = await this.coupleService.getCouple(id);
-    if (!couple) {
-      return { statusCode: 404, code: 'COUPLE_NOT_FOUND' };
-    }
-    return couple.toJSON();
+  @Get('pending')
+  async getPending(@CurrentUser() user: { userId: string }) {
+    const couples = await this.coupleService.getPendingByUser(user.userId);
+    return couples.map((c) => c.toJSON());
   }
 
   @Get('mine')
   async getMyCouple(@CurrentUser() user: { userId: string }) {
     const couple = await this.coupleService.getCoupleByUser(user.userId);
     if (!couple) {
-      return { statusCode: 404, code: 'COUPLE_NOT_FOUND' };
+      throw new NotFoundException('COUPLE_NOT_FOUND');
     }
     return couple.toJSON();
+  }
+
+  @Get(':id')
+  async getCouple(@Param('id') id: string) {
+    const couple = await this.coupleService.getCouple(id);
+    if (!couple) {
+      throw new NotFoundException('COUPLE_NOT_FOUND');
+    }
+    return couple.toJSON();
+  }
+
+  private toHttpException(
+    message: string,
+    map: Record<string, new (msg: string) => any>,
+  ): never {
+    const ExceptionClass = map[message];
+    if (ExceptionClass) {
+      throw new ExceptionClass(message);
+    }
+    throw new InternalServerErrorException(message);
   }
 }

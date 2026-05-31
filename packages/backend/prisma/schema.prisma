@@ -70,11 +70,16 @@ model User {
   password  String   @default("")
   avatarUrl String?
   coupleId  String?
+  coins     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  pets Pet[]
+
   interactions Interaction[]
   sessions     Session[]
+  consumables  UserConsumable[]
+  cosmetics    UserCosmetic[]
 }
 
 model Couple {
@@ -113,14 +118,18 @@ model Pet {
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
+  userId  String?
   coupleId String?
   couple   Couple? @relation(fields: [coupleId], references: [id])
+
+  user User? @relation(fields: [userId], references: [id])
 
   interactions Interaction[]
   events       PetEvent[]
   equipment    PetEquipment[]
 
   @@index([coupleId])
+  @@index([userId])
 }
 
 model WardrobeItem {
@@ -134,10 +143,12 @@ model WardrobeItem {
   species         String[]      @default([])
   unlockCondition String?
   unlockLevel     Int           @default(1)
+  price           Int           @default(0)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  equipment PetEquipment[]
+  equipment      PetEquipment[]
+  ownedBy        UserCosmetic[]
 
   @@index([slot])
   @@index([rarity])
@@ -155,6 +166,47 @@ model PetEquipment {
 
   @@unique([petId, itemId])
   @@index([petId])
+}
+
+model Consumable {
+  id          String   @id @default(uuid())
+  name        String
+  description String   @default("")
+  price       Int
+  imageUrl    String   @default("")
+  category    String   // FOOD, SPONGE, TOY, MEDICINE
+  effect      Json     // {"stat": "hunger", "amount": 30}
+  createdAt   DateTime @default(now())
+
+  userItems UserConsumable[]
+}
+
+model UserConsumable {
+  id        String   @id @default(uuid())
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  userId       String
+  consumableId String
+
+  user       User       @relation(fields: [userId], references: [id])
+  consumable Consumable @relation(fields: [consumableId], references: [id])
+
+  @@unique([userId, consumableId])
+  @@index([userId])
+}
+
+model UserCosmetic {
+  id        String   @id @default(uuid())
+  userId    String
+  itemId    String
+  createdAt DateTime @default(now())
+
+  user          User         @relation(fields: [userId], references: [id])
+  wardrobeItem  WardrobeItem @relation(fields: [itemId], references: [id])
+
+  @@unique([userId, itemId])
+  @@index([userId])
 }
 
 model Interaction {

@@ -23,6 +23,16 @@ export class PrismaCoupleRepository implements CoupleRepositoryPort {
     return this.toDomain(data);
   }
 
+  async findPendingByUserId(userId: string): Promise<Couple[]> {
+    const data = await this.prisma.couple.findMany({
+      where: {
+        OR: [{ user1Id: userId }, { user2Id: userId }],
+        status: 'PENDING',
+      },
+    });
+    return data.map((d: any) => this.toDomain(d));
+  }
+
   async save(couple: Couple): Promise<void> {
     const data = couple.toJSON();
     await this.prisma.couple.create({ data });

@@ -101,6 +101,47 @@ export interface UserProfile {
   name: string;
   avatarUrl: string | null;
   coupleId: string | null;
+  coins: number;
+}
+
+export interface ConsumableInfo {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  effect: Record<string, unknown>;
+}
+
+export interface ShopItemInfo {
+  id: string;
+  type: 'COSMETIC' | 'CONSUMABLE';
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  slot?: ClothingSlot;
+  rarity?: ClothingRarity;
+  species?: string[];
+  category?: string;
+  effect?: Record<string, unknown>;
+}
+
+export interface InventoryItem {
+  id: string;
+  type: 'CONSUMABLE';
+  itemId: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  quantity: number;
+  category: string;
+  effect: Record<string, unknown>;
+}
+
+export interface UserBalance {
+  coins: number;
 }
 
 export interface CoupleInfo {

@@ -54,6 +54,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
       name: data.name,
       avatarUrl: data.avatarUrl,
       coupleId: data.coupleId,
+      coins: data.coins ?? 0,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     });

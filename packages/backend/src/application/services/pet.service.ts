@@ -14,11 +14,12 @@ export class PetService {
     private readonly wsNotifier: WebSocketNotifierPort,
   ) {}
 
-  async adoptPet(name: string, species: PetSpecies, coupleId?: string): Promise<Pet> {
+  async adoptPet(name: string, species: PetSpecies, userId: string, coupleId?: string): Promise<Pet> {
     const pet = new Pet({
       id: PetId.create(),
       name,
       species,
+      userId,
       coupleId,
     });
     await this.petRepo.save(pet);
@@ -174,5 +175,9 @@ export class PetService {
 
   async getPetsByCouple(coupleId: string): Promise<Pet[]> {
     return this.petRepo.findByCoupleId(coupleId);
+  }
+
+  async getMyPets(userId: string): Promise<Pet[]> {
+    return this.petRepo.findByUserId(userId);
   }
 }

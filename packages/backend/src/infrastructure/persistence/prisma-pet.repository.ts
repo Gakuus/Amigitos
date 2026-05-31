@@ -26,6 +26,19 @@ export class PrismaPetRepository implements PetRepositoryPort {
     return pets.map((p: any) => this.toDomain(p));
   }
 
+  async findByUserId(userId: string): Promise<Pet[]> {
+    const pets = await this.prisma.pet.findMany({
+      where: {
+        OR: [
+          { userId },
+          { couple: { user1Id: userId } },
+          { couple: { user2Id: userId } },
+        ],
+      },
+    });
+    return pets.map((p: any) => this.toDomain(p));
+  }
+
   async save(pet: Pet): Promise<void> {
     const data = pet.toJSON();
     await this.prisma.pet.create({ data });
@@ -48,6 +61,7 @@ export class PrismaPetRepository implements PetRepositoryPort {
       id: PetId.create(data.id),
       name: data.name,
       species: data.species,
+      userId: data.userId,
       coupleId: data.coupleId,
       level: PetLevel.create(data.level),
       experience: Experience.create(data.experience),
