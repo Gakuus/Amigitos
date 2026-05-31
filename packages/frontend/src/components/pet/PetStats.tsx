@@ -1,19 +1,20 @@
 'use client';
 
 import type { PetState } from '@amigitos/shared';
+import { Apple, Smile, Zap, Sparkles } from 'lucide-react';
 
 interface PetStatsProps {
   pet: PetState;
 }
 
 const statDefs = [
-  { label: 'Hambre', value: 'hunger' as const, icon: '🍽️', color: 'bg-orange-500', glow: 'stat-glow-orange' },
-  { label: 'Felicidad', value: 'happiness' as const, icon: '😊', color: 'bg-yellow-500', glow: 'stat-glow-yellow' },
-  { label: 'Energía', value: 'energy' as const, icon: '⚡', color: 'bg-blue-500', glow: 'stat-glow-blue' },
-  { label: 'Higiene', value: 'hygiene' as const, icon: '🧼', color: 'bg-cyan-500', glow: 'stat-glow-cyan' },
+  { label: 'Hambre', value: 'hunger' as const, icon: Apple, color: 'bg-warm-500', glow: '#f97316' },
+  { label: 'Felicidad', value: 'happiness' as const, icon: Smile, color: 'bg-pet-happy', glow: '#fbbf24' },
+  { label: 'Energía', value: 'energy' as const, icon: Zap, color: 'bg-blue-500', glow: '#3b82f6' },
+  { label: 'Higiene', value: 'hygiene' as const, icon: Sparkles, color: 'bg-cyan-500', glow: '#06b6d4' },
 ];
 
-function StatBar({ label, value, icon, color }: { label: string; value: number; icon: string; color: string }) {
+function StatBar({ label, value, icon: Icon, color }: { label: string; value: number; icon: React.ElementType; color: string }) {
   const pct = Math.max(0, Math.min(100, value));
   const isLow = pct <= 25;
   const isHigh = pct >= 80;
@@ -22,14 +23,14 @@ function StatBar({ label, value, icon, color }: { label: string; value: number; 
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs">
         <span className="flex items-center gap-1.5 text-slate-300">
-          <span className="text-sm">{icon}</span>
+          <Icon size={14} />
           <span>{label}</span>
         </span>
-        <span className={`font-bold tabular-nums ${isLow ? 'text-red-400' : isHigh ? 'text-green-400' : 'text-slate-300'}`}>
+        <span className={`font-bold tabular-nums ${isLow ? 'text-coral-400' : isHigh ? 'text-brand-400' : 'text-slate-300'}`}>
           {pct}%
         </span>
       </div>
-      <div className="h-2.5 bg-slate-700/80 rounded-full overflow-hidden ring-1 ring-slate-600/30">
+      <div className="h-2.5 bg-slate-700/60 rounded-full overflow-hidden ring-1 ring-slate-600/20">
         <div
           className={`h-full rounded-full transition-all duration-700 ease-out ${color} ${isLow ? 'animate-pulse-soft' : ''}`}
           style={{ width: `${pct}%` }}
@@ -40,11 +41,7 @@ function StatBar({ label, value, icon, color }: { label: string; value: number; 
 }
 
 const moodLabels: Record<string, string> = {
-  HAPPY: 'Feliz',
-  NEUTRAL: 'Neutral',
-  SAD: 'Triste',
-  SLEEPING: 'Durmiendo',
-  SICK: 'Enferma',
+  HAPPY: 'Feliz', NEUTRAL: 'Neutral', SAD: 'Triste', SLEEPING: 'Durmiendo', SICK: 'Enferma',
 };
 
 const moodColors: Record<string, string> = {
@@ -56,20 +53,16 @@ const moodColors: Record<string, string> = {
 };
 
 const moodEmoji: Record<string, string> = {
-  HAPPY: '😊',
-  NEUTRAL: '😐',
-  SAD: '😢',
-  SLEEPING: '💤',
-  SICK: '🤒',
+  HAPPY: '😊', NEUTRAL: '😐', SAD: '😢', SLEEPING: '💤', SICK: '🤒',
 };
 
 export function PetStats({ pet }: PetStatsProps) {
   return (
-    <div className="bg-slate-800/80 border border-slate-700/50 rounded-3xl p-5 space-y-4 shadow-xl">
+    <div className="bg-surface-card/80 border border-surface-border/50 rounded-3xl p-5 space-y-4 shadow-xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-xl flex items-center justify-center">
-            <span className="text-xl">{moodEmoji[pet.mood] ?? '🐾'}</span>
+          <div className="w-10 h-10 bg-gradient-to-br from-brand-400/20 to-emerald-500/20 rounded-xl flex items-center justify-center">
+            <span className="text-xl">{moodEmoji[pet.mood]}</span>
           </div>
           <div>
             <h2 className="text-base font-bold font-display text-white">{pet.name}</h2>
@@ -83,13 +76,7 @@ export function PetStats({ pet }: PetStatsProps) {
 
       <div className="space-y-3">
         {statDefs.map((stat) => (
-          <StatBar
-            key={stat.value}
-            label={stat.label}
-            value={pet[stat.value]}
-            icon={stat.icon}
-            color={stat.color}
-          />
+          <StatBar key={stat.value} label={stat.label} value={pet[stat.value]} icon={stat.icon} color={stat.color} />
         ))}
       </div>
 

@@ -7,6 +7,11 @@ import { PetPuzzle } from './PetPuzzle';
 import { useGameStore } from '@/stores/game.store';
 import { useShopStore } from '@/stores/shop.store';
 import { useAuthStore } from '@/stores/auth.store';
+import {
+  Gamepad2, X, ArrowLeft, Coins, Sparkles, Trophy,
+  MemoryStickIcon as Memory, Pizza, Puzzle, Heart,
+  Frown,
+} from 'lucide-react';
 
 interface GameModalProps {
   onClose: () => void;
@@ -14,10 +19,10 @@ interface GameModalProps {
 
 type GameType = 'memory' | 'catch' | 'puzzle';
 
-const GAMES: { id: GameType; name: string; icon: string; description: string; color: string }[] = [
-  { id: 'memory', name: 'Memorama', icon: '🃏', description: 'Encuentra los pares de mascotas', color: 'from-purple-500 to-purple-600' },
-  { id: 'catch', name: 'Atrapa Comida', icon: '🍕', description: 'Atrapa comida en 30 segundos', color: 'from-orange-500 to-orange-600' },
-  { id: 'puzzle', name: 'Rompecabezas', icon: '🧩', description: 'Ordena el puzzle de mascotas', color: 'from-blue-500 to-blue-600' },
+const GAMES: { id: GameType; name: string; icon: React.ElementType; description: string; color: string }[] = [
+  { id: 'memory', name: 'Memorama', icon: Memory, description: 'Encuentra los pares', color: 'from-purple-500 to-purple-600' },
+  { id: 'catch', name: 'Atrapa Comida', icon: Pizza, description: 'Atrapa comida en 30s', color: 'from-orange-500 to-orange-600' },
+  { id: 'puzzle', name: 'Rompecabezas', icon: Puzzle, description: 'Ordena el puzzle', color: 'from-blue-500 to-blue-600' },
 ];
 
 export function GameModal({ onClose }: GameModalProps) {
@@ -52,16 +57,19 @@ export function GameModal({ onClose }: GameModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-slate-800/95 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[85dvh] sm:max-h-[85vh] flex flex-col shadow-2xl border border-slate-700/50 sm:m-4 animate-slide-up sm:animate-pop">
-        {/* Handle bar */}
+      <div className="bg-surface-card/95 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[85dvh] sm:max-h-[85vh] flex flex-col shadow-2xl border border-surface-border/50 sm:m-4 animate-slide-up sm:animate-pop">
         <div className="flex justify-center pt-2 pb-0 sm:hidden">
           <div className="w-10 h-1 bg-slate-600 rounded-full" />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-700/50">
-          <h2 className="text-lg font-bold font-display text-white flex items-center gap-2">🎮 Mini Juegos</h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-700/50 text-slate-400 hover:text-white active:scale-90 transition-all">✕</button>
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-surface-border/50">
+          <h2 className="text-lg font-bold font-display text-white flex items-center gap-2">
+            <Gamepad2 size={20} className="text-purple-400" />
+            Mini Juegos
+          </h2>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-700/50 text-slate-400 hover:text-white active:scale-90 transition-all">
+            <X size={16} />
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-5">
@@ -73,8 +81,12 @@ export function GameModal({ onClose }: GameModalProps) {
 
           {gameResult ? (
             <div className="flex flex-col items-center gap-4 py-6 text-center animate-pop">
-              <span className="text-6xl animate-bounce-in">{gameResult.won ? '🎉' : '💔'}</span>
-              <h3 className={`text-xl font-bold font-display ${gameResult.won ? 'text-green-400' : 'text-red-400'}`}>
+              {gameResult.won ? (
+                <Heart size={56} className="text-coral-400 animate-bounce-in" fill="currentColor" />
+              ) : (
+                <Frown size={56} className="text-slate-500 animate-bounce-in" />
+              )}
+              <h3 className={`text-xl font-bold font-display ${gameResult.won ? 'text-brand-400' : 'text-slate-400'}`}>
                 {gameResult.won ? '¡Victoria!' : 'Has perdido'}
               </h3>
               {gameResult.won ? (
@@ -82,16 +94,16 @@ export function GameModal({ onClose }: GameModalProps) {
               ) : (
                 <p className="text-slate-400 text-sm">¡La próxima será!</p>
               )}
-              <div className={`flex items-center gap-2 px-6 py-3 rounded-2xl ${gameResult.coins > 0 ? 'bg-yellow-500/10 border border-yellow-500/30' : 'bg-slate-700/30'}`}>
+              <div className={`flex items-center gap-2 px-6 py-3 rounded-2xl ${gameResult.coins > 0 ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-slate-700/30'}`}>
                 {gameResult.coins > 0 ? (
-                  <><span className="text-2xl animate-bounce-in">🪙</span><span className="text-2xl font-bold text-yellow-400">+{gameResult.coins}</span></>
+                  <><Coins size={24} className="text-amber-400" /><span className="text-2xl font-bold text-amber-400">+{gameResult.coins}</span></>
                 ) : (
-                  <span className="text-slate-500 text-sm">🪙 +0 monedas</span>
+                  <span className="text-slate-500 text-sm flex items-center gap-1"><Coins size={16} />+0 monedas</span>
                 )}
               </div>
               <button
                 onClick={handleBack}
-                className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl font-bold text-sm shadow-lg shadow-green-500/25 active:scale-95 transition-all"
+                className="px-8 py-3 bg-gradient-to-r from-brand-500 to-emerald-500 rounded-2xl font-bold text-sm shadow-lg shadow-brand-500/25 active:scale-95 transition-all"
               >
                 Volver a juegos
               </button>
@@ -99,7 +111,7 @@ export function GameModal({ onClose }: GameModalProps) {
           ) : selectedGame ? (
             <div className="space-y-4">
               <button onClick={handleBack} className="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition-all">
-                ← Volver
+                <ArrowLeft size={14} /> Volver
               </button>
               {selectedGame === 'memory' && <MemoryMatch onFinish={handleFinish} />}
               {selectedGame === 'catch' && <CatchTreats onFinish={handleFinish} />}
@@ -110,6 +122,8 @@ export function GameModal({ onClose }: GameModalProps) {
               {GAMES.map(game => {
                 const cd = cooldowns[game.id] ?? 0;
                 const onCooldown = cd > 0;
+                const Icon = game.icon;
+
                 return (
                   <button
                     key={game.id}
@@ -119,8 +133,8 @@ export function GameModal({ onClose }: GameModalProps) {
                       onCooldown ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-700/30' : 'bg-slate-700/30 border-slate-700/30 hover:bg-slate-700/60 hover:border-slate-500/50'
                     }`}
                   >
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${game.color} flex items-center justify-center text-xl shadow-lg`}>
-                      {game.icon}
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${game.color} flex items-center justify-center shadow-lg`}>
+                      <Icon size={22} className="text-white" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-bold text-white">{game.name}</p>
@@ -129,7 +143,10 @@ export function GameModal({ onClose }: GameModalProps) {
                     {onCooldown ? (
                       <span className="text-xs text-slate-500 font-mono">{cd}s</span>
                     ) : (
-                      <span className="text-xs font-bold text-green-400 bg-green-500/10 px-3 py-1.5 rounded-xl">Jugar</span>
+                      <span className="text-xs font-bold text-brand-400 bg-brand-500/10 px-3 py-1.5 rounded-xl">
+                        <Gamepad2 size={14} className="inline mr-1 -mt-0.5" />
+                        Jugar
+                      </span>
                     )}
                   </button>
                 );

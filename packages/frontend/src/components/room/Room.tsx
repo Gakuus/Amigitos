@@ -6,13 +6,14 @@ import { usePetStore } from '@/stores/pet.store';
 import { RoomScene } from './RoomScene';
 import { getSleepPositions } from './sleepTileMap';
 import type { SleepPosition } from './sleepTileMap';
+import { Sofa, UtensilsCrossed, Gamepad2, Bath, Moon, Sparkles } from 'lucide-react';
 
 const ROOMS = [
-  { id: 'living', label: 'Sala', icon: '🏠' },
-  { id: 'eat', label: 'Comer', icon: '🍽️' },
-  { id: 'play', label: 'Jugar', icon: '🎾' },
-  { id: 'bath', label: 'Baño', icon: '🛁' },
-  { id: 'sleep', label: 'Dormir', icon: '🛏️' },
+  { id: 'living', label: 'Sala', icon: Sofa },
+  { id: 'eat', label: 'Comer', icon: UtensilsCrossed },
+  { id: 'play', label: 'Jugar', icon: Gamepad2 },
+  { id: 'bath', label: 'Baño', icon: Bath },
+  { id: 'sleep', label: 'Dormir', icon: Moon },
 ] as const;
 
 type RoomId = (typeof ROOMS)[number]['id'];
@@ -67,7 +68,7 @@ export function Room() {
   const { pets, petMap, performAction } = usePetStore();
   const [room, setRoom] = useState<RoomId>('living');
   const [petPositions, setPetPositions] = useState<PetPosition[]>([]);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const fbTimeout = useRef<ReturnType<typeof setTimeout>>();
 
@@ -121,9 +122,10 @@ export function Room() {
       const action = actionMap[newRoom];
       if (!action) return;
 
-      setFeedback(ROOMS.find((r) => r.id === newRoom)?.icon ?? '✅');
+      const found = ROOMS.find((r) => r.id === newRoom);
+      setFeedback(true);
       if (fbTimeout.current) clearTimeout(fbTimeout.current);
-      fbTimeout.current = setTimeout(() => setFeedback(null), 2000);
+      fbTimeout.current = setTimeout(() => setFeedback(false), 2000);
 
       for (const p of pets) {
         const data = petMap[p.id];
@@ -151,11 +153,11 @@ export function Room() {
             onClick={() => switchRoom(r.id)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
               room === r.id
-                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/20 scale-105'
-                : 'bg-slate-800/60 text-slate-400 hover:bg-slate-700/60 hover:text-slate-200 border border-slate-700/30'
+                ? 'bg-gradient-to-r from-brand-500 to-emerald-500 text-white shadow-lg shadow-brand-500/20 scale-105'
+                : 'bg-surface/60 text-slate-400 hover:bg-surface-light/60 hover:text-slate-200 border border-surface-border/30'
             }`}
           >
-            <span className="text-base">{r.icon}</span>
+            <r.icon size={16} />
             <span>{r.label}</span>
           </button>
         ))}
@@ -302,7 +304,11 @@ export function Room() {
         {/* Room Label */}
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
           <div className="bg-slate-900/50 text-white text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1">
-            <span>{ROOMS.find((r) => r.id === room)?.icon}</span>
+            {(() => {
+              const roomData = ROOMS.find((r) => r.id === room);
+              const Icon = roomData?.icon;
+              return Icon ? <Icon size={12} /> : null;
+            })()}
             <span className="font-semibold">{ROOMS.find((r) => r.id === room)?.label}</span>
           </div>
         </div>
@@ -310,7 +316,7 @@ export function Room() {
         {/* Feedback */}
         {feedback && (
           <div className="absolute top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-            <div className="text-3xl animate-bounce drop-shadow-lg">{feedback}</div>
+            <Sparkles size={36} className="text-brand-400 animate-bounce drop-shadow-lg" />
           </div>
         )}
       </div>

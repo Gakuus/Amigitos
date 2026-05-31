@@ -4,8 +4,13 @@ import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 import type { CoupleInfo } from '@amigitos/shared';
+import { HeartHandshake, Send, Check, X, UserPlus, Heart, ArrowLeft } from 'lucide-react';
 
-export function CoupleManager() {
+interface CoupleManagerProps {
+  onClose?: () => void;
+}
+
+export function CoupleManager({ onClose }: CoupleManagerProps) {
   const { user } = useAuthStore();
   const [couple, setCouple] = useState<CoupleInfo | null>(null);
   const [pending, setPending] = useState<CoupleInfo[]>([]);
@@ -65,7 +70,7 @@ export function CoupleManager() {
   if (loading && !couple && pending.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="animate-spin w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full mx-auto" />
+        <div className="animate-spin w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full mx-auto" />
       </div>
     );
   }
@@ -76,15 +81,25 @@ export function CoupleManager() {
         <div className="bg-red-900/40 border border-red-700/30 text-red-300 text-sm px-4 py-2.5 rounded-2xl">{error}</div>
       )}
       {success && (
-        <div className="bg-green-900/40 border border-green-700/30 text-green-300 text-sm px-4 py-2.5 rounded-2xl">{success}</div>
+        <div className="bg-brand-900/40 border border-brand-700/30 text-brand-300 text-sm px-4 py-2.5 rounded-2xl">{success}</div>
       )}
 
       {couple ? (
-        <div className="bg-slate-800/80 border border-slate-700/50 rounded-3xl p-5 space-y-4 shadow-xl">
+        <div className="bg-surface-card/80 border border-surface-border/50 rounded-3xl p-5 space-y-4 shadow-xl">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold font-display text-lg flex items-center gap-2">💞 Pareja</h3>
+            <div className="flex items-center gap-2">
+              {onClose && (
+                <button onClick={onClose} className="text-slate-400 hover:text-white mr-1">
+                  <ArrowLeft size={18} />
+                </button>
+              )}
+              <h3 className="font-bold font-display text-lg flex items-center gap-2">
+                <Heart size={20} className="text-coral-400" fill="currentColor" />
+                Pareja
+              </h3>
+            </div>
             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-              couple.status === 'ACTIVE' ? 'bg-green-900/40 text-green-300 border border-green-700/30' : 'bg-yellow-900/40 text-yellow-300 border border-yellow-700/30'
+              couple.status === 'ACTIVE' ? 'bg-brand-900/40 text-brand-300 border border-brand-700/30' : 'bg-amber-900/40 text-amber-300 border border-amber-700/30'
             }`}>
               {couple.status === 'ACTIVE' ? 'Activa' : 'Pendiente'}
             </span>
@@ -96,9 +111,9 @@ export function CoupleManager() {
 
           {couple.status === 'PENDING' && !isInviter && (
             <button onClick={() => handleAccept(couple.id)} disabled={loading}
-              className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl text-sm font-bold shadow-lg shadow-green-500/20 active:scale-[0.98] transition-all"
+              className="w-full px-4 py-3 bg-gradient-to-r from-brand-500 to-emerald-500 rounded-2xl text-sm font-bold shadow-lg shadow-brand-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
-              {loading ? 'Aceptando...' : '✓ Aceptar Invitación'}
+              {loading ? 'Aceptando...' : <><Check size={18} /> Aceptar Invitación</>}
             </button>
           )}
 
@@ -107,39 +122,49 @@ export function CoupleManager() {
           )}
 
           <button onClick={handleDissolve} disabled={loading}
-            className="w-full px-4 py-2.5 bg-red-900/20 border border-red-700/30 rounded-2xl text-sm text-red-400 font-semibold active:scale-[0.98] transition-all"
+            className="w-full px-4 py-2.5 bg-red-900/20 border border-red-700/30 rounded-2xl text-sm text-red-400 font-semibold active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
+            <X size={16} />
             {loading ? '...' : 'Disolver Pareja'}
           </button>
         </div>
       ) : (
         <div className="space-y-4">
+          {onClose && (
+            <button onClick={onClose} className="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+              <ArrowLeft size={14} /> Volver
+            </button>
+          )}
+
           {pending.length > 0 && (
-            <div className="bg-slate-800/80 border border-slate-700/50 rounded-3xl p-5 space-y-3 shadow-xl">
+            <div className="bg-surface-card/80 border border-surface-border/50 rounded-3xl p-5 space-y-3 shadow-xl">
               <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Invitaciones</h3>
               {pending.map((inv) => (
                 <div key={inv.id} className="flex items-center justify-between bg-slate-700/30 rounded-2xl p-4">
-                  <span className="text-sm text-slate-300">Te invitaron a una pareja</span>
+                  <span className="text-sm text-slate-300 flex items-center gap-2">
+                    <UserPlus size={16} className="text-brand-400" />
+                    Te invitaron a una pareja
+                  </span>
                   <button onClick={() => handleAccept(inv.id)} disabled={loading}
-                    className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl text-xs font-bold active:scale-95 transition-all"
+                    className="px-4 py-2 bg-gradient-to-r from-brand-500 to-emerald-500 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center gap-1.5"
                   >
-                    {loading ? '...' : 'Aceptar'}
+                    {loading ? '...' : <><Check size={14} /> Aceptar</>}
                   </button>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="bg-slate-800/80 border border-slate-700/50 rounded-3xl p-5 space-y-4 shadow-xl">
+          <div className="bg-surface-card/80 border border-surface-border/50 rounded-3xl p-5 space-y-4 shadow-xl">
             <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Invitar Pareja</h3>
             <p className="text-xs text-slate-500">Ingresa su email para compartir mascotas</p>
             <form onSubmit={handleInvite} className="flex gap-2">
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@ejemplo.com" required
-                className="flex-1 bg-slate-700/50 border border-slate-600/50 rounded-2xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 transition-all" />
+                className="flex-1 bg-slate-700/50 border border-slate-600/50 rounded-2xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 transition-all" />
               <button type="submit" disabled={loading || !email}
-                className="px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl text-sm font-bold shadow-lg shadow-green-500/10 active:scale-[0.98] transition-all disabled:opacity-50"
+                className="px-5 py-3 bg-gradient-to-r from-brand-500 to-emerald-500 rounded-2xl text-sm font-bold shadow-lg shadow-brand-500/10 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-1.5"
               >
-                {loading ? '...' : 'Invitar'}
+                {loading ? '...' : <><Send size={16} /> Invitar</>}
               </button>
             </form>
           </div>

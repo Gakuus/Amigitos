@@ -2,6 +2,7 @@
 
 import type { PetSummary } from '@amigitos/shared';
 import { PET_SPECIES_LABELS } from '@amigitos/shared';
+import { Plus } from 'lucide-react';
 
 interface PetSelectorProps {
   pets: PetSummary[];
@@ -27,15 +28,15 @@ export function PetSelector({ pets, activePetId, onSelect, onAdopt }: PetSelecto
         <button
           key={pet.id}
           onClick={() => onSelect(pet.id)}
-          className={`flex-shrink-0 flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl transition-all ${
+          className={`flex-shrink-0 flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl transition-all relative ${
             activePetId === pet.id
-              ? 'bg-gradient-to-b from-green-500/20 to-green-600/10 ring-2 ring-green-500/50 shadow-lg shadow-green-500/10 scale-105'
-              : 'bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/30'
+              ? 'bg-gradient-to-b from-brand-500/20 to-brand-600/10 ring-2 ring-brand-500/40 shadow-lg shadow-brand-500/10 scale-105'
+              : 'bg-surface-card/60 hover:bg-surface-light/60 border border-surface-border/30'
           }`}
         >
           <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl transition-all ${
             activePetId === pet.id
-              ? 'bg-gradient-to-br from-green-400 to-emerald-500'
+              ? 'bg-gradient-to-br from-brand-400 to-emerald-500'
               : 'bg-slate-700/80'
           }`}>
             {PET_SPECIES_LABELS[pet.species]?.split(' ')[1] ?? '🐾'}
@@ -50,17 +51,17 @@ export function PetSelector({ pets, activePetId, onSelect, onAdopt }: PetSelecto
             </div>
           </div>
           {pet.isSleeping && (
-            <span className="text-xs absolute top-1 right-1 animate-pulse">💤</span>
+            <span className="text-xs absolute top-0 right-1 animate-pulse">💤</span>
           )}
         </button>
       ))}
 
       <button
         onClick={onAdopt}
-        className="flex-shrink-0 flex flex-col items-center justify-center gap-1 w-[88px] h-[96px] rounded-2xl border-2 border-dashed border-slate-600/50 text-slate-500 hover:text-green-400 hover:border-green-500/50 active:scale-95 transition-all"
+        className="flex-shrink-0 flex flex-col items-center justify-center gap-1 w-[88px] h-[96px] rounded-2xl border-2 border-dashed border-slate-600/30 text-slate-500 hover:text-brand-400 hover:border-brand-500/40 active:scale-95 transition-all"
       >
-        <span className="text-xl">+</span>
-        <span className="text-[10px] font-medium">Adoptar</span>
+        <Plus size={24} />
+        <span className="text-[10px] font-semibold">Adoptar</span>
       </button>
     </div>
   );

@@ -13,8 +13,12 @@ import { GameModal } from '@/components/games/GameModal';
 import { Wardrobe } from '@/components/pet/Wardrobe';
 import { usePetStore } from '@/stores/pet.store';
 import { useAuthStore } from '@/stores/auth.store';
+import {
+  Home, Gamepad2, ShoppingBag, HeartHandshake, User,
+  PawPrint, Sparkles, Shirt, LogOut, Trophy, Coins,
+} from 'lucide-react';
 
-type Tab = 'home' | 'shop' | 'games' | 'couple' | 'profile';
+type Tab = 'home' | 'games' | 'shop' | 'couple' | 'profile';
 
 export default function HomePage() {
   const router = useRouter();
@@ -53,9 +57,9 @@ export default function HomePage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-slate-900 via-[#0b1120] to-slate-900">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-[3px] border-green-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-[3px] border-brand-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-slate-400 animate-pulse-soft">Cargando...</p>
         </div>
       </div>
@@ -66,34 +70,33 @@ export default function HomePage() {
 
   const activePet = activePetId ? petMap[activePetId] : null;
 
-  const navItems: { id: Tab; label: string; icon: string }[] = [
-    { id: 'home', label: 'Inicio', icon: '🏠' },
-    { id: 'games', label: 'Juegos', icon: '🎮' },
-    { id: 'shop', label: 'Tienda', icon: '🛒' },
-    { id: 'couple', label: 'Pareja', icon: '💞' },
-    { id: 'profile', label: 'Perfil', icon: '👤' },
+  const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    { id: 'home', label: 'Inicio', icon: <Home size={22} /> },
+    { id: 'games', label: 'Juegos', icon: <Gamepad2 size={22} /> },
+    { id: 'shop', label: 'Tienda', icon: <ShoppingBag size={22} /> },
+    { id: 'couple', label: 'Pareja', icon: <HeartHandshake size={22} /> },
+    { id: 'profile', label: 'Perfil', icon: <User size={22} /> },
   ];
 
   return (
-    <div className="min-h-dvh flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-dvh flex flex-col bg-gradient-to-br from-slate-900 via-[#0b1120] to-slate-900">
       {/* ===== Top Header ===== */}
-      <header className="sticky top-0 z-40 glass-strong border-b border-slate-700/50 px-4 py-3">
+      <header className="sticky top-0 z-40 glass-strong border-b border-surface-border/50 px-4 py-3">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🐾</span>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-green-400 via-emerald-300 to-green-400 bg-clip-text text-transparent font-display">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-gradient-to-br from-brand-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
+              <PawPrint size={18} className="text-white" />
+            </div>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-brand-400 via-emerald-300 to-brand-400 bg-clip-text text-transparent font-display">
               Amigitos
             </h1>
           </div>
           <div className="flex items-center gap-3">
             {user?.coins !== undefined && (
-              <span className="flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full text-sm">
-                <span>🪙</span>
-                <span className="font-bold text-yellow-400">{user.coins}</span>
+              <span className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl text-sm">
+                <Coins size={16} className="text-amber-400" />
+                <span className="font-bold text-amber-400">{user.coins}</span>
               </span>
-            )}
-            {user?.name && (
-              <span className="text-sm text-slate-300 hidden sm:block">{user.name}</span>
             )}
           </div>
         </div>
@@ -106,7 +109,7 @@ export default function HomePage() {
           {loading && (
             <div className="flex items-center justify-center py-20">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
                 <p className="text-xs text-slate-500 animate-pulse-soft">Cargando mascotas...</p>
               </div>
             </div>
@@ -115,8 +118,8 @@ export default function HomePage() {
           {/* Empty state */}
           {!loading && pets.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center space-y-5 animate-fade-in">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center border-2 border-green-500/20">
-                <span className="text-5xl sm:text-6xl animate-bounce-gentle">🏠</span>
+              <div className="w-28 h-28 sm:w-36 sm:h-36 bg-gradient-to-br from-brand-500/20 to-emerald-500/10 rounded-full flex items-center justify-center border-2 border-brand-500/20">
+                <Home size={56} className="text-brand-400/60 animate-bounce-gentle" />
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl sm:text-2xl font-bold font-display text-white">
@@ -128,9 +131,10 @@ export default function HomePage() {
               </div>
               <button
                 onClick={() => setShowAdopt(true)}
-                className="px-8 py-3.5 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 rounded-2xl font-bold shadow-lg shadow-green-500/25 active:scale-95 transition-all"
+                className="px-8 py-3.5 bg-gradient-to-r from-brand-500 to-emerald-500 hover:from-brand-400 hover:to-emerald-400 rounded-2xl font-bold shadow-lg shadow-brand-500/25 active:scale-95 transition-all"
               >
-                ✨ Adoptar Mascota
+                <Sparkles size={16} className="inline mr-1.5 -mt-0.5" />
+                Adoptar Mascota
               </button>
             </div>
           )}
@@ -145,7 +149,7 @@ export default function HomePage() {
             />
           )}
 
-          {/* Home tab: Room + Stats + Actions */}
+          {/* Home tab */}
           {tab === 'home' && !loading && pets.length > 0 && (
             <>
               <Room />
@@ -156,9 +160,10 @@ export default function HomePage() {
                     <PetStats pet={activePet} />
                     <button
                       onClick={() => setShowWardrobe(!showWardrobe)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600/20 border border-purple-600/30 rounded-2xl text-sm text-purple-300 font-medium hover:bg-purple-600/30 active:scale-[0.98] transition-all"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-purple-600/15 border border-purple-600/25 rounded-2xl text-sm text-purple-300 font-semibold hover:bg-purple-600/25 active:scale-[0.98] transition-all"
                     >
-                      👗 {showWardrobe ? 'Cerrar armario' : 'Armario'}
+                      <Shirt size={18} />
+                      {showWardrobe ? 'Cerrar armario' : 'Armario'}
                     </button>
                   </div>
                   <div className="space-y-4">
@@ -166,15 +171,17 @@ export default function HomePage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setShowGames(true)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-600/30 rounded-2xl text-sm text-purple-300 font-medium hover:from-purple-600/40 hover:to-pink-600/40 active:scale-[0.98] transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-purple-600/25 to-coral-500/20 border border-purple-600/25 rounded-2xl text-sm text-purple-300 font-semibold hover:from-purple-600/35 hover:to-coral-500/30 active:scale-[0.98] transition-all"
                       >
-                        🎮 Jugar
+                        <Gamepad2 size={18} />
+                        Jugar
                       </button>
                       <button
                         onClick={() => setShowShop(true)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-yellow-600/30 to-orange-600/30 border border-yellow-600/30 rounded-2xl text-sm text-yellow-300 font-medium hover:from-yellow-600/40 hover:to-orange-600/40 active:scale-[0.98] transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-amber-600/20 to-warm-500/20 border border-amber-600/25 rounded-2xl text-sm text-amber-300 font-semibold hover:from-amber-600/30 hover:to-warm-500/30 active:scale-[0.98] transition-all"
                       >
-                        🛒 Tienda
+                        <ShoppingBag size={18} />
+                        Tienda
                       </button>
                     </div>
                   </div>
@@ -194,38 +201,33 @@ export default function HomePage() {
             </>
           )}
 
-          {/* Games tab */}
-          {tab === 'games' && !loading && (
+          {/* Shop tab */}
+          {tab === 'shop' && (
             <div className="animate-fade-in">
-              <div className="text-center py-8 space-y-4">
-                <span className="text-5xl">🎮</span>
-                <h2 className="text-xl font-bold font-display">Mini Juegos</h2>
-                <p className="text-sm text-slate-400">¡Juega y gana monedas!</p>
-                <GameModal onClose={() => setTab('home')} />
-              </div>
+              <ShopModal onClose={() => setTab('home')} />
             </div>
           )}
 
-          {/* Shop tab */}
-          {tab === 'shop' && !loading && (
+          {/* Games tab */}
+          {tab === 'games' && (
             <div className="animate-fade-in">
-              <ShopModal onClose={() => setTab('home')} />
+              <GameModal onClose={() => setTab('home')} />
             </div>
           )}
 
           {/* Couple tab */}
           {tab === 'couple' && (
             <div className="animate-fade-in">
-              <CoupleManager />
+              <CoupleManager onClose={() => setTab('home')} />
             </div>
           )}
 
           {/* Profile tab */}
           {tab === 'profile' && (
             <div className="animate-fade-in">
-              <div className="bg-slate-800/80 rounded-3xl p-6 border border-slate-700/50 space-y-5">
+              <div className="bg-surface-card/80 rounded-3xl p-6 border border-surface-border/50 space-y-5 shadow-xl">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-2xl font-bold text-white font-display shadow-lg">
+                  <div className="w-16 h-16 bg-gradient-to-br from-brand-400 to-emerald-500 rounded-2xl flex items-center justify-center text-2xl font-bold text-white font-display shadow-lg">
                     {user?.name?.charAt(0)?.toUpperCase() ?? '?'}
                   </div>
                   <div className="flex-1">
@@ -235,37 +237,39 @@ export default function HomePage() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-slate-700/50 rounded-2xl p-4 text-center space-y-1">
-                    <span className="text-2xl">🪙</span>
-                    <p className="text-lg font-bold text-yellow-400">{user?.coins ?? 0}</p>
-                    <p className="text-[10px] text-slate-500">Monedas</p>
+                  <div className="bg-surface/50 rounded-2xl p-4 text-center space-y-1.5 border border-surface-border/30">
+                    <Coins size={24} className="mx-auto text-amber-400" />
+                    <p className="text-lg font-bold text-amber-400">{user?.coins ?? 0}</p>
+                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Monedas</p>
                   </div>
-                  <div className="bg-slate-700/50 rounded-2xl p-4 text-center space-y-1">
-                    <span className="text-2xl">🐾</span>
-                    <p className="text-lg font-bold text-green-400">{pets.length}</p>
-                    <p className="text-[10px] text-slate-500">Mascotas</p>
+                  <div className="bg-surface/50 rounded-2xl p-4 text-center space-y-1.5 border border-surface-border/30">
+                    <PawPrint size={24} className="mx-auto text-brand-400" />
+                    <p className="text-lg font-bold text-brand-400">{pets.length}</p>
+                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Mascotas</p>
                   </div>
-                  <div className="bg-slate-700/50 rounded-2xl p-4 text-center space-y-1">
-                    <span className="text-2xl">🏅</span>
+                  <div className="bg-surface/50 rounded-2xl p-4 text-center space-y-1.5 border border-surface-border/30">
+                    <Trophy size={24} className="mx-auto text-purple-400" />
                     <p className="text-lg font-bold text-purple-400">-</p>
-                    <p className="text-[10px] text-slate-500">Logros</p>
+                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Logros</p>
                   </div>
                 </div>
 
-                {showCouple && <CoupleManager />}
+                {showCouple && <CoupleManager onClose={() => setShowCouple(false)} />}
                 {!showCouple && (
                   <button
                     onClick={() => setShowCouple(true)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-pink-600/20 border border-pink-600/30 rounded-2xl text-sm text-pink-300 font-medium hover:bg-pink-600/30 active:scale-[0.98] transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-coral-600/15 border border-coral-600/25 rounded-2xl text-sm text-coral-300 font-semibold hover:bg-coral-600/25 active:scale-[0.98] transition-all"
                   >
-                    💞 Gestionar Pareja
+                    <HeartHandshake size={18} />
+                    Gestionar Pareja
                   </button>
                 )}
 
                 <button
                   onClick={logout}
-                  className="w-full px-4 py-3 bg-slate-700/50 hover:bg-red-900/30 border border-slate-600/50 hover:border-red-700/30 rounded-2xl text-sm text-slate-400 hover:text-red-300 font-medium active:scale-[0.98] transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-surface/50 hover:bg-red-900/20 border border-surface-border/50 hover:border-red-700/30 rounded-2xl text-sm text-slate-400 hover:text-red-300 font-semibold active:scale-[0.98] transition-all"
                 >
+                  <LogOut size={18} />
                   Cerrar Sesión
                 </button>
               </div>
@@ -275,7 +279,7 @@ export default function HomePage() {
       </main>
 
       {/* ===== Bottom Navigation ===== */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-slate-700/50 pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-surface-border/50 pb-safe">
         <div className="flex items-center justify-around max-w-lg mx-auto px-2 py-1">
           {navItems.map((item) => (
             <button
@@ -283,14 +287,14 @@ export default function HomePage() {
               onClick={() => setTab(item.id)}
               className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-all min-w-0 ${
                 tab === item.id
-                  ? 'text-green-400 scale-110'
+                  ? 'text-brand-400 scale-110'
                   : 'text-slate-500 hover:text-slate-300'
               }`}
             >
-              <span className={`text-xl transition-transform ${tab === item.id ? 'animate-bounce-gentle' : ''}`}>
+              <span className={`transition-transform ${tab === item.id ? 'animate-bounce-gentle' : ''}`}>
                 {item.icon}
               </span>
-              <span className={`text-[10px] font-medium ${tab === item.id ? 'text-green-400' : 'text-slate-500'}`}>
+              <span className={`text-[10px] font-semibold ${tab === item.id ? 'text-brand-400' : 'text-slate-500'}`}>
                 {item.label}
               </span>
             </button>
