@@ -149,7 +149,9 @@ function BathScene() {
   );
 }
 
-function SleepScene({ petXs }: { petXs: number[] }) {
+type PetPos = { x: number; depth: number };
+
+function SleepScene({ petPositions }: { petPositions: PetPos[] }) {
   return (
     <g>
       <circle cx={1300} cy={100} r={55} fill="#fef3c7" opacity={0.7} />
@@ -168,8 +170,8 @@ function SleepScene({ petXs }: { petXs: number[] }) {
         <ellipse cx={0} cy={-75} rx={32} ry={9} fill="#fef3c7" opacity={0.35} />
         <ellipse cx={0} cy={-30} rx={90} ry={65} fill="rgba(254,243,199,0.04)" />
       </g>
-      {petXs.map((x, i) => (
-        <PetBed key={i} cx={x * VW} />
+      {petPositions.map((pos, i) => (
+        <PetBed key={i} cx={pos.x * VW} />
       ))}
     </g>
   );
@@ -177,7 +179,7 @@ function SleepScene({ petXs }: { petXs: number[] }) {
 
 type RoomId = 'living' | 'eat' | 'play' | 'bath' | 'sleep';
 
-export function RoomScene({ room, petXs }: { room: RoomId; petXs: number[] }) {
+export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: PetPos[] }) {
   return (
     <svg
       viewBox={`0 0 ${VW} ${VH}`}
@@ -274,7 +276,7 @@ export function RoomScene({ room, petXs }: { room: RoomId; petXs: number[] }) {
       {room === 'eat' && <EatScene />}
       {room === 'play' && <PlayScene />}
       {room === 'bath' && <BathScene />}
-      {room === 'sleep' && <SleepScene petXs={petXs} />}
+      {room === 'sleep' && <SleepScene petPositions={petPositions} />}
     </svg>
   );
 }

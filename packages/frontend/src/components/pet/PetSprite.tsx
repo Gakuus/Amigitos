@@ -30,7 +30,7 @@ export function PetSprite({ species, mood, isSleeping, size = 200 }: PetSpritePr
 
   return (
     <div
-      className="relative flex items-center justify-center"
+      className={`relative flex items-center justify-center ${isSleeping ? 'animate-breathe-sleep' : ''}`}
       style={{ width: size, height: size }}
     >
       {/* Glow aura */}
@@ -542,6 +542,18 @@ const animations = `
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-6px); }
   }
+  @keyframes breathe-sleep {
+    0%, 100% { transform: scaleY(1) translateY(0); }
+    50% { transform: scaleY(1.03) translateY(-2px); }
+  }
+  @keyframes lie-down {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(90deg); }
+  }
+  @keyframes wake-up {
+    from { transform: rotate(90deg); }
+    to { transform: rotate(0deg); }
+  }
   @keyframes blink {
     0%, 95%, 100% { transform: scaleY(1); }
     97% { transform: scaleY(0.1); }
@@ -600,4 +612,7 @@ const animations = `
   .animate-flipper { animation: flipper 2s ease-in-out infinite; transform-origin: right; }
   .animate-fire { animation: fire 0.6s ease-in-out infinite; transform-origin: center; }
   .animate-horn-glow { animation: horn-glow 1.5s ease-in-out infinite; }
+  .animate-breathe-sleep { animation: breathe-sleep 3s ease-in-out infinite; }
+  .animate-lie-down { animation: lie-down 0.5s ease-in-out forwards; }
+  .animate-wake-up { animation: wake-up 0.5s ease-in-out forwards; }
 `;
