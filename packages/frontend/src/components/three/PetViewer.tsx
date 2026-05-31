@@ -3,12 +3,13 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import { Suspense } from 'react';
-import type { PetMood } from '@amigitos/shared';
+import type { PetMood, PetSpecies } from '@amigitos/shared';
 import { PetModel } from './PetModel';
 
 interface PetViewerProps {
   modelUrl?: string | null;
   mood: PetMood;
+  species?: PetSpecies;
 }
 
 const moodColors: Record<string, string> = {
@@ -19,7 +20,7 @@ const moodColors: Record<string, string> = {
   SICK: '#ef4444',
 };
 
-export function PetViewer({ modelUrl, mood }: PetViewerProps) {
+export function PetViewer({ modelUrl, mood, species }: PetViewerProps) {
   return (
     <Canvas
       camera={{ position: [0, 2, 5], fov: 45 }}
@@ -32,7 +33,7 @@ export function PetViewer({ modelUrl, mood }: PetViewerProps) {
         <directionalLight position={[-5, 5, -5]} intensity={0.3} />
         <pointLight position={[0, 3, 0]} intensity={0.5} color={moodColors[mood] ?? '#ffffff'} />
 
-        <PetModel modelUrl={modelUrl} mood={mood} />
+        <PetModel modelUrl={modelUrl} mood={mood} species={species} />
 
         <ContactShadows position={[0, -1.5, 0]} opacity={0.4} scale={10} blur={2.5} />
         <Environment preset="studio" />

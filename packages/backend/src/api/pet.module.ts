@@ -3,8 +3,10 @@ import { PetController } from './controllers/pet.controller';
 import { PetService } from '../application/services/pet.service';
 import { PrismaPetRepository } from '../infrastructure/persistence/prisma-pet.repository';
 import { PetGateway } from '../infrastructure/websockets/pet.gateway';
+import { WsModule } from './ws.module';
 
 @Module({
+  imports: [WsModule],
   controllers: [PetController],
   providers: [
     {
@@ -12,7 +14,6 @@ import { PetGateway } from '../infrastructure/websockets/pet.gateway';
       useFactory: (petRepo: PrismaPetRepository, ws: PetGateway) => new PetService(petRepo, ws),
       inject: [PrismaPetRepository, PetGateway],
     },
-    PetGateway,
   ],
   exports: ['PetService'],
 })

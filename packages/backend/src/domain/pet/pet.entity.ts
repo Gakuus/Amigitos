@@ -14,7 +14,7 @@ interface PetProps {
   id: PetId;
   name: string;
   species: PetSpecies;
-  coupleId: string;
+  coupleId?: string;
   level?: PetLevel;
   experience?: Experience;
   hunger?: Hunger;
@@ -42,7 +42,7 @@ export class Pet {
   private readonly _id: PetId;
   private _name: string;
   private readonly _species: PetSpecies;
-  private readonly _coupleId: string;
+  private readonly _coupleId: string | null;
   private _level: PetLevel;
   private _experience: Experience;
   private _hunger: Hunger;
@@ -61,7 +61,7 @@ export class Pet {
     this._id = props.id;
     this._name = props.name;
     this._species = props.species;
-    this._coupleId = props.coupleId;
+    this._coupleId = props.coupleId ?? null;
     this._level = props.level ?? PetLevel.create(1);
     this._experience = props.experience ?? Experience.create(0);
     this._hunger = props.hunger ?? Hunger.create(100);
@@ -80,7 +80,7 @@ export class Pet {
   get id(): PetId { return this._id; }
   get name(): string { return this._name; }
   get species(): PetSpecies { return this._species; }
-  get coupleId(): string { return this._coupleId; }
+  get coupleId(): string | null { return this._coupleId; }
   get level(): PetLevel { return this._level; }
   get experience(): Experience { return this._experience; }
   get hunger(): Hunger { return this._hunger; }

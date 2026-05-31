@@ -6,20 +6,23 @@ import { AdoptPetDto, UpdatePetDto } from '../dto/pet.dto';
 import { JwtGuard } from '../../infrastructure/auth/jwt.guard';
 import { CurrentUser } from '../../infrastructure/auth/current-user.decorator';
 import { PetSpecies } from '../../domain/pet/pet-species';
+import { PrismaUserRepository } from '../../infrastructure/persistence/prisma-user.repository';
 
 @Controller('pets')
 @UseGuards(JwtGuard)
 export class PetController {
   constructor(
     @Inject('PetService') private readonly petService: PetService,
+    private readonly userRepo: PrismaUserRepository,
   ) {}
 
   @Post('adopt')
   async adopt(@Body() dto: AdoptPetDto, @CurrentUser() user: { userId: string }) {
+    const userEntity = await this.userRepo.findById(user.userId);
     const pet = await this.petService.adoptPet(
       dto.name,
       dto.species as PetSpecies,
-      user.userId,
+      userEntity?.coupleId ?? undefined,
     );
     return pet.toJSON();
   }

@@ -14,7 +14,7 @@ export class PetService {
     private readonly wsNotifier: WebSocketNotifierPort,
   ) {}
 
-  async adoptPet(name: string, species: PetSpecies, coupleId: string): Promise<Pet> {
+  async adoptPet(name: string, species: PetSpecies, coupleId?: string): Promise<Pet> {
     const pet = new Pet({
       id: PetId.create(),
       name,
