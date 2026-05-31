@@ -5,6 +5,8 @@ import { connectToPetRoom, disconnectFromPetRoom, getSocket } from '@/lib/socket
 
 type PetAction = 'feed' | 'play' | 'bathe' | 'sleep' | 'wake';
 
+const POLL_INTERVAL_MS = 30000;
+
 interface PetStore {
   pets: PetSummary[];
   pet: PetState | null;
@@ -26,6 +28,8 @@ interface PetStore {
   refreshOutfit: () => Promise<void>;
   refreshOutfitForPet: (petId: string) => Promise<void>;
 }
+
+let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 export const usePetStore = create<PetStore>((set, get) => ({
   pets: [],
@@ -72,6 +76,11 @@ export const usePetStore = create<PetStore>((set, get) => ({
       disconnectFromPetRoom(prevId);
     }
 
+    if (pollInterval) {
+      clearInterval(pollInterval);
+      pollInterval = null;
+    }
+
     set({ activePetId: petId, loading: true });
     try {
       const [petData, outfitData] = await Promise.all([
@@ -105,6 +114,20 @@ export const usePetStore = create<PetStore>((set, get) => ({
         outfitMap: { ...get().outfitMap, [petId]: outfitData },
         loading: false,
       });
+
+      pollInterval = setInterval(async () => {
+        const currentPetId = get().activePetId;
+        if (!currentPetId) return;
+        try {
+          const freshPet = await api.getPet(currentPetId);
+          set((state) => ({
+            pet: freshPet,
+            petMap: { ...state.petMap, [currentPetId]: freshPet },
+          }));
+        } catch {
+          // ignore polling errors
+        }
+      }, POLL_INTERVAL_MS);
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to select pet', loading: false });
     }
