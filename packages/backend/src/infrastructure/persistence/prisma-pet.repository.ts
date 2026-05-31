@@ -26,6 +26,13 @@ export class PrismaPetRepository implements PetRepositoryPort {
     return pets.map((p: any) => this.toDomain(p));
   }
 
+  async countByUserOrCouple(userId: string, coupleId?: string): Promise<number> {
+    const where = coupleId
+      ? { OR: [{ userId }, { coupleId }] }
+      : { userId };
+    return this.prisma.pet.count({ where });
+  }
+
   async findByUserId(userId: string): Promise<Pet[]> {
     const pets = await this.prisma.pet.findMany({
       where: {

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { PetSprite } from '@/components/pet/PetSprite';
 import { usePetStore } from '@/stores/pet.store';
 import { RoomScene } from './RoomScene';
+import { getSleepPositions } from './sleepTileMap';
+import type { SleepPosition } from './sleepTileMap';
 
 const ROOMS = [
   { id: 'living', label: 'Sala', icon: '🏠' },
@@ -45,26 +47,27 @@ function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
 }
 
-function distributePositions(count: number): { x: number; depth: number }[] {
-  if (count <= 1) return [{ x: 0.5, depth: 0.5 }];
+function distributePositions(count: number): PetPosition[] {
+  if (count <= 1) return [{ x: 0.5, depth: 0.5, top: 82 }];
 
   const spreadX = Math.min(0.72, 0.22 + (count - 2) * 0.16);
   const spacingX = spreadX / (count - 1);
   const startX = 0.5 - spreadX / 2;
 
-  const positions: { x: number; depth: number }[] = [];
+  const positions: PetPosition[] = [];
   for (let i = 0; i < count; i++) {
     const t = count <= 1 ? 0.5 : i / (count - 1);
     const depth = 0.15 + t * 0.7;
     positions.push({
       x: startX + spacingX * i,
       depth,
+      top: 82,
     });
   }
   return positions;
 }
 
-type PetPosition = { x: number; depth: number };
+type PetPosition = SleepPosition;
 
 export function Room() {
   const { pets, petMap, performAction } = usePetStore();
@@ -75,7 +78,11 @@ export function Room() {
   const previousRoom = useRef<RoomId>('living');
 
   useEffect(() => {
-    setPetPositions(distributePositions(pets.length));
+    if (room === 'sleep') {
+      setPetPositions(getSleepPositions(pets.length));
+    } else {
+      setPetPositions(distributePositions(pets.length));
+    }
     previousRoom.current = room;
   }, [room, pets.length]);
 
@@ -92,6 +99,7 @@ export function Room() {
           next[i] = {
             x: 0.5 - rangeX / 2 + Math.random() * rangeX,
             depth: next[i]?.depth ?? 0.5,
+            top: next[i]?.top ?? 82,
           };
           return next;
         });
@@ -157,22 +165,21 @@ export function Room() {
         style={{
           aspectRatio: '16/9',
           minHeight: '420px',
-          perspective: '900px',
-          perspectiveOrigin: 'center 40%',
+          perspective: '800px',
         }}
       >
-        {/* 3D Room interior */}
+        {/* 3D background layer: wall + floor + furniture */}
         <div
-          className="absolute inset-0 transition-transform duration-700"
+          className="absolute inset-0"
           style={{
-            transform: 'rotateX(6deg)',
-            transformOrigin: 'center bottom',
+            transform: 'rotateX(5deg)',
+            transformOrigin: 'center 60%',
             transformStyle: 'preserve-3d',
           }}
         >
           {/* Wall */}
           <div
-            className={`absolute inset-0 bottom-[25%] bg-gradient-to-b ${design.wall} transition-colors duration-700 z-0`}
+            className={`absolute inset-0 bottom-[25%] bg-gradient-to-b ${design.wall} transition-colors duration-700`}
           >
             <div
               className="absolute inset-0 opacity-[0.03]"
@@ -186,11 +193,7 @@ export function Room() {
 
           {/* Floor */}
           <div
-            className={`absolute bottom-0 left-0 right-0 h-[25%] bg-gradient-to-b ${design.floor} transition-colors duration-700 z-0`}
-            style={{
-              transform: 'rotateX(2deg)',
-              transformOrigin: 'top center',
-            }}
+            className={`absolute bottom-0 left-0 right-0 ${room === 'sleep' ? 'h-[35%]' : 'h-[25%]'} bg-gradient-to-b ${design.floor} transition-colors duration-700`}
           >
             <div
               className="absolute inset-0 opacity-15"
@@ -205,68 +208,99 @@ export function Room() {
 
           {/* Floor shadow gradient for depth */}
           <div
-            className="absolute bottom-0 left-0 right-0 h-[25%] z-[1] pointer-events-none"
+            className={`absolute bottom-0 left-0 right-0 ${room === 'sleep' ? 'h-[35%]' : 'h-[25%]'} pointer-events-none`}
             style={{
               background: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 40%, transparent 100%)',
             }}
           />
+
+          {/* Furniture SVG (fills full room container) */}
+          <RoomScene room={room} petPositions={petPositions} />
         </div>
 
-        {/* Furniture SVG (fills full room container) */}
-        <RoomScene room={room} petPositions={petPositions} />
+        {/* Flat pets layer (no 3D transform to prevent distortion) */}
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          {pets.map((summary, i) => {
+            const pos = petPositions[i];
+            if (!pos) return null;
+            const data = petMap[summary.id];
+            const isSleeping = summary.isSleeping;
+            const depth = pos.depth;
 
-        {/* Pets */}
-        {pets.map((summary, i) => {
-          const pos = petPositions[i];
-          if (!pos) return null;
-          const data = petMap[summary.id];
-          const isSleeping = summary.isSleeping;
-          const depth = pos.depth;
+            const depthScale = 0.55 + depth * 0.55;
+            const size = isSleeping ? PET_SIZE_SLEEP * depthScale : PET_SIZE * depthScale;
 
-          const depthScale = 0.55 + depth * 0.55;
-          const size = isSleeping ? PET_SIZE_SLEEP * depthScale : PET_SIZE * depthScale;
-          const floorY = room === 'sleep' && isSleeping ? 32 : 16;
-          const baseBottom = `calc(${floorY}% + ${(1 - depth) * 40}px)`;
+            const petScale = isSleeping ? 'scaleY(0.75)' : 'scaleY(1)';
+            const posStyle: Record<string, string | number | undefined> = room === 'sleep' ? {
+              left: `${pos.x}%`,
+              top: `${(pos as SleepPosition).top}%`,
+              transform: `translate(-50%, -50%) ${petScale}`,
+            } : {
+              left: `${pos.x * 100}%`,
+              bottom: `calc(16% + ${(1 - depth) * 40}px)`,
+              transform: `translateX(-50%) ${petScale}`,
+            };
 
-          return (
-            <div
-              key={summary.id}
-              className="absolute z-20 transition-all duration-[1000ms] ease-out"
-              style={{
-                left: `${pos.x * 100}%`,
-                bottom: baseBottom,
-                transform: `translateX(-50%) ${isSleeping ? 'rotate(90deg)' : 'rotate(0deg)'}`,
-                transformOrigin: 'center center',
-                zIndex: Math.round(depth * 100) + 10,
-                filter: `brightness(${0.75 + depth * 0.3})`,
-              }}
-            >
+            return (
               <div
-                className="absolute whitespace-nowrap z-30 pointer-events-none"
+                key={summary.id}
+                className="absolute transition-all duration-[1000ms] ease-out pointer-events-auto"
                 style={{
-                  left: '50%',
-                  [isSleeping ? 'bottom' : 'top']: isSleeping ? '-8px' : '-22px',
-                  transform: isSleeping ? 'translate(-50%, 0)' : 'translateX(-50%)',
+                  ...posStyle,
+                  transformOrigin: 'center center',
+                  zIndex: Math.round(depth * 100) + 10,
+                  filter: `brightness(${0.75 + depth * 0.3})`,
                 }}
               >
-                <div className="text-[11px] font-medium px-2 py-0.5 rounded-full shadow-lg bg-slate-900/60 text-slate-200 backdrop-blur-sm">
-                  {summary.name}
+                <div
+                  className="absolute whitespace-nowrap pointer-events-none"
+                  style={{
+                    left: '50%',
+                    [isSleeping ? 'bottom' : 'top']: isSleeping ? '-8px' : '-22px',
+                    transform: isSleeping ? 'translate(-50%, 0)' : 'translateX(-50%)',
+                  }}
+                >
+                  <div className="text-[11px] font-medium px-2 py-0.5 rounded-full shadow-lg bg-slate-900/60 text-slate-200 backdrop-blur-sm">
+                    {summary.name}
+                  </div>
                 </div>
+
+                <PetSprite
+                  species={summary.species}
+                  mood={data?.mood ?? summary.mood}
+                  isSleeping={isSleeping}
+                  size={Math.round(size)}
+                />
+
+                {isSleeping && room === 'sleep' && (
+                  <div
+                    className="absolute z-30 pointer-events-none"
+                    style={{
+                      bottom: '-2px',
+                      left: '-10%',
+                      width: '120%',
+                      height: '60%',
+                      background: 'linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%)',
+                      borderRadius: '10px 10px 6px 6px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                      opacity: 0.92,
+                    }}
+                  >
+                    <div className="absolute left-[28%] inset-y-1.5 w-[2.5px] bg-white/20 rounded-full" />
+                    <div className="absolute w-2 h-2 bg-white/15 rounded-full" style={{ top: '36%', left: '45%' }} />
+                    <div className="absolute w-1.5 h-1.5 bg-white/12 rounded-full" style={{ top: '52%', left: '22%' }} />
+                    <div className="absolute w-1.5 h-1.5 bg-white/12 rounded-full" style={{ top: '28%', left: '65%' }} />
+                    <div className="absolute w-1.5 h-1.5 bg-white/15 rounded-full" style={{ top: '55%', left: '72%' }} />
+                  </div>
+                )}
+
+                {isSleeping && (
+                  <div className="absolute text-sm animate-pulse" style={{ top: '-10px', left: '60%' }}>💤</div>
+                )}
               </div>
-
-              <PetSprite
-                species={summary.species}
-                mood={data?.mood ?? summary.mood}
-                isSleeping={isSleeping}
-                size={Math.round(size)}
-              />
-
-              {isSleeping && (
-                <div className="absolute text-sm animate-pulse z-30" style={{ top: '-10px', left: '60%' }}>💤</div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
 
         {/* Room label */}
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none">

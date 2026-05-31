@@ -4,6 +4,7 @@ export interface PetRepositoryPort {
   findById(id: string): Promise<Pet | null>;
   findByCoupleId(coupleId: string): Promise<Pet[]>;
   findByUserId(userId: string): Promise<Pet[]>;
+  countByUserOrCouple(userId: string, coupleId?: string): Promise<number>;
   save(pet: Pet): Promise<void>;
   update(pet: Pet): Promise<void>;
   delete(id: string): Promise<void>;

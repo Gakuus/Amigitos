@@ -5,6 +5,7 @@ import { PetRepositoryPort } from '../ports/pet-repository.port';
 import { WebSocketNotifierPort } from '../ports/websocket-notifier.port';
 import { DecayService } from '../../domain/services/decay.service';
 import { PetFedEvent, PetPlayedEvent, PetBathedEvent, PetSleptEvent, PetEvolvedEvent, PetMoodChangedEvent } from '../../domain/pet/pet.domain-events';
+import { MAX_PETS_PER_COUPLE } from '@amigitos/shared';
 
 export class PetService {
   private readonly decayService = new DecayService();
@@ -15,6 +16,11 @@ export class PetService {
   ) {}
 
   async adoptPet(name: string, species: PetSpecies, userId: string, coupleId?: string): Promise<Pet> {
+    const count = await this.petRepo.countByUserOrCouple(userId, coupleId);
+    if (count >= MAX_PETS_PER_COUPLE) {
+      throw new Error('MAX_PETS_REACHED');
+    }
+
     const pet = new Pet({
       id: PetId.create(),
       name,

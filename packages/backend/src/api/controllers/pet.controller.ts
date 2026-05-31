@@ -18,14 +18,19 @@ export class PetController {
 
   @Post('adopt')
   async adopt(@Body() dto: AdoptPetDto, @CurrentUser() user: { userId: string }) {
-    const userEntity = await this.userRepo.findById(user.userId);
-    const pet = await this.petService.adoptPet(
-      dto.name,
-      dto.species as PetSpecies,
-      user.userId,
-      userEntity?.coupleId ?? undefined,
-    );
-    return pet.toJSON();
+    try {
+      const userEntity = await this.userRepo.findById(user.userId);
+      const pet = await this.petService.adoptPet(
+        dto.name,
+        dto.species as PetSpecies,
+        user.userId,
+        userEntity?.coupleId ?? undefined,
+      );
+      return pet.toJSON();
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'UNKNOWN';
+      return this.handlePetError(message);
+    }
   }
 
   @Get('mine')

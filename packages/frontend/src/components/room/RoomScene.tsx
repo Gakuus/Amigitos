@@ -1,22 +1,10 @@
 'use client';
 
+import type { SleepPosition } from './sleepTileMap';
+
 const VW = 1600;
 const VH = 900;
 const FLOOR_Y = 675;
-
-function PetBed({ cx }: { cx: number }) {
-  return (
-    <g transform={`translate(${cx}, ${FLOOR_Y - 55})`}>
-      <ellipse cx={0} cy={70} rx={160} ry={14} fill="rgba(0,0,0,0.12)" />
-      <rect x={-150} y={-25} width={300} height={80} rx={12} fill="url(#bedFrame)" stroke="#6d28d9" strokeWidth={2} />
-      <rect x={-140} y={-35} width={280} height={50} rx={10} fill="url(#mattress)" />
-      <rect x={-140} y={-38} width={280} height={8} rx={4} fill="rgba(255,255,255,0.3)" />
-      <rect x={-130} y={-30} width={90} height={35} rx={8} fill="url(#pillow)" />
-      <rect x={-30} y={-15} width={160} height={40} rx={8} fill="url(#blanket)" opacity={0.85} />
-      <line x1={-30} y1={-15} x2={-30} y2={25} stroke="rgba(255,255,255,0.25)" strokeWidth={3} />
-    </g>
-  );
-}
 
 function LivingScene() {
   return (
@@ -149,29 +137,97 @@ function BathScene() {
   );
 }
 
-type PetPos = { x: number; depth: number };
-
-function SleepScene({ petPositions }: { petPositions: PetPos[] }) {
+function FloorVignette() {
   return (
     <g>
-      <circle cx={1300} cy={100} r={55} fill="#fef3c7" opacity={0.7} />
-      <circle cx={1325} cy={88} r={50} fill="#1e1b4b" />
-      <circle cx={200} cy={80} r={3.5} fill="#fef3c7" opacity={0.6} />
-      <circle cx={400} cy={140} r={2.5} fill="#fef3c7" opacity={0.5} />
-      <circle cx={550} cy={55} r={3.5} fill="#fef3c7" opacity={0.7} />
-      <circle cx={1050} cy={110} r={2} fill="#fef3c7" opacity={0.4} />
-      <circle cx={1450} cy={70} r={3.5} fill="#fef3c7" opacity={0.6} />
-      <circle cx={750} cy={70} r={2} fill="#fef3c7" opacity={0.5} />
-      <g transform="translate(200, 500)">
-        <rect x={-35} y={0} width={70} height={85} rx={5} fill="#6d597a" />
-        <rect x={-40} y={-6} width={80} height={10} rx={4} fill="#7d6a8a" />
-        <line x1={0} y1={-6} x2={0} y2={-75} stroke="#4a3a55" strokeWidth={2} />
-        <path d="M-28 -75 Q0 -118 28 -75" fill="#fef3c7" opacity={0.55} stroke="#d4a017" strokeWidth={1.5} />
-        <ellipse cx={0} cy={-75} rx={32} ry={9} fill="#fef3c7" opacity={0.35} />
-        <ellipse cx={0} cy={-30} rx={90} ry={65} fill="rgba(254,243,199,0.04)" />
-      </g>
+      <rect x={0} y={FLOOR_Y - 3} width={VW} height={3} fill="rgba(0,0,0,0.12)" />
+      <rect x={0} y={FLOOR_Y} width={VW} height={2} fill="rgba(0,0,0,0.08)" />
+    </g>
+  );
+}
+
+function FloorLines({ room }: { room: string }) {
+  const floorTop = room === 'sleep' ? 585 : 675;
+  const vp = { x: VW / 2, y: 340 };
+  const lines: JSX.Element[] = [];
+  const count = 14;
+  for (let i = 0; i <= count; i++) {
+    const bx = (i / count) * VW;
+    lines.push(
+      <line key={i} x1={vp.x} y1={vp.y} x2={bx} y2={VH} stroke="rgba(255,255,255,0.045)" strokeWidth={1.5} />
+    );
+  }
+  const hCount = 8;
+  const hLines: JSX.Element[] = [];
+  for (let i = 1; i < hCount; i++) {
+    const t = i / hCount;
+    const y = floorTop + (VH - floorTop) * t * t;
+    hLines.push(
+      <line key={`h${i}`} x1={0} y1={y} x2={VW} y2={y} stroke="rgba(255,255,255,0.025)" strokeWidth={1} />
+    );
+  }
+  return (
+    <g className="floor-lines">
+      {hLines}
+      {lines}
+    </g>
+  );
+}
+
+function Bed2D({ cx, cy, depth }: { cx: number; cy: number; depth: number }) {
+  const scale = 0.55 + depth * 0.55;
+  const bw = 260 * scale;
+  const bh = 80 * scale;
+  const sideH = 10 * scale;
+  const x = cx - bw / 2;
+  const y = cy - bh / 2 - sideH;
+
+  const frameColor = '#7c3aed';
+  const frameDark = '#5b21b6';
+  const headColor = '#6d28d9';
+
+  return (
+    <g>
+      <ellipse cx={cx} cy={y + bh + sideH + 8 * scale} rx={bw * 0.54} ry={8 * scale} fill="rgba(0,0,0,0.15)" />
+      <rect x={x + bw * 0.06} y={y - 16 * scale} width={bw * 0.88} height={16 * scale} rx={5 * scale} fill={headColor} />
+      <rect x={x + bw * 0.06} y={y - 16 * scale} width={bw * 0.88} height={4 * scale} rx={2 * scale} fill="rgba(255,255,255,0.1)" />
+      <rect x={x} y={y + bh} width={bw} height={sideH} rx={0} fill={frameDark} />
+      <rect x={x} y={y} width={bw} height={bh} rx={10 * scale} fill={frameColor} stroke={frameDark} strokeWidth={1.5 * scale} />
+      <rect x={x + 8 * scale} y={y + 6 * scale} width={bw - 16 * scale} height={bh * 0.46} rx={6 * scale} fill="#f1f5f9" />
+      <rect x={x + 10 * scale} y={y + 9 * scale} width={bw * 0.16} height={bh * 0.34} rx={5 * scale} fill="#fde68a" />
+      <rect x={x + 8 * scale} y={y + bh * 0.42} width={bw * 0.84} height={bh * 0.5} rx={6 * scale} fill="#a78bfa" opacity={0.92} />
+      <rect x={x + 12 * scale + bw * 0.16} y={y + bh * 0.42} width={3 * scale} height={bh * 0.35} rx={1.5 * scale} fill="rgba(255,255,255,0.2)" />
+      <rect x={x + 8 * scale} y={y + bh * 0.44} width={bw * 0.84} height={3 * scale} rx={1.5 * scale} fill="rgba(255,255,255,0.08)" />
+    </g>
+  );
+}
+
+function SleepScene({ petPositions }: { petPositions: SleepPosition[] }) {
+  return (
+    <g>
+      <circle cx={1320} cy={90} r={52} fill="#fef3c7" opacity={0.65} />
+      <circle cx={1340} cy={80} r={48} fill="#1e1b4b" />
+      <circle cx={180} cy={70} r={3} fill="#fef3c7" opacity={0.5} />
+      <circle cx={360} cy={120} r={2.5} fill="#fef3c7" opacity={0.4} />
+      <circle cx={520} cy={50} r={3} fill="#fef3c7" opacity={0.6} />
+      <circle cx={1080} cy={100} r={2} fill="#fef3c7" opacity={0.35} />
+      <circle cx={480} cy={170} r={2} fill="#fef3c7" opacity={0.45} />
+      <circle cx={720} cy={60} r={2.5} fill="#fef3c7" opacity={0.55} />
+      <circle cx={140} cy={160} r={2} fill="#fef3c7" opacity={0.4} />
+      <circle cx={1460} cy={130} r={2.5} fill="#fef3c7" opacity={0.45} />
+      <circle cx={440} cy={90} r={1.8} fill="#fef3c7" opacity={0.5} />
+      <circle cx={980} cy={55} r={2.8} fill="#fef3c7" opacity={0.5} />
+      <FloorLines room="sleep" />
+      <rect x={80} y={630} width={1440} height={240} rx={32} fill="rgba(76,29,149,0.3)" />
+      <rect x={100} y={640} width={1400} height={220} rx={24} fill="rgba(76,29,149,0.15)" />
+      <FloorVignette />
       {petPositions.map((pos, i) => (
-        <PetBed key={i} cx={pos.x * VW} />
+        <Bed2D
+          key={i}
+          cx={(pos.x / 100) * VW}
+          cy={(pos.top / 100) * VH}
+          depth={pos.depth}
+        />
       ))}
     </g>
   );
@@ -179,7 +235,7 @@ function SleepScene({ petPositions }: { petPositions: PetPos[] }) {
 
 type RoomId = 'living' | 'eat' | 'play' | 'bath' | 'sleep';
 
-export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: PetPos[] }) {
+export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: SleepPosition[] }) {
   return (
     <svg
       viewBox={`0 0 ${VW} ${VH}`}
@@ -254,24 +310,9 @@ export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: 
           <stop offset="0%" stopColor="#7dd3fc" />
           <stop offset="100%" stopColor="#0ea5e9" />
         </linearGradient>
-        <linearGradient id="bedFrame" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#6d28d9" />
-        </linearGradient>
-        <linearGradient id="mattress" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f8fafc" />
-          <stop offset="100%" stopColor="#e2e8f0" />
-        </linearGradient>
-        <linearGradient id="pillow" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fef3c7" />
-          <stop offset="100%" stopColor="#fde68a" />
-        </linearGradient>
-        <linearGradient id="blanket" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="100%" stopColor="#7c3aed" />
-        </linearGradient>
       </defs>
 
+      <FloorLines room={room} />
       {room === 'living' && <LivingScene />}
       {room === 'eat' && <EatScene />}
       {room === 'play' && <PlayScene />}
