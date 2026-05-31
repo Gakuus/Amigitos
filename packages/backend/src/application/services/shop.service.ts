@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/persistence/prisma.service';
 import { PrismaUserRepository } from '../../infrastructure/persistence/prisma-user.repository';
+import type { WardrobeItem, Consumable } from '@prisma/client';
 
 @Injectable()
 export class ShopService {
@@ -10,17 +11,17 @@ export class ShopService {
   ) {}
 
   async getShopItems() {
-    const cosmetics = await this.prisma.wardrobeItem.findMany({
+    const cosmetics: WardrobeItem[] = await this.prisma.wardrobeItem.findMany({
       where: { price: { gt: 0 } },
       orderBy: { price: 'asc' },
     });
 
-    const consumables = await this.prisma.consumable.findMany({
+    const consumables: Consumable[] = await this.prisma.consumable.findMany({
       orderBy: { price: 'asc' },
     });
 
     return [
-      ...cosmetics.map((c) => ({
+      ...cosmetics.map((c: WardrobeItem) => ({
         id: c.id,
         type: 'COSMETIC' as const,
         name: c.name,
@@ -31,7 +32,7 @@ export class ShopService {
         rarity: c.rarity,
         species: c.species,
       })),
-      ...consumables.map((c) => ({
+      ...consumables.map((c: Consumable) => ({
         id: c.id,
         type: 'CONSUMABLE' as const,
         name: c.name,
@@ -101,7 +102,7 @@ export class ShopService {
     });
 
     return [
-      ...consumables.map((uc) => ({
+      ...consumables.map((uc: typeof consumables[0]) => ({
         id: uc.id,
         type: 'CONSUMABLE' as const,
         itemId: uc.consumableId,
@@ -112,7 +113,7 @@ export class ShopService {
         category: uc.consumable.category,
         effect: uc.consumable.effect as Record<string, unknown>,
       })),
-      ...cosmetics.map((uc) => ({
+      ...cosmetics.map((uc: typeof cosmetics[0]) => ({
         id: uc.id,
         type: 'COSMETIC' as const,
         itemId: uc.itemId,
