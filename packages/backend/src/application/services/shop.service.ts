@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/persistence/prisma.service';
 import { PrismaUserRepository } from '../../infrastructure/persistence/prisma-user.repository';
+import { PrismaPetRepository } from '../../infrastructure/persistence/prisma-pet.repository';
 import type { WardrobeItem, Consumable } from '@prisma/client';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class ShopService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly userRepo: PrismaUserRepository,
+    private readonly petRepo: PrismaPetRepository,
   ) {}
 
   async getShopItems() {
@@ -130,5 +132,32 @@ export class ShopService {
     const user = await this.userRepo.findById(userId);
     if (!user) throw new NotFoundException('User not found');
     return { coins: user.coins };
+  }
+
+  async useConsumableOnPet(userId: string, petId: string, consumableId: string) {
+    const pet = await this.petRepo.findById(petId);
+    if (!pet) throw new NotFoundException('Pet not found');
+
+    const userItem = await this.prisma.userConsumable.findUnique({
+      where: { userId_consumableId: { userId, consumableId } },
+      include: { consumable: true },
+    });
+    if (!userItem || userItem.quantity <= 0) throw new BadRequestException('Item not in inventory');
+
+    const effect = userItem.consumable.effect as { stat: string; amount: number };
+
+    pet.applyItemEffect(effect.stat, effect.amount);
+    await this.petRepo.update(pet);
+
+    if (userItem.quantity <= 1) {
+      await this.prisma.userConsumable.delete({ where: { id: userItem.id } });
+    } else {
+      await this.prisma.userConsumable.update({
+        where: { id: userItem.id },
+        data: { quantity: { decrement: 1 } },
+      });
+    }
+
+    return { success: true, pet: pet.toJSON() };
   }
 }

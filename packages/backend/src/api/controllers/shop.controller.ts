@@ -43,4 +43,20 @@ export class ShopController {
   async balance(@CurrentUser() user: { userId: string }) {
     return this.shopService.getBalance(user.userId);
   }
+
+  @Post('use/:itemId')
+  async useItem(
+    @Param('itemId') itemId: string,
+    @Body() body: { petId: string },
+    @CurrentUser() user: { userId: string },
+  ) {
+    try {
+      return await this.shopService.useConsumableOnPet(user.userId, body.petId, itemId);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw error;
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ShopItemInfo, InventoryItem, UserBalance } from '@amigitos/shared';
+import type { ShopItemInfo, InventoryItem, UserBalance, PetState } from '@amigitos/shared';
 import { api } from '@/lib/api';
 
 interface ShopStore {
@@ -8,6 +8,7 @@ interface ShopStore {
   balance: UserBalance | null;
   loading: boolean;
   buying: boolean;
+  using: boolean;
   error: string | null;
   success: string | null;
 
@@ -15,6 +16,7 @@ interface ShopStore {
   fetchInventory: () => Promise<void>;
   fetchBalance: () => Promise<void>;
   buyItem: (itemType: string, itemId: string) => Promise<boolean>;
+  applyConsumable: (itemId: string, petId: string) => Promise<boolean>;
   clearMessages: () => void;
 }
 
@@ -24,6 +26,7 @@ export const useShopStore = create<ShopStore>((set, get) => ({
   balance: null,
   loading: false,
   buying: false,
+  using: false,
   error: null,
   success: null,
 
@@ -68,6 +71,22 @@ export const useShopStore = create<ShopStore>((set, get) => ({
       set({
         error: err instanceof Error ? err.message : 'Failed to buy item',
         buying: false,
+      });
+      return false;
+    }
+  },
+
+  applyConsumable: async (itemId: string, petId: string) => {
+    set({ using: true, error: null });
+    try {
+      const result = await api.useConsumable(itemId, petId);
+      set({ using: false, success: '¡Usado con éxito!' });
+      await get().fetchInventory();
+      return true;
+    } catch (err) {
+      set({
+        error: err instanceof Error ? err.message : 'Failed to use item',
+        using: false,
       });
       return false;
     }

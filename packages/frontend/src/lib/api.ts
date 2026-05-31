@@ -127,4 +127,10 @@ export const api = {
   getInventory: () => request<InventoryItem[]>('/shop/inventory'),
 
   getBalance: () => request<UserBalance>('/shop/balance'),
+
+  useConsumable: (itemId: string, petId: string) =>
+    request<{ success: boolean; pet: PetState }>(`/shop/use/${itemId}`, {
+      method: 'POST',
+      body: JSON.stringify({ petId }),
+    }),
 };

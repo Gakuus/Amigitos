@@ -236,6 +236,24 @@ export class Pet {
     this.touch();
   }
 
+  applyItemEffect(stat: string, amount: number): void {
+    this._isSleeping = false;
+    if (stat === 'hunger' || stat === 'all') {
+      this._hunger = Hunger.create(Math.min(100, this._hunger.value + amount));
+    }
+    if (stat === 'happiness' || stat === 'all') {
+      this._happiness = Happiness.create(Math.min(100, this._happiness.value + amount));
+    }
+    if (stat === 'energy' || stat === 'all') {
+      this._energy = Energy.create(Math.min(100, this._energy.value + amount));
+    }
+    if (stat === 'hygiene' || stat === 'all') {
+      this._hygiene = Hygiene.create(Math.min(100, this._hygiene.value + amount));
+    }
+    this.calculateMood();
+    this.touch();
+  }
+
   toJSON() {
     return {
       id: this._id.value,

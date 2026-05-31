@@ -134,6 +134,7 @@ export default function HomePage() {
         <AdoptModal
           onClose={() => setShowAdopt(false)}
           onAdopted={(petId) => selectPet(petId)}
+          userCoupleId={user?.coupleId}
         />
       )}
 
