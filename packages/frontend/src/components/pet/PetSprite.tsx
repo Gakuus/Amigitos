@@ -137,7 +137,7 @@ function CatSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boolean }
   return (
     <g className="animate-bounce-idle">
       {/* Tail */}
-      <g className="animate-tail-wag" transform-origin="50 160">
+      <g className="animate-tail-wag" transformOrigin="50 160">
         <path d="M55 160 Q35 140 30 120 Q28 112 32 108" fill="none" stroke="#f97316" strokeWidth="6" strokeLinecap="round" />
       </g>
       {/* Body */}
@@ -146,11 +146,11 @@ function CatSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boolean }
       {/* Head */}
       <circle cx="100" cy="85" r="40" fill="#f97316" />
       {/* Ears */}
-      <g className="animate-ear-wiggle" transform-origin="70 50">
+      <g className="animate-ear-wiggle" transformOrigin="70 50">
         <polygon points="60,45 75,50 65,75" fill="#f97316" />
         <polygon points="63,50 72,53 67,70" fill="#fecdd3" />
       </g>
-      <g className="animate-ear-wiggle" transform-origin="130 50" style={{ animationDelay: '0.15s' }}>
+      <g className="animate-ear-wiggle" transformOrigin="130 50" style={{ animationDelay: '0.15s' }}>
         <polygon points="140,45 125,50 135,75" fill="#f97316" />
         <polygon points="137,50 128,53 133,70" fill="#fecdd3" />
       </g>
@@ -178,7 +178,7 @@ function DogSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boolean }
   return (
     <g className="animate-bounce-idle">
       {/* Tail */}
-      <g className="animate-tail-wag" transform-origin="60 150">
+      <g className="animate-tail-wag" transformOrigin="60 150">
         <path d="M60 150 Q40 125 45 110" fill="none" stroke="#d4a574" strokeWidth="7" strokeLinecap="round" />
       </g>
       {/* Body */}
@@ -189,10 +189,10 @@ function DogSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boolean }
       {/* Snout */}
       <ellipse cx="105" cy="98" rx="18" ry="13" fill="#c4956a" />
       {/* Floppy ears */}
-      <g className="animate-ear-flop" transform-origin="70 55">
+      <g className="animate-ear-flop" transformOrigin="70 55">
         <ellipse cx="68" cy="78" rx="12" ry="22" fill="#a67c52" transform="rotate(15 68 78)" />
       </g>
-      <g className="animate-ear-flop" transform-origin="140 55" style={{ animationDelay: '0.2s' }}>
+      <g className="animate-ear-flop" transformOrigin="140 55" style={{ animationDelay: '0.2s' }}>
         <ellipse cx="142" cy="78" rx="12" ry="22" fill="#a67c52" transform="rotate(-15 142 78)" />
       </g>
       {/* Eyes */}
@@ -222,11 +222,11 @@ function RabbitSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boolea
       {/* Head */}
       <circle cx="100" cy="85" r="32" fill="#f3f4f6" />
       {/* Long ears */}
-      <g className="animate-ear-flop" transform-origin="82 55">
+      <g className="animate-ear-flop" transformOrigin="82 55">
         <ellipse cx="78" cy="35" rx="9" ry="30" fill="#f3f4f6" />
         <ellipse cx="78" cy="35" rx="5" ry="22" fill="#fce7f3" />
       </g>
-      <g className="animate-ear-flop" transform-origin="118 55" style={{ animationDelay: '0.1s' }}>
+      <g className="animate-ear-flop" transformOrigin="118 55" style={{ animationDelay: '0.1s' }}>
         <ellipse cx="122" cy="35" rx="9" ry="30" fill="#f3f4f6" />
         <ellipse cx="122" cy="35" rx="5" ry="22" fill="#fce7f3" />
       </g>
@@ -293,7 +293,7 @@ function FoxSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boolean }
   return (
     <g className="animate-bounce-idle">
       {/* Bushy tail */}
-      <g className="animate-tail-wag" transform-origin="55 150">
+      <g className="animate-tail-wag" transformOrigin="55 150">
         <path d="M60 150 Q30 130 25 100 Q22 85 28 80" fill="none" stroke="#f97316" strokeWidth="14" strokeLinecap="round" />
         <circle cx="28" cy="82" r="6" fill="#fef3c7" />
       </g>
@@ -305,11 +305,11 @@ function FoxSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boolean }
       {/* Snout */}
       <ellipse cx="105" cy="96" rx="16" ry="10" fill="#fef3c7" />
       {/* Ears */}
-      <g className="animate-ear-wiggle" transform-origin="78 55">
+      <g className="animate-ear-wiggle" transformOrigin="78 55">
         <polygon points="75,48 88,52 80,80" fill="#f97316" />
         <polygon points="78,52 86,55 82,74" fill="#1e293b" />
       </g>
-      <g className="animate-ear-wiggle" transform-origin="132 55" style={{ animationDelay: '0.12s' }}>
+      <g className="animate-ear-wiggle" transformOrigin="132 55" style={{ animationDelay: '0.12s' }}>
         <polygon points="125,48 112,52 120,80" fill="#f97316" />
         <polygon points="122,52 114,55 118,74" fill="#1e293b" />
       </g>
@@ -401,10 +401,10 @@ function PenguinSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boole
         ) : null
       )}
       {/* Flippers */}
-      <g className="animate-flipper" transform-origin="65 120">
+      <g className="animate-flipper" transformOrigin="65 120">
         <ellipse cx="65" cy="120" rx="8" ry="25" fill="#1e293b" transform="rotate(20 65 120)" />
       </g>
-      <g className="animate-flipper" transform-origin="135 120" style={{ animationDelay: '0.15s' }}>
+      <g className="animate-flipper" transformOrigin="135 120" style={{ animationDelay: '0.15s' }}>
         <ellipse cx="135" cy="120" rx="8" ry="25" fill="#1e293b" transform="rotate(-20 135 120)" />
       </g>
       {/* Feet */}
@@ -418,7 +418,7 @@ function DragonSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boolea
   return (
     <g className="animate-bounce-idle">
       {/* Tail */}
-      <g className="animate-tail-wag" transform-origin="55 145">
+      <g className="animate-tail-wag" transformOrigin="55 145">
         <path d="M60 145 Q30 135 20 115 Q12 100 18 95" fill="none" stroke="#22c55e" strokeWidth="10" strokeLinecap="round" />
         <polygon points="18,95 12,88 22,90" fill="#fbbf24" />
       </g>
@@ -447,10 +447,10 @@ function DragonSprite({ mood, isSleeping }: { mood: PetMood; isSleeping?: boolea
         </g>
       )}
       {/* Wings */}
-      <g className="animate-wing" transform-origin="68 100">
+      <g className="animate-wing" transformOrigin="68 100">
         <path d="M68 100 Q40 80 35 60 Q45 75 60 85 Q50 70 48 55 Q58 70 68 85 Z" fill="#16a34a" opacity="0.8" />
       </g>
-      <g className="animate-wing" transform-origin="132 100" style={{ animationDelay: '0.1s' }}>
+      <g className="animate-wing" transformOrigin="132 100" style={{ animationDelay: '0.1s' }}>
         <path d="M132 100 Q160 80 165 60 Q155 75 140 85 Q150 70 152 55 Q142 70 132 85 Z" fill="#16a34a" opacity="0.8" />
       </g>
       {/* Spikes */}
