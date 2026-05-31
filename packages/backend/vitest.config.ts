@@ -6,6 +6,7 @@ export default defineConfig({
     environment: 'node',
     root: '.',
     include: ['src/**/*.test.ts'],
+    passWithNoTests: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
