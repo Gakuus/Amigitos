@@ -4,7 +4,7 @@ import { api } from '@/lib/api';
 interface GameStore {
   cooldowns: Record<string, number>;
   claiming: string | null;
-  claimReward: (gameType: string, score: number) => Promise<{ coins: number; won: boolean } | null>;
+  claimReward: (gameType: string, score: number) => Promise<{ coins: number; totalCoins: number; won: boolean } | null>;
   fetchCooldowns: () => Promise<void>;
 }
 

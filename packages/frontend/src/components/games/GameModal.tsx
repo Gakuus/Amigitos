@@ -6,6 +6,7 @@ import { CatchTreats } from './CatchTreats';
 import { PetPuzzle } from './PetPuzzle';
 import { useGameStore } from '@/stores/game.store';
 import { useShopStore } from '@/stores/shop.store';
+import { useAuthStore } from '@/stores/auth.store';
 
 interface GameModalProps {
   onClose: () => void;
@@ -22,8 +23,11 @@ const GAMES: { id: GameType; name: string; icon: string; description: string; co
 export function GameModal({ onClose }: GameModalProps) {
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null);
   const [gameResult, setGameResult] = useState<{ score: number; coins: number; won: boolean } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [errorCount, setErrorCount] = useState(0);
   const { claimReward, cooldowns, fetchCooldowns } = useGameStore();
   const { fetchBalance } = useShopStore();
+  const updateCoins = useAuthStore(s => s.updateCoins);
 
   useEffect(() => {
     fetchCooldowns();
@@ -31,16 +35,24 @@ export function GameModal({ onClose }: GameModalProps) {
 
   const handleFinish = async (score: number) => {
     if (!selectedGame) return;
+    setError(null);
     const data = await claimReward(selectedGame, Math.round(score));
     if (data !== null) {
       setGameResult({ score: Math.round(score), coins: data.coins, won: data.won });
       fetchBalance();
+      updateCoins(data.totalCoins);
+    } else {
+      setErrorCount(c => c + 1);
+      setError(errorCount > 0
+        ? 'El servidor no responde. Asegurate de tener el backend corriendo.'
+        : 'Error al reclamar recompensa. ¿El backend está funcionando?');
     }
   };
 
   const handleBack = () => {
     setSelectedGame(null);
     setGameResult(null);
+    setError(null);
     fetchCooldowns();
   };
 
@@ -61,6 +73,13 @@ export function GameModal({ onClose }: GameModalProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
+          {error && (
+            <div className="mb-3 p-3 bg-red-900/40 border border-red-700/50 rounded-xl text-sm text-red-300 flex items-start gap-2">
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
+
           {gameResult ? (
             /* Result screen */
             <div className="flex flex-col items-center gap-4 py-8 text-center">
@@ -73,20 +92,34 @@ export function GameModal({ onClose }: GameModalProps) {
               ) : (
                 <p className="text-slate-400">Sigue intentando, ¡la próxima será!</p>
               )}
-              <div className="flex items-center gap-2">
-                {gameResult.won && gameResult.coins > 0 ? (
+
+              {/* Coins display */}
+              <div className={`flex items-center gap-2 px-6 py-3 rounded-xl ${
+                gameResult.coins > 0
+                  ? 'bg-yellow-500/10 border border-yellow-500/30'
+                  : 'bg-slate-700/30'
+              }`}>
+                {gameResult.coins > 0 ? (
                   <>
-                    <span className="text-yellow-400 text-lg font-bold flex items-center gap-2 justify-center">
-                      🪙 +{gameResult.coins}
+                    <span className="text-2xl animate-bounce-in">🪙</span>
+                    <span className="text-2xl font-bold text-yellow-400">
+                      +{gameResult.coins}
                     </span>
                   </>
                 ) : (
                   <span className="text-slate-500 text-sm">🪙 +0 monedas</span>
                 )}
               </div>
+
+              {gameResult.coins > 0 && (
+                <p className="text-xs text-slate-500">
+                  {gameResult.score >= 50 ? '🏆 ¡Excelente partida!' : gameResult.score >= 20 ? '👍 Buen trabajo!' : '💪 Sigue así!'}
+                </p>
+              )}
+
               <button
                 onClick={handleBack}
-                className="mt-4 px-6 py-2.5 bg-green-600 hover:bg-green-500 rounded-xl font-medium transition-colors"
+                className="mt-2 px-6 py-2.5 bg-green-600 hover:bg-green-500 rounded-xl font-medium transition-colors"
               >
                 Volver a juegos
               </button>

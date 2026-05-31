@@ -13,6 +13,7 @@ interface AuthStore {
   register: (email: string, name: string, password: string) => Promise<boolean>;
   logout: () => void;
   init: () => Promise<void>;
+  updateCoins: (coins: number) => void;
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -73,5 +74,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     localStorage.removeItem('refreshToken');
     disconnectSocket();
     set({ user: null, token: null, isAuthenticated: false, error: null });
+  },
+
+  updateCoins: (coins: number) => {
+    const user = get().user;
+    if (user) set({ user: { ...user, coins } });
   },
 }));
