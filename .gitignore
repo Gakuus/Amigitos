@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.next/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+*.log
+coverage/
+.turbo/
+docker/data/
+*.glb
+*.gltf
+!public/models/*.glb
+!public/models/*.gltf
+.DS_Store

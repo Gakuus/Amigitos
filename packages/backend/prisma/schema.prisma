@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PetSpecies {
+  CAT
+  DOG
+  RABBIT
+  HAMSTER
+  FOX
+  PANDA
+  PENGUIN
+  DRAGON
+  UNICORN
+  CUSTOM
+}
+
+enum PetMood {
+  HAPPY
+  NEUTRAL
+  SAD
+  SLEEPING
+  SICK
+}
+
+enum CoupleStatus {
+  PENDING
+  ACTIVE
+  DISSOLVED
+}
+
+enum ClothingSlot {
+  HAT
+  GLASSES
+  TOP
+  BOTTOM
+  SHOES
+  ACCESSORY
+  WINGS
+  TAIL
+}
+
+enum ClothingRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+enum EventType {
+  PET_FED
+  PET_PLAYED
+  PET_BATHED
+  PET_SLEPT
+  PET_EVOLVED
+  PET_SAD
+  PET_HAPPY
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String   @default("")
+  avatarUrl String?
+  coupleId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  interactions Interaction[]
+  sessions     Session[]
+}
+
+model Couple {
+  id         String        @id @default(uuid())
+  status     CoupleStatus  @default(PENDING)
+  invitedBy  String
+  invitedAt  DateTime      @default(now())
+  acceptedAt DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  user1Id String
+  user2Id String
+
+  pets Pet[]
+
+  @@index([user1Id])
+  @@index([user2Id])
+}
+
+model Pet {
+  id         String     @id @default(uuid())
+  name       String
+  species    PetSpecies
+  level      Int        @default(1)
+  experience Int        @default(0)
+  hunger     Int        @default(100)
+  happiness  Int        @default(100)
+  energy     Int        @default(100)
+  hygiene    Int        @default(100)
+  mood       PetMood    @default(HAPPY)
+  isSleeping Boolean    @default(false)
+  modelUrl   String?
+  thumbnail  String?
+  isActive   Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  coupleId String
+  couple   Couple  @relation(fields: [coupleId], references: [id])
+
+  interactions Interaction[]
+  events       PetEvent[]
+  equipment    PetEquipment[]
+
+  @@index([coupleId])
+}
+
+model WardrobeItem {
+  id              String        @id @default(uuid())
+  name            String
+  description     String        @default("")
+  slot            ClothingSlot
+  rarity          ClothingRarity @default(COMMON)
+  modelUrl        String
+  thumbnail       String
+  species         String[]      @default([])
+  unlockCondition String?
+  unlockLevel     Int           @default(1)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  equipment PetEquipment[]
+
+  @@index([slot])
+  @@index([rarity])
+}
+
+model PetEquipment {
+  id         String   @id @default(uuid())
+  equippedAt DateTime @default(now())
+
+  petId  String
+  itemId String
+
+  pet  Pet          @relation(fields: [petId], references: [id])
+  item WardrobeItem @relation(fields: [itemId], references: [id])
+
+  @@unique([petId, itemId])
+  @@index([petId])
+}
+
+model Interaction {
+  id        String   @id @default(uuid())
+  type      String
+  createdAt DateTime @default(now())
+
+  petId  String
+  userId String
+  pet    Pet    @relation(fields: [petId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([petId, createdAt])
+}
+
+model PetEvent {
+  id        String    @id @default(uuid())
+  type      EventType
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  petId String
+  pet   Pet    @relation(fields: [petId], references: [id])
+
+  @@index([petId, createdAt])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([token])
+}

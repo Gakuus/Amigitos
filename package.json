@@ -1,0 +1,29 @@
+{
+  "name": "amigitos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Amigitos - Aplicación web de cuidado de mascotas virtuales en pareja",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "npm@11.9.0"
+}

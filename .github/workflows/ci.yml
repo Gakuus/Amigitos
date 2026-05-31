@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: "20"
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  lint-typecheck:
+    name: Lint & TypeCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: amigitos_test
+          POSTGRES_USER: amigitos
+          POSTGRES_PASSWORD: testpass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+      - run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: packages/backend
+      - name: Run migrations
+        run: npx prisma migrate deploy
+        working-directory: packages/backend
+        env:
+          DATABASE_URL: postgresql://amigitos:testpass@localhost:5432/amigitos_test
+      - name: Run tests
+        run: npm run test
+        env:
+          DATABASE_URL: postgresql://amigitos:testpass@localhost:5432/amigitos_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret
+          JWT_REFRESH_SECRET: test-refresh-secret
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint-typecheck, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: build-output
+          path: |
+            packages/backend/dist
+            packages/frontend/.next

@@ -1,0 +1,299 @@
+openapi: "3.1.0"
+info:
+  title: Amigitos API
+  version: "0.1.0"
+  description: API para el cuidado de mascotas virtuales en pareja
+
+servers:
+  - url: http://localhost:3001/api/v1
+    description: Desarrollo
+  - url: https://api.amigitos.app/v1
+    description: Producción
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string, minLength: 2, maxLength: 50 }
+        avatarUrl: { type: string, format: uri, nullable: true }
+        createdAt: { type: string, format: date-time }
+      required: [id, email, name, createdAt]
+
+    Pet:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, minLength: 2, maxLength: 20 }
+        species: { type: string, enum: [CAT, DOG, RABBIT, DRAGON, CUSTOM] }
+        level: { type: integer, minimum: 1, maximum: 50 }
+        experience: { type: integer, minimum: 0 }
+        hunger: { type: integer, minimum: 0, maximum: 100 }
+        happiness: { type: integer, minimum: 0, maximum: 100 }
+        energy: { type: integer, minimum: 0, maximum: 100 }
+        hygiene: { type: integer, minimum: 0, maximum: 100 }
+        mood: { type: string, enum: [HAPPY, NEUTRAL, SAD, SLEEPING, SICK] }
+        isSleeping: { type: boolean }
+        modelUrl: { type: string, nullable: true }
+        thumbnail: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, species, level, hunger, happiness, energy, hygiene, mood]
+
+    Couple:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [PENDING, ACTIVE, DISSOLVED] }
+        user1: { $ref: "#/components/schemas/User" }
+        user2: { $ref: "#/components/schemas/User" }
+        pets: { type: array, items: { $ref: "#/components/schemas/Pet" } }
+        createdAt: { type: string, format: date-time }
+      required: [id, status, user1, user2, createdAt]
+
+    Interaction:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string, enum: [FEED, PLAY, BATH, SLEEP] }
+        userId: { type: string, format: uuid }
+        petId: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+      required: [id, type, userId, petId, createdAt]
+
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        timestamp: { type: string, format: date-time }
+      required: [code, message, timestamp]
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Registrar nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, name, password]
+              properties:
+                email: { type: string, format: email }
+                name: { type: string, minLength: 2 }
+                password: { type: string, minLength: 8 }
+      responses:
+        "201":
+          description: Usuario creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: "#/components/schemas/User" }
+                  token: { type: string }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200":
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: "#/components/schemas/User" }
+                  token: { type: string }
+
+  /pets/adopt:
+    post:
+      tags: [Pets]
+      summary: Adoptar una nueva mascota
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, species]
+              properties:
+                name: { type: string, minLength: 2, maxLength: 20 }
+                species: { type: string, enum: [CAT, DOG, RABBIT, DRAGON, CUSTOM] }
+      responses:
+        "201":
+          description: Mascota adoptada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+
+  /pets/{id}:
+    get:
+      tags: [Pets]
+      summary: Obtener estado de la mascota
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Estado de la mascota
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+
+  /pets/{id}/feed:
+    post:
+      tags: [Pets]
+      summary: Alimentar mascota
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Mascota alimentada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "429":
+          description: Cooldown activo
+
+  /pets/{id}/play:
+    post:
+      tags: [Pets]
+      summary: Jugar con mascota
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Mascota jugó
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+
+  /pets/{id}/bathe:
+    post:
+      tags: [Pets]
+      summary: Bañar mascota
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Mascota bañada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+
+  /pets/{id}/model:
+    post:
+      tags: [Pets]
+      summary: Subir modelo 3D personalizado
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Modelo subido exitosamente
+
+  /couples/invite:
+    post:
+      tags: [Couples]
+      summary: Invitar a usuario como pareja
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userEmail]
+              properties:
+                userEmail: { type: string, format: email }
+      responses:
+        "201":
+          description: Invitación enviada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Couple"
+
+  /couples/{id}/accept:
+    post:
+      tags: [Couples]
+      summary: Aceptar invitación de pareja
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Pareja formada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Couple"
