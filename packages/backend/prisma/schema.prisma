@@ -234,6 +234,18 @@ model PetEvent {
   @@index([petId, createdAt])
 }
 
+model GameResult {
+  id         String   @id @default(uuid())
+  userId     String
+  gameType   String
+  score      Int
+  coinsEarned Int
+  createdAt  DateTime @default(now())
+
+  @@index([userId, gameType])
+  @@index([createdAt])
+}
+
 model Session {
   id        String   @id @default(uuid())
   token     String   @unique

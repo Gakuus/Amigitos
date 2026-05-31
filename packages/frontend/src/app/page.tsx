@@ -6,6 +6,7 @@ import { Room } from '@/components/room/Room';
 import { AdoptModal } from '@/components/pet/AdoptModal';
 import { CoupleManager } from '@/components/couple/CoupleManager';
 import { ShopModal } from '@/components/shop/ShopModal';
+import { GameModal } from '@/components/games/GameModal';
 import { usePetStore } from '@/stores/pet.store';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -16,6 +17,7 @@ export default function HomePage() {
   const [showAdopt, setShowAdopt] = useState(false);
   const [showCouple, setShowCouple] = useState(false);
   const [showShop, setShowShop] = useState(false);
+  const [showGames, setShowGames] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -58,6 +60,12 @@ export default function HomePage() {
             <span className="text-green-400 font-medium">Mis Mascotas</span>
             <button onClick={() => setShowCouple(!showCouple)} className="hover:text-slate-200 transition-colors">
               {showCouple ? '▲ Pareja' : 'Pareja'}
+            </button>
+            <button
+              onClick={() => setShowGames(true)}
+              className="hover:text-purple-400 transition-colors"
+            >
+              🎮 Juegos
             </button>
             <button
               onClick={() => setShowShop(true)}
@@ -140,6 +148,10 @@ export default function HomePage() {
 
       {showShop && (
         <ShopModal onClose={() => setShowShop(false)} />
+      )}
+
+      {showGames && (
+        <GameModal onClose={() => setShowGames(false)} />
       )}
     </main>
   );

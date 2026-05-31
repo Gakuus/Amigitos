@@ -133,4 +133,14 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ petId }),
     }),
+
+  // Games
+  claimGameReward: (gameType: string, score: number) =>
+    request<{ coins: number; totalCoins: number; gameType: string }>('/games/claim', {
+      method: 'POST',
+      body: JSON.stringify({ gameType, score }),
+    }),
+
+  getGameStats: () =>
+    request<{ results: unknown[]; totals: unknown[]; cooldowns: Record<string, number> }>('/games/stats'),
 };

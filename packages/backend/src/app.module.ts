@@ -9,6 +9,7 @@ import { PrismaModule } from './infrastructure/persistence/prisma.module';
 import { StorageModule } from './api/storage.module';
 import { AssetsModule } from './api/assets.module';
 import { ShopModule } from './api/shop.module';
+import { GameModule } from './api/game.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ShopModule } from './api/shop.module';
     WardrobeModule,
     AssetsModule,
     ShopModule,
+    GameModule,
   ],
 })
 export class AppModule {}
