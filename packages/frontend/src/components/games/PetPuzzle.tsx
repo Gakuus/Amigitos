@@ -53,7 +53,7 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
     setWon(win);
     if (timerRef.current) clearInterval(timerRef.current);
     if (win) {
-      const score = Math.max(0, Math.min(100, 100 - moves * 2 - (TIMER - timeLeft)));
+      const score = Math.max(10, Math.min(100, (MAX_MOVES - moves) * 3 + Math.max(0, TIMER - timeLeft) * 0.5));
       setTimeout(() => onFinish(score), 600);
     } else {
       setTimeout(() => onFinish(0), 600);

@@ -56,7 +56,7 @@ export function MemoryMatch({ onFinish }: MemoryMatchProps) {
     setWon(win);
     if (win) {
       const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      const score = Math.max(0, Math.min(100, 100 - moves * 3 - elapsed));
+      const score = Math.max(10, Math.min(100, (MAX_MOVES - moves) * 5 + Math.max(0, 60 - elapsed)));
       setTimeout(() => onFinish(score), 800);
     } else {
       setTimeout(() => onFinish(0), 800);
