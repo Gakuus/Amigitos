@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { PetViewer } from '@/components/three/PetViewer';
 import { PetStats } from '@/components/pet/PetStats';
 import { PetActions } from '@/components/pet/PetActions';
@@ -8,8 +9,11 @@ import { PetSelector } from '@/components/pet/PetSelector';
 import { AdoptModal } from '@/components/pet/AdoptModal';
 import { Wardrobe } from '@/components/pet/Wardrobe';
 import { usePetStore } from '@/stores/pet.store';
+import { useAuthStore } from '@/stores/auth.store';
 
 export default function HomePage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading, user, logout } = useAuthStore();
   const {
     pets, pet, outfit, activePetId, loading,
     fetchPets, selectPet, adoptPet, refreshOutfit,
@@ -17,8 +21,13 @@ export default function HomePage() {
   const [showAdopt, setShowAdopt] = useState(false);
 
   useEffect(() => {
-    fetchPets();
-  }, [fetchPets]);
+    if (authLoading) return;
+    if (!isAuthenticated) router.push('/login');
+  }, [authLoading, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (isAuthenticated) fetchPets();
+  }, [isAuthenticated, fetchPets]);
 
   useEffect(() => {
     if (pets.length > 0 && !activePetId) {
@@ -33,16 +42,31 @@ export default function HomePage() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="animate-spin w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) return null;
+
   return (
     <main className="flex min-h-screen flex-col p-4 md:p-8 max-w-6xl mx-auto">
       <header className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
           Amigitos 🐾
         </h1>
-        <nav className="flex gap-4 text-sm text-slate-400">
+        <nav className="flex items-center gap-4 text-sm text-slate-400">
           <span className="text-green-400 font-medium">Mis Mascotas</span>
           <span>Pareja</span>
-          <span>Perfil</span>
+          <div className="flex items-center gap-2 pl-4 border-l border-slate-700">
+            <span className="text-slate-300">{user?.name}</span>
+            <button onClick={logout} className="text-xs px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
+              Salir
+            </button>
+          </div>
         </nav>
       </header>
 

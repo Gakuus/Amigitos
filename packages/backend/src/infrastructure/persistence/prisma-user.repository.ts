@@ -32,6 +32,21 @@ export class PrismaUserRepository implements UserRepositoryPort {
     });
   }
 
+  async savePasswordHash(userId: string, passwordHash: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: passwordHash },
+    });
+  }
+
+  async getPasswordHash(userId: string): Promise<string | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { password: true },
+    });
+    return user?.password ?? null;
+  }
+
   private toDomain(data: any): User {
     return new User({
       id: UserId.create(data.id),

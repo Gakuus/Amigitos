@@ -27,6 +27,7 @@ export class AuthService {
     });
 
     await this.userRepo.save(user);
+    await this.userRepo.savePasswordHash(user.id.value, hashedPassword);
 
     const tokens = this.generateTokens(user.id.value);
     return { user, tokens };
@@ -35,6 +36,12 @@ export class AuthService {
   async login(email: string, password: string): Promise<{ user: User; tokens: AuthTokens }> {
     const user = await this.userRepo.findByEmail(email);
     if (!user) throw new Error('INVALID_CREDENTIALS');
+
+    const passwordHash = await this.userRepo.getPasswordHash(user.id.value);
+    if (!passwordHash) throw new Error('INVALID_CREDENTIALS');
+
+    const isValid = await bcryptjs.compare(password, passwordHash);
+    if (!isValid) throw new Error('INVALID_CREDENTIALS');
 
     const tokens = this.generateTokens(user.id.value);
     return { user, tokens };

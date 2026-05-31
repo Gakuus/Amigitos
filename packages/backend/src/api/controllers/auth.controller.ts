@@ -1,4 +1,7 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus, Inject, UseGuards } from '@nestjs/common';
+import {
+  Controller, Post, Get, Body, HttpCode, HttpStatus, Inject, UseGuards,
+  ConflictException, UnauthorizedException, NotFoundException,
+} from '@nestjs/common';
 import { AuthService } from '../../application/services/auth.service';
 import { RegisterDto, LoginDto, RefreshTokenDto } from '../dto/auth.dto';
 import { JwtGuard } from '../../infrastructure/auth/jwt.guard';
@@ -12,31 +15,25 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() dto: RegisterDto) {
-    try {
-      const result = await this.authService.register(dto.email, dto.name, dto.password);
-      return { user: result.user.toJSON(), ...result.tokens };
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'REGISTRATION_FAILED';
-      if (message === 'EMAIL_ALREADY_EXISTS') {
-        return { statusCode: 409, code: message, message: 'Email already registered' };
+    const result = await this.authService.register(dto.email, dto.name, dto.password).catch((error: Error) => {
+      if (error.message === 'EMAIL_ALREADY_EXISTS') {
+        throw new ConflictException('Email already registered');
       }
       throw error;
-    }
+    });
+    return { user: result.user.toJSON(), ...result.tokens };
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto) {
-    try {
-      const result = await this.authService.login(dto.email, dto.password);
-      return { user: result.user.toJSON(), ...result.tokens };
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'LOGIN_FAILED';
-      if (message === 'INVALID_CREDENTIALS') {
-        return { statusCode: 401, code: message, message: 'Invalid credentials' };
+    const result = await this.authService.login(dto.email, dto.password).catch((error: Error) => {
+      if (error.message === 'INVALID_CREDENTIALS') {
+        throw new UnauthorizedException('Invalid credentials');
       }
       throw error;
-    }
+    });
+    return { user: result.user.toJSON(), ...result.tokens };
   }
 
   @Post('refresh')
@@ -51,7 +48,7 @@ export class AuthController {
   async me(@CurrentUser() user: { userId: string }) {
     const userEntity = await this.authService.validateUser(user.userId);
     if (!userEntity) {
-      return { statusCode: 404, code: 'USER_NOT_FOUND', message: 'User not found' };
+      throw new NotFoundException('User not found');
     }
     return userEntity.toJSON();
   }
