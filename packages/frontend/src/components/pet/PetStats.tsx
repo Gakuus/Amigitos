@@ -6,17 +6,33 @@ interface PetStatsProps {
   pet: PetState;
 }
 
-function StatBar({ label, value, color }: { label: string; value: number; color: string }) {
+const statDefs = [
+  { label: 'Hambre', value: 'hunger' as const, icon: '🍽️', color: 'bg-orange-500', glow: 'stat-glow-orange' },
+  { label: 'Felicidad', value: 'happiness' as const, icon: '😊', color: 'bg-yellow-500', glow: 'stat-glow-yellow' },
+  { label: 'Energía', value: 'energy' as const, icon: '⚡', color: 'bg-blue-500', glow: 'stat-glow-blue' },
+  { label: 'Higiene', value: 'hygiene' as const, icon: '🧼', color: 'bg-cyan-500', glow: 'stat-glow-cyan' },
+];
+
+function StatBar({ label, value, icon, color }: { label: string; value: number; icon: string; color: string }) {
+  const pct = Math.max(0, Math.min(100, value));
+  const isLow = pct <= 25;
+  const isHigh = pct >= 80;
+
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-sm">
-        <span className="text-slate-400">{label}</span>
-        <span className="text-slate-300">{value}%</span>
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs">
+        <span className="flex items-center gap-1.5 text-slate-300">
+          <span className="text-sm">{icon}</span>
+          <span>{label}</span>
+        </span>
+        <span className={`font-bold tabular-nums ${isLow ? 'text-red-400' : isHigh ? 'text-green-400' : 'text-slate-300'}`}>
+          {pct}%
+        </span>
       </div>
-      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+      <div className="h-2.5 bg-slate-700/80 rounded-full overflow-hidden ring-1 ring-slate-600/30">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${color}`}
-          style={{ width: `${value}%` }}
+          className={`h-full rounded-full transition-all duration-700 ease-out ${color} ${isLow ? 'animate-pulse-soft' : ''}`}
+          style={{ width: `${pct}%` }}
         />
       </div>
     </div>
@@ -32,33 +48,53 @@ const moodLabels: Record<string, string> = {
 };
 
 const moodColors: Record<string, string> = {
-  HAPPY: 'text-yellow-400',
-  NEUTRAL: 'text-gray-400',
-  SAD: 'text-blue-400',
-  SLEEPING: 'text-purple-400',
-  SICK: 'text-red-400',
+  HAPPY: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
+  NEUTRAL: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
+  SAD: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+  SLEEPING: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+  SICK: 'text-red-400 bg-red-500/10 border-red-500/20',
+};
+
+const moodEmoji: Record<string, string> = {
+  HAPPY: '😊',
+  NEUTRAL: '😐',
+  SAD: '😢',
+  SLEEPING: '💤',
+  SICK: '🤒',
 };
 
 export function PetStats({ pet }: PetStatsProps) {
   return (
-    <div className="bg-slate-800 rounded-2xl p-5 space-y-4">
+    <div className="bg-slate-800/80 border border-slate-700/50 rounded-3xl p-5 space-y-4 shadow-xl">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">{pet.name}</h2>
-          <span className="text-sm text-slate-400">Nv. {pet.level}</span>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-xl flex items-center justify-center">
+            <span className="text-xl">{moodEmoji[pet.mood] ?? '🐾'}</span>
+          </div>
+          <div>
+            <h2 className="text-base font-bold font-display text-white">{pet.name}</h2>
+            <span className="text-xs text-slate-500">Nv. {pet.level}</span>
+          </div>
         </div>
-        <span className={`text-sm font-medium ${moodColors[pet.mood] ?? 'text-slate-400'}`}>
+        <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${moodColors[pet.mood] ?? 'text-slate-400 bg-slate-500/10'}`}>
           {moodLabels[pet.mood] ?? pet.mood}
         </span>
       </div>
 
-      <StatBar label="Hambre" value={pet.hunger} color="bg-orange-500" />
-      <StatBar label="Felicidad" value={pet.happiness} color="bg-yellow-500" />
-      <StatBar label="Energía" value={pet.energy} color="bg-blue-500" />
-      <StatBar label="Higiene" value={pet.hygiene} color="bg-cyan-500" />
+      <div className="space-y-3">
+        {statDefs.map((stat) => (
+          <StatBar
+            key={stat.value}
+            label={stat.label}
+            value={pet[stat.value]}
+            icon={stat.icon}
+            color={stat.color}
+          />
+        ))}
+      </div>
 
       {pet.isSleeping && (
-        <div className="text-center text-sm text-purple-400 animate-pulse">
+        <div className="text-center text-sm text-purple-400 animate-pulse-soft bg-purple-500/10 rounded-xl py-2 border border-purple-500/20">
           💤 Durmiendo...
         </div>
       )}

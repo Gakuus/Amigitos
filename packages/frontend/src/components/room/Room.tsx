@@ -9,10 +9,10 @@ import type { SleepPosition } from './sleepTileMap';
 
 const ROOMS = [
   { id: 'living', label: 'Sala', icon: '🏠' },
-  { id: 'eat', label: 'Comedor', icon: '🍽️' },
-  { id: 'play', label: 'Juegos', icon: '🎾' },
+  { id: 'eat', label: 'Comer', icon: '🍽️' },
+  { id: 'play', label: 'Jugar', icon: '🎾' },
   { id: 'bath', label: 'Baño', icon: '🛁' },
-  { id: 'sleep', label: 'Dormitorio', icon: '🛏️' },
+  { id: 'sleep', label: 'Dormir', icon: '🛏️' },
 ] as const;
 
 type RoomId = (typeof ROOMS)[number]['id'];
@@ -49,20 +49,14 @@ function rand(min: number, max: number) {
 
 function distributePositions(count: number): PetPosition[] {
   if (count <= 1) return [{ x: 0.5, depth: 0.5, top: 82 }];
-
   const spreadX = Math.min(0.72, 0.22 + (count - 2) * 0.16);
   const spacingX = spreadX / (count - 1);
   const startX = 0.5 - spreadX / 2;
-
   const positions: PetPosition[] = [];
   for (let i = 0; i < count; i++) {
     const t = count <= 1 ? 0.5 : i / (count - 1);
     const depth = 0.15 + t * 0.7;
-    positions.push({
-      x: startX + spacingX * i,
-      depth,
-      top: 82,
-    });
+    positions.push({ x: startX + spacingX * i, depth, top: 82 });
   }
   return positions;
 }
@@ -74,8 +68,15 @@ export function Room() {
   const [room, setRoom] = useState<RoomId>('living');
   const [petPositions, setPetPositions] = useState<PetPosition[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const fbTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const previousRoom = useRef<RoomId>('living');
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 640);
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (room === 'sleep') {
@@ -83,7 +84,6 @@ export function Room() {
     } else {
       setPetPositions(distributePositions(pets.length));
     }
-    previousRoom.current = room;
   }, [room, pets.length]);
 
   useEffect(() => {
@@ -142,33 +142,35 @@ export function Room() {
   const design = ROOM_DESIGNS[room];
 
   return (
-    <div className="space-y-3">
-      <div className="flex gap-2 overflow-x-auto pb-1 px-1">
+    <div className="space-y-2">
+      {/* Room Tabs */}
+      <div className="flex gap-1.5 overflow-x-auto pb-0.5 px-0.5 scrollbar-none">
         {ROOMS.map((r) => (
           <button
             key={r.id}
             onClick={() => switchRoom(r.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium transition-all whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
               room === r.id
-                ? 'bg-green-600 text-white shadow-lg shadow-green-600/25 scale-105'
-                : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/20 scale-105'
+                : 'bg-slate-800/60 text-slate-400 hover:bg-slate-700/60 hover:text-slate-200 border border-slate-700/30'
             }`}
           >
-            <span className="text-lg">{r.icon}</span>
+            <span className="text-base">{r.icon}</span>
             <span>{r.label}</span>
           </button>
         ))}
       </div>
 
+      {/* Room Container */}
       <div
-        className="relative w-full rounded-2xl overflow-hidden select-none shadow-xl"
+        className="relative w-full rounded-2xl overflow-hidden select-none shadow-2xl"
         style={{
-          aspectRatio: '16/9',
-          minHeight: '420px',
+          aspectRatio: isMobile ? '4/3' : '16/9',
+          minHeight: isMobile ? '280px' : '380px',
           perspective: '800px',
         }}
       >
-        {/* 3D background layer: wall + floor + furniture */}
+        {/* 3D background */}
         <div
           className="absolute inset-0"
           style={{
@@ -177,7 +179,6 @@ export function Room() {
             transformStyle: 'preserve-3d',
           }}
         >
-          {/* Wall */}
           <div
             className={`absolute inset-0 bottom-[25%] bg-gradient-to-b ${design.wall} transition-colors duration-700`}
           >
@@ -191,7 +192,6 @@ export function Room() {
             <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-b from-black/5 to-black/20" />
           </div>
 
-          {/* Floor */}
           <div
             className={`absolute bottom-0 left-0 right-0 ${room === 'sleep' ? 'h-[35%]' : 'h-[25%]'} bg-gradient-to-b ${design.floor} transition-colors duration-700`}
           >
@@ -206,7 +206,6 @@ export function Room() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-full bg-gradient-to-b from-white/5 to-transparent rounded-full" />
           </div>
 
-          {/* Floor shadow gradient for depth */}
           <div
             className={`absolute bottom-0 left-0 right-0 ${room === 'sleep' ? 'h-[35%]' : 'h-[25%]'} pointer-events-none`}
             style={{
@@ -214,11 +213,10 @@ export function Room() {
             }}
           />
 
-          {/* Furniture SVG (fills full room container) */}
           <RoomScene room={room} petPositions={petPositions} />
         </div>
 
-        {/* Flat pets layer (no 3D transform to prevent distortion) */}
+        {/* Pets Layer */}
         <div className="absolute inset-0 z-10 pointer-events-none">
           {pets.map((summary, i) => {
             const pos = petPositions[i];
@@ -226,11 +224,10 @@ export function Room() {
             const data = petMap[summary.id];
             const isSleeping = summary.isSleeping;
             const depth = pos.depth;
-
             const depthScale = 0.55 + depth * 0.55;
             const size = isSleeping ? PET_SIZE_SLEEP * depthScale : PET_SIZE * depthScale;
-
             const petScale = isSleeping ? 'scaleY(0.75)' : 'scaleY(1)';
+
             const posStyle: Record<string, string | number | undefined> = room === 'sleep' ? {
               left: `${pos.x}%`,
               top: `${(pos as SleepPosition).top}%`,
@@ -302,18 +299,18 @@ export function Room() {
           })}
         </div>
 
-        {/* Room label */}
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-          <div className="bg-slate-900/50 text-white text-xs px-4 py-1.5 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1.5">
-            <span className="text-base">{ROOMS.find((r) => r.id === room)?.icon}</span>
-            <span className="font-medium">{ROOMS.find((r) => r.id === room)?.label}</span>
+        {/* Room Label */}
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+          <div className="bg-slate-900/50 text-white text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1">
+            <span>{ROOMS.find((r) => r.id === room)?.icon}</span>
+            <span className="font-semibold">{ROOMS.find((r) => r.id === room)?.label}</span>
           </div>
         </div>
 
-        {/* Action feedback */}
+        {/* Feedback */}
         {feedback && (
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-            <div className="text-4xl animate-bounce drop-shadow-lg">{feedback}</div>
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+            <div className="text-3xl animate-bounce drop-shadow-lg">{feedback}</div>
           </div>
         )}
       </div>

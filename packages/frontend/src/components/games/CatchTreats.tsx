@@ -192,9 +192,9 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
           {items.map(item => (
             <button
               key={item.id}
-              onMouseDown={() => handleCatch(item.id)}
-              className={`absolute text-2xl md:text-3xl transition-transform hover:scale-125 pointer-events-auto ${
-                item.bad ? 'hover:rotate-12' : ''
+              onPointerDown={() => handleCatch(item.id)}
+              className={`absolute text-2xl md:text-3xl transition-transform active:scale-125 pointer-events-auto ${
+                item.bad ? 'active:rotate-12' : ''
               }`}
               style={{
                 left: `${item.x}%`,

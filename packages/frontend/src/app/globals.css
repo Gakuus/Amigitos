@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Comic+Neue:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
@@ -9,16 +11,35 @@
   --text-secondary: #94a3b8;
 }
 
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
 body {
-  background: var(--bg-primary);
+  background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 50%, #16213e 100%);
   color: var(--text-primary);
   font-family: 'Inter', system-ui, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+/* ===== Touch-friendly ===== */
+@media (hover: none) and (pointer: coarse) {
+  button, a, [role="button"] {
+    min-height: 44px;
+  }
 }
 
+/* ===== Animations ===== */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-4px); }
@@ -27,9 +48,7 @@ body {
   80% { transform: translateX(4px); }
 }
 
-.animate-shake {
-  animation: shake 0.4s ease-in-out;
-}
+.animate-shake { animation: shake 0.4s ease-in-out; }
 
 @keyframes bounce-in {
   0% { transform: scale(0); opacity: 0; }
@@ -37,15 +56,52 @@ body {
   100% { transform: scale(1); opacity: 1; }
 }
 
-.animate-bounce-in {
-  animation: bounce-in 0.3s ease-out;
-}
+.animate-bounce-in { animation: bounce-in 0.3s ease-out; }
 
 @keyframes float-up {
-  0% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(-30px); opacity: 0; }
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-30px) scale(1.2); opacity: 0; }
 }
 
-.animate-float-up {
-  animation: float-up 0.8s ease-out forwards;
+.animate-float-up { animation: float-up 0.8s ease-out forwards; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ===== Bottom sheet ===== */
+@keyframes sheet-up {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes sheet-down {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+
+/* ===== Glass effect ===== */
+.glass {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.glass-strong {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ===== Stat bar glow ===== */
+.stat-glow-orange { box-shadow: 0 0 8px rgba(249, 115, 22, 0.4); }
+.stat-glow-yellow { box-shadow: 0 0 8px rgba(234, 179, 8, 0.4); }
+.stat-glow-blue { box-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }
+.stat-glow-cyan { box-shadow: 0 0 8px rgba(6, 182, 212, 0.4); }
+
+/* ===== Safe area for notched phones ===== */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

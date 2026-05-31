@@ -15,9 +15,9 @@ interface GameModalProps {
 type GameType = 'memory' | 'catch' | 'puzzle';
 
 const GAMES: { id: GameType; name: string; icon: string; description: string; color: string }[] = [
-  { id: 'memory', name: 'Memorama', icon: '🃏', description: 'Encuentra los pares de mascotas', color: 'from-purple-600 to-purple-700' },
-  { id: 'catch', name: 'Atrapa Comida', icon: '🍕', description: 'Atrapa la mayor comida en 30s', color: 'from-orange-600 to-orange-700' },
-  { id: 'puzzle', name: 'Rompecabezas', icon: '🧩', description: 'Ordena el puzzle de mascotas', color: 'from-blue-600 to-blue-700' },
+  { id: 'memory', name: 'Memorama', icon: '🃏', description: 'Encuentra los pares de mascotas', color: 'from-purple-500 to-purple-600' },
+  { id: 'catch', name: 'Atrapa Comida', icon: '🍕', description: 'Atrapa comida en 30 segundos', color: 'from-orange-500 to-orange-600' },
+  { id: 'puzzle', name: 'Rompecabezas', icon: '🧩', description: 'Ordena el puzzle de mascotas', color: 'from-blue-500 to-blue-600' },
 ];
 
 export function GameModal({ onClose }: GameModalProps) {
@@ -28,9 +28,7 @@ export function GameModal({ onClose }: GameModalProps) {
   const { fetchBalance } = useShopStore();
   const updateCoins = useAuthStore(s => s.updateCoins);
 
-  useEffect(() => {
-    fetchCooldowns();
-  }, [fetchCooldowns]);
+  useEffect(() => { fetchCooldowns(); }, [fetchCooldowns]);
 
   const handleFinish = async (score: number) => {
     if (!selectedGame) return;
@@ -53,80 +51,54 @@ export function GameModal({ onClose }: GameModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-slate-800 rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl border border-slate-700">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            🎮 Mini Juegos
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-white text-xl leading-none p-1"
-          >
-            ✕
-          </button>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="bg-slate-800/95 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[85dvh] sm:max-h-[85vh] flex flex-col shadow-2xl border border-slate-700/50 sm:m-4 animate-slide-up sm:animate-pop">
+        {/* Handle bar */}
+        <div className="flex justify-center pt-2 pb-0 sm:hidden">
+          <div className="w-10 h-1 bg-slate-600 rounded-full" />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-700/50">
+          <h2 className="text-lg font-bold font-display text-white flex items-center gap-2">🎮 Mini Juegos</h2>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-700/50 text-slate-400 hover:text-white active:scale-90 transition-all">✕</button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5">
           {error && (
-            <div className="mb-3 p-3 bg-red-900/40 border border-red-700/50 rounded-xl text-sm text-red-300 flex items-start gap-2">
-              <span>⚠️</span>
-              <span>{error}</span>
+            <div className="mb-3 p-3 bg-red-900/40 border border-red-700/30 rounded-xl text-xs text-red-300 flex items-start gap-2">
+              <span>⚠️</span><span>{error}</span>
             </div>
           )}
 
           {gameResult ? (
-            /* Result screen */
-            <div className="flex flex-col items-center gap-4 py-8 text-center">
+            <div className="flex flex-col items-center gap-4 py-6 text-center animate-pop">
               <span className="text-6xl animate-bounce-in">{gameResult.won ? '🎉' : '💔'}</span>
-              <h3 className={`text-xl font-bold ${gameResult.won ? 'text-green-400' : 'text-red-400'}`}>
+              <h3 className={`text-xl font-bold font-display ${gameResult.won ? 'text-green-400' : 'text-red-400'}`}>
                 {gameResult.won ? '¡Victoria!' : 'Has perdido'}
               </h3>
               {gameResult.won ? (
-                <p className="text-slate-400">Puntuación: <span className="text-white font-medium">{gameResult.score}</span></p>
+                <p className="text-slate-400 text-sm">Puntuación: <span className="text-white font-bold">{gameResult.score}</span></p>
               ) : (
-                <p className="text-slate-400">Sigue intentando, ¡la próxima será!</p>
+                <p className="text-slate-400 text-sm">¡La próxima será!</p>
               )}
-
-              {/* Coins display */}
-              <div className={`flex items-center gap-2 px-6 py-3 rounded-xl ${
-                gameResult.coins > 0
-                  ? 'bg-yellow-500/10 border border-yellow-500/30'
-                  : 'bg-slate-700/30'
-              }`}>
+              <div className={`flex items-center gap-2 px-6 py-3 rounded-2xl ${gameResult.coins > 0 ? 'bg-yellow-500/10 border border-yellow-500/30' : 'bg-slate-700/30'}`}>
                 {gameResult.coins > 0 ? (
-                  <>
-                    <span className="text-2xl animate-bounce-in">🪙</span>
-                    <span className="text-2xl font-bold text-yellow-400">
-                      +{gameResult.coins}
-                    </span>
-                  </>
+                  <><span className="text-2xl animate-bounce-in">🪙</span><span className="text-2xl font-bold text-yellow-400">+{gameResult.coins}</span></>
                 ) : (
                   <span className="text-slate-500 text-sm">🪙 +0 monedas</span>
                 )}
               </div>
-
-              {gameResult.coins > 0 && (
-                <p className="text-xs text-slate-500">
-                  {gameResult.score >= 50 ? '🏆 ¡Excelente partida!' : gameResult.score >= 20 ? '👍 Buen trabajo!' : '💪 Sigue así!'}
-                </p>
-              )}
-
               <button
                 onClick={handleBack}
-                className="mt-2 px-6 py-2.5 bg-green-600 hover:bg-green-500 rounded-xl font-medium transition-colors"
+                className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl font-bold text-sm shadow-lg shadow-green-500/25 active:scale-95 transition-all"
               >
                 Volver a juegos
               </button>
             </div>
           ) : selectedGame ? (
-            /* Game screen */
             <div className="space-y-4">
-              <button
-                onClick={handleBack}
-                className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1"
-              >
+              <button onClick={handleBack} className="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition-all">
                 ← Volver
               </button>
               {selectedGame === 'memory' && <MemoryMatch onFinish={handleFinish} />}
@@ -134,7 +106,6 @@ export function GameModal({ onClose }: GameModalProps) {
               {selectedGame === 'puzzle' && <PetPuzzle onFinish={handleFinish} />}
             </div>
           ) : (
-            /* Game selection */
             <div className="grid gap-3">
               {GAMES.map(game => {
                 const cd = cooldowns[game.id] ?? 0;
@@ -144,23 +115,21 @@ export function GameModal({ onClose }: GameModalProps) {
                     key={game.id}
                     onClick={() => !onCooldown && setSelectedGame(game.id)}
                     disabled={onCooldown}
-                    className={`flex items-center gap-4 p-4 rounded-xl border border-slate-700/50 transition-all text-left ${
-                      onCooldown
-                        ? 'opacity-40 cursor-not-allowed bg-slate-800/50'
-                        : 'bg-slate-700/30 hover:bg-slate-700/60 hover:border-slate-500 active:scale-[0.98]'
+                    className={`flex items-center gap-4 p-4 rounded-2xl border transition-all text-left active:scale-[0.98] ${
+                      onCooldown ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-700/30' : 'bg-slate-700/30 border-slate-700/30 hover:bg-slate-700/60 hover:border-slate-500/50'
                     }`}
                   >
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${game.color} flex items-center justify-center text-xl`}>
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${game.color} flex items-center justify-center text-xl shadow-lg`}>
                       {game.icon}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-white">{game.name}</p>
+                      <p className="text-sm font-bold text-white">{game.name}</p>
                       <p className="text-xs text-slate-400">{game.description}</p>
                     </div>
                     {onCooldown ? (
-                      <span className="text-xs text-slate-500">{cd}s</span>
+                      <span className="text-xs text-slate-500 font-mono">{cd}s</span>
                     ) : (
-                      <span className="text-xs text-green-400">🎮 Jugar</span>
+                      <span className="text-xs font-bold text-green-400 bg-green-500/10 px-3 py-1.5 rounded-xl">Jugar</span>
                     )}
                   </button>
                 );

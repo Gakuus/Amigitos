@@ -15,179 +15,113 @@ export function CoupleManager() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const load = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true); setError(null);
     try {
       const [c, p] = await Promise.all([
         api.getMyCouple().catch(() => null),
         api.getPendingInvitations().catch(() => [] as CoupleInfo[]),
       ]);
-      setCouple(c);
-      setPending(p);
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
+      setCouple(c); setPending(p);
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-    setLoading(true);
+    e.preventDefault(); setError(null); setSuccess(null); setLoading(true);
     try {
       const result = await api.invitePartner(email);
-      setCouple(result);
-      setEmail('');
-      setSuccess('Invitación enviada correctamente');
+      setCouple(result); setEmail(''); setSuccess('Invitación enviada');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al invitar';
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
+      setError(err instanceof Error ? err.message : 'Error al invitar');
+    } finally { setLoading(false); }
   };
 
   const handleAccept = async (id: string) => {
-    setError(null);
-    setLoading(true);
+    setError(null); setLoading(true);
     try {
       const result = await api.acceptInvitation(id);
-      setCouple(result);
-      setPending([]);
-      setSuccess('¡Pareja vinculada correctamente!');
+      setCouple(result); setPending([]); setSuccess('¡Pareja vinculada!');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al aceptar';
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
+      setError(err instanceof Error ? err.message : 'Error al aceptar');
+    } finally { setLoading(false); }
   };
 
   const handleDissolve = async () => {
     if (!couple) return;
-    if (!confirm('¿Estás seguro de disolver la pareja? Se perderá el vínculo.')) return;
-    setError(null);
-    setLoading(true);
+    if (!confirm('¿Estás seguro de disolver la pareja?')) return;
+    setError(null); setLoading(true);
     try {
       await api.dissolveCouple(couple.id);
-      setCouple(null);
-      setSuccess('Pareja disuelta');
+      setCouple(null); setSuccess('Pareja disuelta');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al disolver';
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
+      setError(err instanceof Error ? err.message : 'Error al disolver');
+    } finally { setLoading(false); }
   };
 
   const isInviter = couple && couple.invitedBy === user?.id;
-  const partnerName = couple
-    ? isInviter
-      ? 'Tu pareja'
-      : 'Tu pareja'
-    : null;
 
   if (loading && !couple && pending.length === 0) {
     return (
-      <div className="text-center py-8 text-sm text-slate-400">
+      <div className="text-center py-8">
         <div className="animate-spin w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full mx-auto" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {error && (
-        <div className="bg-red-900/50 text-red-300 text-sm px-4 py-2 rounded-lg">
-          {error}
-        </div>
+        <div className="bg-red-900/40 border border-red-700/30 text-red-300 text-sm px-4 py-2.5 rounded-2xl">{error}</div>
       )}
       {success && (
-        <div className="bg-green-900/50 text-green-300 text-sm px-4 py-2 rounded-lg">
-          {success}
-        </div>
+        <div className="bg-green-900/40 border border-green-700/30 text-green-300 text-sm px-4 py-2.5 rounded-2xl">{success}</div>
       )}
 
       {couple ? (
-        <div className="space-y-4">
-          <div className="bg-slate-800 rounded-2xl p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold">💞 Pareja vinculada</h3>
-              {couple.status === 'PENDING' && (
-                <span className="text-xs bg-yellow-600/30 text-yellow-300 px-2 py-0.5 rounded-full">
-                  Pendiente
-                </span>
-              )}
-              {couple.status === 'ACTIVE' && (
-                <span className="text-xs bg-green-600/30 text-green-300 px-2 py-0.5 rounded-full">
-                  Activa
-                </span>
-              )}
-            </div>
-
-            {couple.status === 'PENDING' && isInviter && (
-              <p className="text-sm text-slate-400">
-                Esperando a que tu pareja acepte la invitación...
-              </p>
-            )}
-
-            {couple.status === 'PENDING' && !isInviter && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleAccept(couple.id)}
-                  disabled={loading}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Aceptando...' : '✓ Aceptar invitación'}
-                </button>
-              </div>
-            )}
-
-            {couple.status === 'ACTIVE' && (
-              <div>
-                <p className="text-sm text-slate-400">
-                  {isInviter
-                    ? 'Iniciaste la pareja'
-                    : 'Aceptaste la invitación'}
-                </p>
-              </div>
-            )}
-
-            <button
-              onClick={handleDissolve}
-              disabled={loading}
-              className="text-sm text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
-            >
-              {loading ? '...' : 'Disolver pareja'}
-            </button>
+        <div className="bg-slate-800/80 border border-slate-700/50 rounded-3xl p-5 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold font-display text-lg flex items-center gap-2">💞 Pareja</h3>
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+              couple.status === 'ACTIVE' ? 'bg-green-900/40 text-green-300 border border-green-700/30' : 'bg-yellow-900/40 text-yellow-300 border border-yellow-700/30'
+            }`}>
+              {couple.status === 'ACTIVE' ? 'Activa' : 'Pendiente'}
+            </span>
           </div>
+
+          {couple.status === 'PENDING' && isInviter && (
+            <p className="text-sm text-slate-400">Esperando que tu pareja acepte...</p>
+          )}
+
+          {couple.status === 'PENDING' && !isInviter && (
+            <button onClick={() => handleAccept(couple.id)} disabled={loading}
+              className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl text-sm font-bold shadow-lg shadow-green-500/20 active:scale-[0.98] transition-all"
+            >
+              {loading ? 'Aceptando...' : '✓ Aceptar Invitación'}
+            </button>
+          )}
+
+          {couple.status === 'ACTIVE' && (
+            <p className="text-sm text-slate-400">{isInviter ? 'Iniciaste la pareja' : 'Aceptaste la invitación'}</p>
+          )}
+
+          <button onClick={handleDissolve} disabled={loading}
+            className="w-full px-4 py-2.5 bg-red-900/20 border border-red-700/30 rounded-2xl text-sm text-red-400 font-semibold active:scale-[0.98] transition-all"
+          >
+            {loading ? '...' : 'Disolver Pareja'}
+          </button>
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Pending invitations */}
           {pending.length > 0 && (
-            <div className="bg-slate-800 rounded-2xl p-5 space-y-3">
-              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider">
-                Invitaciones pendientes
-              </h3>
+            <div className="bg-slate-800/80 border border-slate-700/50 rounded-3xl p-5 space-y-3 shadow-xl">
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Invitaciones</h3>
               {pending.map((inv) => (
-                <div
-                  key={inv.id}
-                  className="flex items-center justify-between bg-slate-700/50 rounded-xl p-3"
-                >
-                  <div className="text-sm text-slate-300">
-                    Te invitaron a una pareja
-                  </div>
-                  <button
-                    onClick={() => handleAccept(inv.id)}
-                    disabled={loading}
-                    className="px-3 py-1.5 bg-green-600 hover:bg-green-500 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                <div key={inv.id} className="flex items-center justify-between bg-slate-700/30 rounded-2xl p-4">
+                  <span className="text-sm text-slate-300">Te invitaron a una pareja</span>
+                  <button onClick={() => handleAccept(inv.id)} disabled={loading}
+                    className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl text-xs font-bold active:scale-95 transition-all"
                   >
                     {loading ? '...' : 'Aceptar'}
                   </button>
@@ -196,27 +130,14 @@ export function CoupleManager() {
             </div>
           )}
 
-          {/* Invite form */}
-          <div className="bg-slate-800 rounded-2xl p-5 space-y-3">
-            <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider">
-              Invitar pareja
-            </h3>
-            <p className="text-xs text-slate-500">
-              Ingresa el email de tu pareja o amigo para vincularse y compartir mascotas.
-            </p>
+          <div className="bg-slate-800/80 border border-slate-700/50 rounded-3xl p-5 space-y-4 shadow-xl">
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Invitar Pareja</h3>
+            <p className="text-xs text-slate-500">Ingresa su email para compartir mascotas</p>
             <form onSubmit={handleInvite} className="flex gap-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@ejemplo.com"
-                required
-                className="flex-1 bg-slate-700 border border-slate-600 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-              <button
-                type="submit"
-                disabled={loading || !email}
-                className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@ejemplo.com" required
+                className="flex-1 bg-slate-700/50 border border-slate-600/50 rounded-2xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 transition-all" />
+              <button type="submit" disabled={loading || !email}
+                className="px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl text-sm font-bold shadow-lg shadow-green-500/10 active:scale-[0.98] transition-all disabled:opacity-50"
               >
                 {loading ? '...' : 'Invitar'}
               </button>
