@@ -23,7 +23,7 @@ export class WardrobeItemId {
   }
   get value(): string { return this._value; }
   static create(value?: string): WardrobeItemId {
-    return new WardrobeItemId(value ?? require('uuid').v4());
+    return new WardrobeItemId(value ?? uuidv4());
   }
   equals(other: WardrobeItemId): boolean { return this._value === other._value; }
 }

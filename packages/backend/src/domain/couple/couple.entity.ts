@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export enum CoupleStatus {
   PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
@@ -11,7 +13,7 @@ export class CoupleId {
 
   get value(): string { return this._value; }
   static create(value?: string): CoupleId {
-    return new CoupleId(value ?? require('uuid').v4());
+    return new CoupleId(value ?? uuidv4());
   }
   equals(other: CoupleId): boolean { return this._value === other._value; }
 }

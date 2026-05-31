@@ -1,3 +1,4 @@
+import * as jwt from 'jsonwebtoken';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -28,7 +29,6 @@ export class PetGateway implements OnGatewayConnection, OnGatewayDisconnect, Web
       return;
     }
     try {
-      const jwt = require('jsonwebtoken');
       const payload = jwt.verify(token, process.env.JWT_SECRET ?? 'dev-secret');
       const userId = payload.sub as string;
       client.data.userId = userId;
