@@ -19,7 +19,7 @@ export class PrismaWardrobeRepository implements WardrobeRepositoryPort {
       ? { OR: [{ species: { has: species } }, { species: { equals: [] } }] }
       : {};
     const items = await this.prisma.wardrobeItem.findMany({ where });
-    return items.map((i) => this.toDomain(i));
+    return items.map((i: any) => this.toDomain(i));
   }
 
   async saveItem(item: WardrobeItem): Promise<void> {

@@ -23,7 +23,7 @@ export class PrismaPetRepository implements PetRepositoryPort {
 
   async findByCoupleId(coupleId: string): Promise<Pet[]> {
     const pets = await this.prisma.pet.findMany({ where: { coupleId } });
-    return pets.map((p) => this.toDomain(p));
+    return pets.map((p: any) => this.toDomain(p));
   }
 
   async save(pet: Pet): Promise<void> {

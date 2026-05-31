@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export enum ClothingSlot {
   HAT = 'HAT',
   GLASSES = 'GLASSES',
