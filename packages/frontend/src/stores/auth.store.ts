@@ -32,17 +32,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   init: async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const stored = localStorage.getItem('token');
+    if (!stored) {
       set({ isLoading: false });
       return;
     }
     try {
       const user = await api.getMe();
-      set({ user, token, isAuthenticated: true, isLoading: false });
-    } catch {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
+      set({ user, token: stored, isAuthenticated: true, isLoading: false });
+    } catch (err) {
+      if (err && typeof err === 'object' && 'statusCode' in err && (err as { statusCode: number }).statusCode === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+      }
       set({ isLoading: false });
     }
   },
