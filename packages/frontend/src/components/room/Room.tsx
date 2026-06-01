@@ -8,6 +8,8 @@ import { getSleepPositions } from './sleepTileMap';
 import { ItemSelector } from './ItemSelector';
 import { RoomNeedsOverlay } from './RoomNeedsOverlay';
 import { useSimulatedNeeds } from '@/hooks/useSimulatedNeeds';
+import { SpeechBubble } from '@/components/pet/SpeechBubble';
+import { getPhrase, getActionPhrase } from '@/lib/petPhrases';
 import type { SleepPosition } from './sleepTileMap';
 import {
   Sofa, UtensilsCrossed, Gamepad2, Bath, Moon,
@@ -63,9 +65,11 @@ export function Room() {
   const [petRooms, setPetRooms] = useState<Record<string, RoomId>>({});
   const [petPositions, setPetPositions] = useState<PetPosition[]>([]);
   const [feedback, setFeedback] = useState<{ emoji: string; petId: string } | null>(null);
+  const [speech, setSpeech] = useState<Record<string, string | null>>({});
   const [isMobile, setIsMobile] = useState(false);
   const [itemSelector, setItemSelector] = useState<{ category: string; petId: string } | null>(null);
   const fbTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const speechTimeouts = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 640);
@@ -109,29 +113,44 @@ export function Room() {
     }
   }, [room, petRooms, pets]);
 
-  // Living room random movement
+  const showSpeech = useCallback((petId: string, text: string) => {
+    setSpeech((prev) => ({ ...prev, [petId]: text }));
+    if (speechTimeouts.current[petId]) clearTimeout(speechTimeouts.current[petId]);
+    speechTimeouts.current[petId] = setTimeout(() => {
+      setSpeech((prev) => ({ ...prev, [petId]: null }));
+    }, 3000 + Math.random() * 2000);
+  }, []);
+
+  // Natural wandering in all rooms
   useEffect(() => {
-    if (room !== 'living') return;
-    const currentPets = pets.filter((p) => petRooms[p.id] === 'living');
+    const currentPets = pets.filter((p) => petRooms[p.id] === room && !p.isSleeping);
     if (currentPets.length === 0) return;
     const timers: ReturnType<typeof setInterval>[] = [];
     for (let i = 0; i < currentPets.length; i++) {
-      const t = setInterval(() => {
+      const petId = currentPets[i]!.id;
+      // Movement
+      const moveTimer = setInterval(() => {
         setPetPositions((prev) => {
           const next = [...prev];
           const rangeX = Math.min(0.72, 0.22 + (currentPets.length - 2) * 0.16);
           next[i] = {
             x: 0.5 - rangeX / 2 + Math.random() * rangeX,
-            depth: next[i]?.depth ?? 0.5,
+            depth: Math.min(0.85, Math.max(0.15, (next[i]?.depth ?? 0.5) + (Math.random() - 0.5) * 0.3)),
             top: next[i]?.top ?? 82,
           };
           return next;
         });
-      }, rand(4000, 7000));
-      timers.push(t);
+      }, rand(3000, 6000));
+      timers.push(moveTimer);
+      // Random speech
+      const speechTimer = setInterval(() => {
+        const species = pets.find((p) => p.id === petId)?.species;
+        if (species) showSpeech(petId, getPhrase(species));
+      }, rand(12000, 25000));
+      timers.push(speechTimer);
     }
     return () => timers.forEach(clearInterval);
-  }, [room, petRooms, pets]);
+  }, [room, petRooms, pets, showSpeech]);
 
   const showFeedback = (emoji: string, petId: string) => {
     setFeedback({ emoji, petId });
@@ -153,8 +172,9 @@ export function Room() {
 
       await performAction(petId, action, itemId);
       showFeedback(feedbackEmojis[action] || '✨', petId);
+      showSpeech(petId, getActionPhrase(action));
     },
-    [room, performAction],
+    [room, performAction, showSpeech],
   );
 
   const handleSleepToggle = useCallback(
@@ -163,8 +183,9 @@ export function Room() {
       const action = data?.isSleeping ? 'wake' : 'sleep';
       await performAction(petId, action);
       showFeedback(data?.isSleeping ? '🌅' : '💤', petId);
+      showSpeech(petId, getActionPhrase(action));
     },
-    [petMap, performAction],
+    [petMap, performAction, showSpeech],
   );
 
   const handleCallPet = useCallback(
@@ -173,10 +194,12 @@ export function Room() {
       if (data?.isSleeping) {
         await performAction(petId, 'wake');
         showFeedback('🌅', petId);
+        showSpeech(petId, getActionPhrase('wake'));
       }
       setPetRooms((prev) => ({ ...prev, [petId]: room }));
+      showSpeech(petId, getActionPhrase('call'));
     },
-    [room, petMap, performAction],
+    [room, petMap, performAction, showSpeech],
   );
 
   const handleItemSelect = async (petId: string, itemId: string) => {
@@ -274,6 +297,10 @@ export function Room() {
                     {summary.name}
                   </div>
                 </div>
+
+                {speech[summary.id] && (
+                  <SpeechBubble text={speech[summary.id]!} />
+                )}
 
                 <PetSprite
                   species={summary.species}

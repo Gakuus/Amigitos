@@ -42,11 +42,14 @@
 - Muebles SVG reemplazan CSS divs (SofaSVG, DiningTableSVG, BathtubSVG, BedSVG, etc.)
 - Atmósfera única por habitación: dormitorio nocturno con luna/estrellas, living con brillo cálido, baño con patrón azulejos, play con círculos coloridos
 
-### 2.7 Rediseño de Mascotas
+### 2.7 Rediseño de Mascotas ✅
 - Representación SVG mucho mejor que emojis
 - Sprites o ilustraciones de mascotas con más detalle
 - Diferentes expresiones según estado de ánimo
 - Animaciones entre estados
+- **Movimiento natural**: mascotas deambulan por todas las salas (x + profundidad)
+- **Frases y personalidad**: burbujas de diálogo con frases únicas por especie
+- Frases al interactuar (comer, jugar, bañar, dormir, despertar, llamar)
 
 ## Sprint 3 — Tiempo Real y Multijugador
 - Sincronización WebSocket de todas las interacciones
