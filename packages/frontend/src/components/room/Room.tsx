@@ -47,6 +47,21 @@ function distributePositions(count: number): PetPosition[] {
   return positions;
 }
 
+function getEatPositions(count: number): PetPosition[] {
+  const cx = 0.5, cy = 0.5;
+  const rx = 0.22, ry = 0.22;
+  const positions: PetPosition[] = [];
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+    positions.push({
+      x: cx + Math.cos(angle) * rx,
+      depth: cy + Math.sin(angle) * ry,
+      top: 82,
+    });
+  }
+  return positions;
+}
+
 type PetPosition = SleepPosition;
 
 const ROOM_ACTIONS: Record<RoomId, { category: string; label: string; emoji: string } | null> = {
@@ -103,11 +118,12 @@ export function Room() {
         if (p.isSleeping) {
           return bedPos[bi++] ?? { x: 50, depth: 0.35, top: 65 };
         }
-        // Convert floorPos (decimal 0-1) to sleep position format (percentage 0-100)
         const fp = floorPos[fi++] ?? { x: 0.5, depth: 0.5, top: 82 };
         return { x: fp.x * 100, depth: fp.depth, top: fp.top };
       });
       setPetPositions(positions);
+    } else if (room === 'eat') {
+      setPetPositions(getEatPositions(currentPets.length));
     } else {
       setPetPositions(distributePositions(currentPets.length));
     }
@@ -121,8 +137,9 @@ export function Room() {
     }, 3000 + Math.random() * 2000);
   }, []);
 
-  // Natural wandering in all rooms
+  // Natural wandering in all rooms (except eat — they sit at the table)
   useEffect(() => {
+    if (room === 'eat') return;
     const currentPets = pets.filter((p) => petRooms[p.id] === room && !p.isSleeping);
     if (currentPets.length === 0) return;
     const timers: ReturnType<typeof setInterval>[] = [];

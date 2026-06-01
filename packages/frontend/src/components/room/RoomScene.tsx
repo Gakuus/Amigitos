@@ -197,7 +197,7 @@ function LivingFurniture({ depth }: { depth: (d: number) => React.CSSProperties 
 
 /* ───────── Eat Room ───────── */
 
-function EatFurniture({ depth }: { depth: (d: number) => React.CSSProperties }) {
+function EatFurniture({ petPositions, depth }: { petPositions: SleepPosition[]; depth: (d: number) => React.CSSProperties }) {
   return (
     <>
       {/* Table */}
@@ -207,9 +207,18 @@ function EatFurniture({ depth }: { depth: (d: number) => React.CSSProperties }) 
         </div>
       </div>
 
-      {/* Chairs */}
-      {[14, 60].map((left) => (
-        <div key={left} className="absolute bottom-[11%]" style={{ left: `${left}%`, ...depth(0.4) }}>
+      {/* Chairs — one per pet, positioned around the table */}
+      {petPositions.map((pos, i) => (
+        <div
+          key={i}
+          className="absolute"
+          style={{
+            left: `${pos.x * 100}%`,
+            bottom: `calc(16% + ${(1 - pos.depth) * 40}px)`,
+            transform: `translateX(-50%) scale(${0.5 + pos.depth * 0.55})`,
+            transformOrigin: 'bottom center',
+          }}
+        >
           <div className="w-[14vw] max-w-[80px] h-[90px]">
             <DiningChairSVG />
           </div>
@@ -222,7 +231,7 @@ function EatFurniture({ depth }: { depth: (d: number) => React.CSSProperties }) 
       </div>
 
       {/* Sideboard */}
-      <div className="absolute bottom-[22%] right-[3%]" style={depth(0.45)}>
+      <div className="absolute bottom-[22%] right-[6%]" style={depth(0.45)}>
         <div className="w-[60px] h-[48px]">
           <SideboardSVG />
         </div>
@@ -392,7 +401,7 @@ export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: 
 
       <div className="absolute inset-0">
         {room === 'living' && <LivingFurniture depth={depth} />}
-        {room === 'eat' && <EatFurniture depth={depth} />}
+        {room === 'eat' && <EatFurniture petPositions={petPositions} depth={depth} />}
         {room === 'play' && <PlayFurniture depth={depth} />}
         {room === 'bath' && <BathFurniture depth={depth} />}
         {room === 'sleep' && <SleepFurniture petPositions={petPositions} depth={depth} />}
