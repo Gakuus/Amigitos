@@ -14,13 +14,13 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#0f172a',
+  themeColor: '#a78bfa',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className="min-h-dvh bg-slate-900 text-slate-100 overflow-x-hidden">
+      <body className="min-h-dvh bg-pastel-cream dark:bg-slate-900 text-pastel-foreground dark:text-slate-100 overflow-x-hidden">
         <AuthInit>{children}</AuthInit>
       </body>
     </html>

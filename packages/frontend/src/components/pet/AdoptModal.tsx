@@ -47,21 +47,21 @@ export function AdoptModal({ onClose, onAdopted, userCoupleId }: AdoptModalProps
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-surface-card/95 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[85dvh] flex flex-col shadow-2xl border border-surface-border/50 sm:m-4 animate-slide-up sm:animate-pop">
+      <div className="bg-white/95 dark:bg-surface-card/95 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[85dvh] flex flex-col shadow-2xl border border-pastel-purple/15 dark:border-surface-border/50 sm:m-4 animate-slide-up sm:animate-pop">
         <div className="flex justify-center pt-2 pb-0 sm:hidden">
-          <div className="w-10 h-1 bg-slate-600 rounded-full" />
+          <div className="w-10 h-1 bg-pastel-purple/20 dark:bg-slate-600 rounded-full" />
         </div>
 
-        <div className="px-5 pt-4 pb-3 border-b border-surface-border/50 flex items-center justify-between">
-          <h2 className="text-lg font-bold font-display flex items-center gap-2">
-            <PawPrint size={20} className="text-brand-400" />
+        <div className="px-5 pt-4 pb-3 border-b border-pastel-purple/15 dark:border-surface-border/50 flex items-center justify-between">
+          <h2 className="text-lg font-bold font-display flex items-center gap-2 text-pastel-foreground dark:text-white">
+            <PawPrint size={20} className="text-pastel-purple dark:text-brand-400" />
             Adoptar Mascota
           </h2>
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${atLimit ? 'bg-red-900/40 text-red-300 border border-red-700/30' : 'bg-slate-700/50 text-slate-300'}`}>
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${atLimit ? 'bg-pastel-coral/20 text-pastel-coral border border-pastel-coral/30 dark:bg-red-900/40 dark:text-red-300 dark:border-red-700/30' : 'bg-pastel-lavender/30 text-pastel-muted dark:bg-slate-700/50 dark:text-slate-300'}`}>
               {petCount}/{MAX_PETS_PER_COUPLE}
             </span>
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-700/50 text-slate-400 hover:text-white active:scale-90 transition-all">
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-pastel-lavender/30 dark:bg-slate-700/50 text-pastel-muted dark:text-slate-400 hover:text-pastel-foreground dark:hover:text-white active:scale-90 transition-all">
               <X size={16} />
             </button>
           </div>
@@ -69,18 +69,18 @@ export function AdoptModal({ onClose, onAdopted, userCoupleId }: AdoptModalProps
 
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           <div>
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Nombre</label>
+            <label className="text-xs font-semibold text-pastel-muted dark:text-slate-400 uppercase tracking-wider mb-2 block">Nombre</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="ej: Pelusa"
               maxLength={20}
-              className="w-full px-4 py-3 bg-slate-700/50 rounded-2xl border border-slate-600/50 focus:border-brand-500/50 outline-none text-sm text-white placeholder-slate-500 transition-all"
+              className="w-full px-4 py-3 bg-pastel-lavender/20 dark:bg-slate-700/50 rounded-2xl border border-pastel-purple/20 dark:border-slate-600/50 focus:border-pastel-purple/50 dark:focus:border-brand-500/50 outline-none text-sm text-pastel-foreground dark:text-white placeholder-pastel-muted dark:placeholder-slate-500 transition-all"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Especie</label>
+            <label className="text-xs font-semibold text-pastel-muted dark:text-slate-400 uppercase tracking-wider mb-2 block">Especie</label>
             <div className="grid grid-cols-3 gap-2">
               {speciesList.map(([key, label]) => (
                 <button
@@ -88,8 +88,8 @@ export function AdoptModal({ onClose, onAdopted, userCoupleId }: AdoptModalProps
                   onClick={() => setSpecies(key)}
                   className={`p-3 rounded-2xl text-center text-xs font-semibold transition-all active:scale-[0.97] ${
                     species === key
-                      ? 'bg-gradient-to-br from-brand-500 to-emerald-500 text-white shadow-lg shadow-brand-500/20 scale-105'
-                      : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/30'
+                      ? 'bg-gradient-to-br from-pastel-purple to-pastel-coral dark:from-brand-500 dark:to-emerald-500 text-white shadow-lg shadow-pastel-purple/30 dark:shadow-brand-500/20 scale-105'
+                      : 'bg-pastel-lavender/20 dark:bg-slate-700/50 text-pastel-muted dark:text-slate-300 hover:bg-pastel-lavender/40 dark:hover:bg-slate-700 border border-pastel-purple/15 dark:border-slate-600/30'
                   }`}
                 >
                   {label}
@@ -99,17 +99,17 @@ export function AdoptModal({ onClose, onAdopted, userCoupleId }: AdoptModalProps
           </div>
 
           {errorMsg && (
-            <div className="px-4 py-3 bg-red-900/40 border border-red-700/30 rounded-2xl text-sm text-red-300">{errorMsg}</div>
+            <div className="px-4 py-3 bg-pastel-coral/20 dark:bg-red-900/40 border border-pastel-coral/30 dark:border-red-700/30 rounded-2xl text-sm text-pastel-coral dark:text-red-300">{errorMsg}</div>
           )}
 
           <div className="flex gap-3 pt-2">
-            <button onClick={onClose} className="flex-1 py-3 rounded-2xl bg-slate-700/50 hover:bg-slate-700 text-sm font-semibold active:scale-[0.97] transition-all">
+            <button onClick={onClose} className="flex-1 py-3 rounded-2xl bg-pastel-lavender/30 dark:bg-slate-700/50 hover:bg-pastel-lavender/50 dark:hover:bg-slate-700 text-sm font-semibold text-pastel-foreground dark:text-white active:scale-[0.97] transition-all">
               Cancelar
             </button>
             <button
               onClick={handleAdopt}
               disabled={!name.trim() || name.length < 2 || loading || atLimit}
-              className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-brand-500 to-emerald-500 disabled:opacity-40 text-sm font-bold shadow-lg shadow-brand-500/20 active:scale-[0.97] transition-all flex items-center justify-center gap-1.5"
+              className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-pastel-purple to-pastel-coral dark:from-brand-500 dark:to-emerald-500 disabled:opacity-40 text-sm font-bold shadow-lg shadow-pastel-purple/30 dark:shadow-brand-500/20 active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 text-white"
             >
               {loading ? (
                 <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />

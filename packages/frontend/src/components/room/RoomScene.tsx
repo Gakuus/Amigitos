@@ -9,15 +9,15 @@ const FLOOR_Y = 675;
 function LivingScene() {
   return (
     <g>
-      <rect x={100} y={40} width={220} height={480} rx={10} fill="url(#curtain)" opacity={0.35} />
-      <rect x={1280} y={40} width={220} height={480} rx={10} fill="url(#curtain)" opacity={0.35} />
+      <rect x={100} y={40} width={220} height={480} rx={10} fill="url(#curtain)" opacity={0.25} />
+      <rect x={1280} y={40} width={220} height={480} rx={10} fill="url(#curtain)" opacity={0.25} />
       <rect x={550} y={60} width={500} height={420} rx={200} ry={200} fill="url(#window)" />
-      <rect x={550} y={60} width={500} height={420} rx={200} ry={200} fill="none" stroke="#d4a056" strokeWidth={4} />
+      <rect x={550} y={60} width={500} height={420} rx={200} ry={200} fill="none" stroke="#a78bfa" strokeWidth={4} />
       <rect x={555} y={280} width={490} height={200} rx={10} fill="url(#windowsill)" />
-      <line x1={800} y1={60} x2={800} y2={480} stroke="rgba(180,120,60,0.4)" strokeWidth={3} />
-      <line x1={555} y1={270} x2={1045} y2={270} stroke="rgba(180,120,60,0.4)" strokeWidth={3} />
+      <line x1={800} y1={60} x2={800} y2={480} stroke="rgba(167,139,250,0.3)" strokeWidth={3} />
+      <line x1={555} y1={270} x2={1045} y2={270} stroke="rgba(167,139,250,0.3)" strokeWidth={3} />
       <g transform="translate(800, 560)">
-        <ellipse cx={0} cy={85} rx={280} ry={20} fill="rgba(0,0,0,0.12)" />
+        <ellipse cx={0} cy={85} rx={280} ry={20} fill="rgba(0,0,0,0.08)" />
         <rect x={-260} y={-80} width={520} height={120} rx={20} fill="url(#sofaBack)" />
         <rect x={-250} y={-70} width={500} height={80} rx={14} fill="url(#sofaCushion)" />
         <rect x={-270} y={30} width={540} height={55} rx={16} fill="url(#sofaSeat)" />
@@ -26,11 +26,11 @@ function LivingScene() {
         <rect x={250} y={-40} width={60} height={120} rx={16} fill="url(#sofaArm)" />
       </g>
       <g transform="translate(1300, 520)">
-        <rect x={-25} y={0} width={50} height={60} rx={4} fill="#8B7355" />
-        <rect x={-30} y={-5} width={60} height={8} rx={3} fill="#A0896C" />
-        <line x1={0} y1={-5} x2={0} y2={-100} stroke="#6B5B3E" strokeWidth={3} />
-        <path d="M-40 -100 Q0 -160 40 -100" fill="#F5DEB3" opacity={0.7} stroke="#D4A056" strokeWidth={2} />
-        <ellipse cx={0} cy={-100} rx={45} ry={12} fill="#F5DEB3" opacity={0.5} />
+        <rect x={-25} y={0} width={50} height={60} rx={4} fill="#c4b5fd" />
+        <rect x={-30} y={-5} width={60} height={8} rx={3} fill="#ddd6fe" />
+        <line x1={0} y1={-5} x2={0} y2={-100} stroke="#a78bfa" strokeWidth={3} />
+        <path d="M-40 -100 Q0 -160 40 -100" fill="#fef3c7" opacity={0.7} stroke="#fde68a" strokeWidth={2} />
+        <ellipse cx={0} cy={-100} rx={45} ry={12} fill="#fef3c7" opacity={0.5} />
       </g>
     </g>
   );
@@ -39,17 +39,17 @@ function LivingScene() {
 function EatScene() {
   return (
     <g>
-      <line x1={800} y1={0} x2={800} y2={120} stroke="#8B7355" strokeWidth={2} />
-      <path d="M740 120 Q800 180 860 120" fill="#F5DEB3" opacity={0.6} stroke="#D4A056" strokeWidth={2} />
-      <line x1={760} y1={125} x2={840} y2={125} stroke="#D4A056" strokeWidth={2} />
+      <line x1={800} y1={0} x2={800} y2={120} stroke="#c4b5fd" strokeWidth={2} />
+      <path d="M740 120 Q800 180 860 120" fill="#fef3c7" opacity={0.6} stroke="#fde68a" strokeWidth={2} />
+      <line x1={760} y1={125} x2={840} y2={125} stroke="#c4b5fd" strokeWidth={2} />
       <ellipse cx={800} cy={180} rx={200} ry={80} fill="rgba(255,230,150,0.08)" />
       <g transform="translate(800, 560)">
         <ellipse cx={0} cy={100} rx={280} ry={22} fill="rgba(0,0,0,0.12)" />
-        <rect x={-220} y={10} width={10} height={85} rx={4} fill="#8B7355" />
-        <rect x={210} y={10} width={10} height={85} rx={4} fill="#8B7355" />
-        <rect x={-220} y={10} width={10} height={85} rx={4} fill="#8B7355" />
-        <rect x={210} y={10} width={10} height={85} rx={4} fill="#8B7355" />
-        <ellipse cx={0} cy={8} rx={280} ry={45} fill="url(#tableTop)" stroke="#8B7355" strokeWidth={2} />
+        <rect x={-220} y={10} width={10} height={85} rx={4} fill="#c4b5fd" />
+        <rect x={210} y={10} width={10} height={85} rx={4} fill="#c4b5fd" />
+        <rect x={-220} y={10} width={10} height={85} rx={4} fill="#c4b5fd" />
+        <rect x={210} y={10} width={10} height={85} rx={4} fill="#c4b5fd" />
+        <ellipse cx={0} cy={8} rx={280} ry={45} fill="url(#tableTop)" stroke="#a78bfa" strokeWidth={2} />
         <ellipse cx={0} cy={4} rx={270} ry={40} fill="url(#tableCloth)" />
         <ellipse cx={-110} cy={0} rx={38} ry={20} fill="#f8f8f8" stroke="#ddd" strokeWidth={1} />
         <ellipse cx={-110} cy={-2} rx={28} ry={14} fill="#fff" />
@@ -66,22 +66,22 @@ function EatScene() {
 
 function PlayScene() {
   const toys = [
-    { x: 300, y: 580, r: 32, fill: '#ef4444' },
-    { x: 460, y: 545, r: 26, fill: '#3b82f6' },
-    { x: 1100, y: 565, r: 30, fill: '#22c55e' },
-    { x: 1260, y: 535, r: 24, fill: '#eab308' },
-    { x: 1360, y: 575, r: 28, fill: '#a855f7' },
+    { x: 300, y: 580, r: 32, fill: '#f9a8d4' },
+    { x: 460, y: 545, r: 26, fill: '#a78bfa' },
+    { x: 1100, y: 565, r: 30, fill: '#a7f3d0' },
+    { x: 1260, y: 535, r: 24, fill: '#fde68a' },
+    { x: 1360, y: 575, r: 28, fill: '#c4b5fd' },
   ];
   return (
     <g>
-      <rect x={200} y={240} width={300} height={16} rx={4} fill="#A0896C" />
-      <rect x={200} y={240} width={10} height={220} rx={3} fill="#8B7355" />
-      <rect x={490} y={240} width={10} height={220} rx={3} fill="#8B7355" />
-      <circle cx={260} cy={225} r={20} fill="#ef4444" />
-      <circle cx={320} cy={228} r={16} fill="#3b82f6" />
-      <rect x={355} y={208} width={30} height={30} rx={4} fill="#22c55e" />
-      <circle cx={410} cy={226} r={17} fill="#eab308" />
-      <rect x={440} y={212} width={22} height={22} rx={3} fill="#a855f7" />
+      <rect x={200} y={240} width={300} height={16} rx={4} fill="#c4b5fd" />
+      <rect x={200} y={240} width={10} height={220} rx={3} fill="#a78bfa" />
+      <rect x={490} y={240} width={10} height={220} rx={3} fill="#a78bfa" />
+      <circle cx={260} cy={225} r={20} fill="#f9a8d4" />
+      <circle cx={320} cy={228} r={16} fill="#a78bfa" />
+      <rect x={355} y={208} width={30} height={30} rx={4} fill="#a7f3d0" />
+      <circle cx={410} cy={226} r={17} fill="#fde68a" />
+      <rect x={440} y={212} width={22} height={22} rx={3} fill="#c4b5fd" />
       <rect x={350} y={610} width={900} height={55} rx={20} fill="url(#playMat)" opacity={0.5} />
       {toys.map((t, i) => (
         <g key={i}>
@@ -90,9 +90,9 @@ function PlayScene() {
           <circle cx={t.x - 6} cy={t.y - 6} r={t.r * 0.3} fill="rgba(255,255,255,0.3)" />
         </g>
       ))}
-      <rect x={650} y={555} width={42} height={42} rx={5} fill="#f97316" opacity={0.55} stroke="#ea580c" strokeWidth={2} />
-      <rect x={705} y={535} width={38} height={38} rx={5} fill="#06b6d4" opacity={0.55} stroke="#0891b2" strokeWidth={2} transform="rotate(12 724 554)" />
-      <rect x={920} y={550} width={40} height={40} rx={5} fill="#ec4899" opacity={0.55} stroke="#db2777" strokeWidth={2} />
+      <rect x={650} y={555} width={42} height={42} rx={5} fill="#fdba74" opacity={0.55} stroke="#fb923c" strokeWidth={2} />
+      <rect x={705} y={535} width={38} height={38} rx={5} fill="#67e8f9" opacity={0.55} stroke="#22d3ee" strokeWidth={2} transform="rotate(12 724 554)" />
+      <rect x={920} y={550} width={40} height={40} rx={5} fill="#f9a8d4" opacity={0.55} stroke="#e879b9" strokeWidth={2} />
     </g>
   );
 }
@@ -100,34 +100,34 @@ function PlayScene() {
 function BathScene() {
   return (
     <g>
-      <circle cx={800} cy={200} r={130} fill="url(#mirror)" stroke="#94a3b8" strokeWidth={4} />
+      <circle cx={800} cy={200} r={130} fill="url(#mirror)" stroke="#c4b5fd" strokeWidth={4} />
       <circle cx={800} cy={200} r={125} fill="url(#mirrorGlass)" />
       <ellipse cx={775} cy={178} rx={45} ry={22} fill="rgba(255,255,255,0.12)" transform="rotate(-20 775 178)" />
-      <rect x={700} y={335} width={200} height={10} rx={5} fill="#94a3b8" />
+      <rect x={700} y={335} width={200} height={10} rx={5} fill="#c4b5fd" />
       <g transform="translate(100, 300)">
-        <line x1={0} y1={0} x2={220} y2={0} stroke="#94a3b8" strokeWidth={5} strokeLinecap="round" />
+        <line x1={0} y1={0} x2={220} y2={0} stroke="#c4b5fd" strokeWidth={5} strokeLinecap="round" />
         <rect x={20} y={2} width={38} height={130} rx={7} fill="url(#towel1)" />
         <rect x={70} y={2} width={38} height={110} rx={7} fill="url(#towel2)" />
         <rect x={145} y={2} width={38} height={120} rx={7} fill="url(#towel1)" />
       </g>
       <g transform="translate(800, 590)">
         <ellipse cx={0} cy={78} rx={280} ry={20} fill="rgba(0,0,0,0.12)" />
-        <path d="M-270 -10 Q-280 65 -240 70 L240 70 Q280 65 270 -10 Z" fill="url(#tubFill)" stroke="#94a3b8" strokeWidth={2} />
+        <path d="M-270 -10 Q-280 65 -240 70 L240 70 Q280 65 270 -10 Z" fill="url(#tubFill)" stroke="#c4b5fd" strokeWidth={2} />
         <path d="M-252 -5 Q-258 55 -228 60 L228 60 Q258 55 252 -5 Z" fill="url(#tubWater)" opacity={0.75} />
-        <path d="M-270 -10 Q0 -22 270 -10" fill="none" stroke="#cbd5e1" strokeWidth={7} strokeLinecap="round" />
+        <path d="M-270 -10 Q0 -22 270 -10" fill="none" stroke="#ddd6fe" strokeWidth={7} strokeLinecap="round" />
         <circle cx={-90} cy={18} r={14} fill="rgba(255,255,255,0.55)" />
         <circle cx={-55} cy={6} r={9} fill="rgba(255,255,255,0.45)" />
         <circle cx={-120} cy={5} r={11} fill="rgba(255,255,255,0.45)" />
         <circle cx={0} cy={12} r={16} fill="rgba(255,255,255,0.55)" />
         <circle cx={65} cy={6} r={10} fill="rgba(255,255,255,0.45)" />
         <circle cx={110} cy={18} r={12} fill="rgba(255,255,255,0.45)" />
-        <circle cx={200} cy={70} r={11} fill="#cbd5e1" />
-        <circle cx={-200} cy={70} r={11} fill="#cbd5e1" />
+        <circle cx={200} cy={70} r={11} fill="#ddd6fe" />
+        <circle cx={-200} cy={70} r={11} fill="#ddd6fe" />
       </g>
       <g transform="translate(1350, 250)">
-        <line x1={0} y1={0} x2={0} y2={220} stroke="#94a3b8" strokeWidth={3} />
-        <ellipse cx={0} cy={-5} rx={22} ry={11} fill="#cbd5e1" />
-        <path d="M-12 220 L12 220" stroke="#94a3b8" strokeWidth={5} strokeLinecap="round" />
+        <line x1={0} y1={0} x2={0} y2={220} stroke="#c4b5fd" strokeWidth={3} />
+        <ellipse cx={0} cy={-5} rx={22} ry={11} fill="#ddd6fe" />
+        <path d="M-12 220 L12 220" stroke="#c4b5fd" strokeWidth={5} strokeLinecap="round" />
         <circle cx={-22} cy={230} r={7} fill="rgba(100,200,255,0.3)" />
         <circle cx={12} cy={242} r={5} fill="rgba(100,200,255,0.3)" />
         <circle cx={-8} cy={252} r={6} fill="rgba(100,200,255,0.3)" />
@@ -182,9 +182,9 @@ function Bed2D({ cx, cy, depth }: { cx: number; cy: number; depth: number }) {
   const x = cx - bw / 2;
   const y = cy - bh / 2 - sideH;
 
-  const frameColor = '#7c3aed';
-  const frameDark = '#5b21b6';
-  const headColor = '#6d28d9';
+  const frameColor = '#a78bfa';
+  const frameDark = '#8b5cf6';
+  const headColor = '#c4b5fd';
 
   return (
     <g>
@@ -193,9 +193,9 @@ function Bed2D({ cx, cy, depth }: { cx: number; cy: number; depth: number }) {
       <rect x={x + bw * 0.06} y={y - 16 * scale} width={bw * 0.88} height={4 * scale} rx={2 * scale} fill="rgba(255,255,255,0.1)" />
       <rect x={x} y={y + bh} width={bw} height={sideH} rx={0} fill={frameDark} />
       <rect x={x} y={y} width={bw} height={bh} rx={10 * scale} fill={frameColor} stroke={frameDark} strokeWidth={1.5 * scale} />
-      <rect x={x + 8 * scale} y={y + 6 * scale} width={bw - 16 * scale} height={bh * 0.46} rx={6 * scale} fill="#f1f5f9" />
+      <rect x={x + 8 * scale} y={y + 6 * scale} width={bw - 16 * scale} height={bh * 0.46} rx={6 * scale} fill="#fef3c7" />
       <rect x={x + 10 * scale} y={y + 9 * scale} width={bw * 0.16} height={bh * 0.34} rx={5 * scale} fill="#fde68a" />
-      <rect x={x + 8 * scale} y={y + bh * 0.42} width={bw * 0.84} height={bh * 0.5} rx={6 * scale} fill="#a78bfa" opacity={0.92} />
+      <rect x={x + 8 * scale} y={y + bh * 0.42} width={bw * 0.84} height={bh * 0.5} rx={6 * scale} fill="#f9a8d4" opacity={0.92} />
       <rect x={x + 12 * scale + bw * 0.16} y={y + bh * 0.42} width={3 * scale} height={bh * 0.35} rx={1.5 * scale} fill="rgba(255,255,255,0.2)" />
       <rect x={x + 8 * scale} y={y + bh * 0.44} width={bw * 0.84} height={3 * scale} rx={1.5 * scale} fill="rgba(255,255,255,0.08)" />
     </g>
@@ -206,7 +206,7 @@ function SleepScene({ petPositions }: { petPositions: SleepPosition[] }) {
   return (
     <g>
       <circle cx={1320} cy={90} r={52} fill="#fef3c7" opacity={0.65} />
-      <circle cx={1340} cy={80} r={48} fill="#1e1b4b" />
+      <circle cx={1340} cy={80} r={48} fill="#2e1065" />
       <circle cx={180} cy={70} r={3} fill="#fef3c7" opacity={0.5} />
       <circle cx={360} cy={120} r={2.5} fill="#fef3c7" opacity={0.4} />
       <circle cx={520} cy={50} r={3} fill="#fef3c7" opacity={0.6} />
@@ -218,8 +218,8 @@ function SleepScene({ petPositions }: { petPositions: SleepPosition[] }) {
       <circle cx={440} cy={90} r={1.8} fill="#fef3c7" opacity={0.5} />
       <circle cx={980} cy={55} r={2.8} fill="#fef3c7" opacity={0.5} />
       <FloorLines room="sleep" />
-      <rect x={80} y={630} width={1440} height={240} rx={32} fill="rgba(76,29,149,0.3)" />
-      <rect x={100} y={640} width={1400} height={220} rx={24} fill="rgba(76,29,149,0.15)" />
+      <rect x={80} y={630} width={1440} height={240} rx={32} fill="rgba(167,139,250,0.2)" />
+      <rect x={100} y={640} width={1400} height={220} rx={24} fill="rgba(167,139,250,0.1)" />
       <FloorVignette />
       {petPositions.map((pos, i) => (
         <Bed2D
@@ -244,51 +244,51 @@ export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: 
     >
       <defs>
         <linearGradient id="curtain" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#d97706" />
+          <stop offset="0%" stopColor="#f9a8d4" />
           <stop offset="100%" stopColor="transparent" />
         </linearGradient>
         <linearGradient id="window" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#87CEEB" />
-          <stop offset="100%" stopColor="#B0E0E6" />
+          <stop offset="0%" stopColor="#bae6fd" />
+          <stop offset="100%" stopColor="#e0f2fe" />
         </linearGradient>
         <linearGradient id="windowsill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#c4956a" />
-          <stop offset="100%" stopColor="#a0764a" />
+          <stop offset="0%" stopColor="#ddd6fe" />
+          <stop offset="100%" stopColor="#c4b5fd" />
         </linearGradient>
         <linearGradient id="sofaBack" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#d97706" />
-          <stop offset="100%" stopColor="#b45309" />
+          <stop offset="0%" stopColor="#c4b5fd" />
+          <stop offset="100%" stopColor="#a78bfa" />
         </linearGradient>
         <linearGradient id="sofaCushion" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f59e0b" />
-          <stop offset="100%" stopColor="#d97706" />
+          <stop offset="0%" stopColor="#ddd6fe" />
+          <stop offset="100%" stopColor="#c4b5fd" />
         </linearGradient>
         <linearGradient id="sofaSeat" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#d97706" />
-          <stop offset="100%" stopColor="#92400e" />
+          <stop offset="0%" stopColor="#a78bfa" />
+          <stop offset="100%" stopColor="#8b5cf6" />
         </linearGradient>
         <linearGradient id="sofaArm" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f59e0b" />
-          <stop offset="100%" stopColor="#b45309" />
+          <stop offset="0%" stopColor="#c4b5fd" />
+          <stop offset="100%" stopColor="#a78bfa" />
         </linearGradient>
         <radialGradient id="tableTop">
-          <stop offset="0%" stopColor="#d4a574" />
-          <stop offset="100%" stopColor="#b8860b" />
+          <stop offset="0%" stopColor="#e9d5ff" />
+          <stop offset="100%" stopColor="#c4b5fd" />
         </radialGradient>
         <radialGradient id="tableCloth">
-          <stop offset="0%" stopColor="#fff8dc" />
-          <stop offset="100%" stopColor="#f5e6c8" />
+          <stop offset="0%" stopColor="#fef3c7" />
+          <stop offset="100%" stopColor="#fde68a" />
         </radialGradient>
         <linearGradient id="playMat" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#3b82f6" />
-          <stop offset="25%" stopColor="#22c55e" />
-          <stop offset="50%" stopColor="#eab308" />
-          <stop offset="75%" stopColor="#ef4444" />
-          <stop offset="100%" stopColor="#a855f7" />
+          <stop offset="0%" stopColor="#a78bfa" />
+          <stop offset="25%" stopColor="#a7f3d0" />
+          <stop offset="50%" stopColor="#fde68a" />
+          <stop offset="75%" stopColor="#f9a8d4" />
+          <stop offset="100%" stopColor="#c4b5fd" />
         </linearGradient>
         <radialGradient id="mirror">
-          <stop offset="0%" stopColor="#64748b" />
-          <stop offset="100%" stopColor="#475569" />
+          <stop offset="0%" stopColor="#c4b5fd" />
+          <stop offset="100%" stopColor="#a78bfa" />
         </radialGradient>
         <radialGradient id="mirrorGlass">
           <stop offset="0%" stopColor="#e0f2fe" />
