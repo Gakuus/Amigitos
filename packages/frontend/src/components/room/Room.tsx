@@ -25,29 +25,6 @@ type RoomId = (typeof ROOMS)[number]['id'];
 const PET_SIZE = 90;
 const PET_SIZE_SLEEP = 80;
 
-const ROOM_DESIGNS: Record<RoomId, { wall: string; floor: string }> = {
-  living: {
-    wall: 'from-pastel-cream via-pastel-peach to-pastel-cream',
-    floor: 'from-pastel-walnut via-pastel-walnut to-pastel-walnut',
-  },
-  eat: {
-    wall: 'from-pastel-cream via-pastel-peach to-pastel-cream',
-    floor: 'from-pastel-walnut via-pastel-walnut to-pastel-walnut',
-  },
-  play: {
-    wall: 'from-pastel-sky via-pastel-lavender to-pastel-sky',
-    floor: 'from-pastel-mint via-pastel-mint to-pastel-mint',
-  },
-  bath: {
-    wall: 'from-pastel-sky via-pastel-mint to-pastel-sky',
-    floor: 'from-pastel-aqua via-pastel-aqua to-pastel-aqua',
-  },
-  sleep: {
-    wall: 'from-pastel-lavender via-pastel-moon to-pastel-lavender',
-    floor: 'from-pastel-purple via-pastel-purple to-pastel-purple',
-  },
-};
-
 function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
 }
@@ -182,9 +159,6 @@ export function Room() {
 
   if (pets.length === 0) return null;
 
-  const design = ROOM_DESIGNS[room];
-  const roomAction = ROOM_ACTIONS[room];
-
   return (
     <div className="space-y-2">
       {/* Room Tabs */}
@@ -211,54 +185,9 @@ export function Room() {
         style={{
           aspectRatio: isMobile ? '4/3' : '16/9',
           minHeight: isMobile ? '280px' : '380px',
-          perspective: '800px',
         }}
       >
-        {/* 3D background */}
-        <div
-          className="absolute inset-0"
-          style={{
-            transform: 'rotateX(5deg)',
-            transformOrigin: 'center 60%',
-            transformStyle: 'preserve-3d',
-          }}
-        >
-          <div
-            className={`absolute inset-0 bottom-[25%] bg-gradient-to-b ${design.wall} transition-colors duration-700`}
-          >
-            <div
-              className="absolute inset-0 opacity-[0.03]"
-              style={{
-                backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px)',
-                backgroundSize: '30px 30px',
-              }}
-            />
-            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-b from-black/5 to-black/10" />
-          </div>
-
-          <div
-            className={`absolute bottom-0 left-0 right-0 ${room === 'sleep' ? 'h-[35%]' : 'h-[25%]'} bg-gradient-to-b ${design.floor} transition-colors duration-700`}
-          >
-            <div
-              className="absolute inset-0 opacity-10"
-              style={{
-                backgroundImage:
-                  'linear-gradient(90deg, transparent 0%, transparent 96%, rgba(255,255,255,0.08) 96%), linear-gradient(0deg, transparent 0%, transparent 96%, rgba(255,255,255,0.06) 96%)',
-                backgroundSize: '6% 20%',
-              }}
-            />
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-full bg-gradient-to-b from-white/10 to-transparent rounded-full" />
-          </div>
-
-          <div
-            className={`absolute bottom-0 left-0 right-0 ${room === 'sleep' ? 'h-[35%]' : 'h-[25%]'} pointer-events-none`}
-            style={{
-              background: 'linear-gradient(to top, rgba(0,0,0,0.2) 0%, transparent 40%, transparent 100%)',
-            }}
-          />
-
-          <RoomScene room={room} petPositions={petPositions} />
-        </div>
+        <RoomScene room={room} petPositions={petPositions} />
 
         {/* Pets Layer */}
         <div className="absolute inset-0 z-10 pointer-events-none">
@@ -320,28 +249,7 @@ export function Room() {
                   </div>
                 )}
 
-                {/* Sleep bed */}
-                {isSleeping && room === 'sleep' && (
-                  <div
-                    className="absolute z-30 pointer-events-none"
-                    style={{
-                      bottom: '-2px',
-                      left: '-10%',
-                      width: '120%',
-                      height: '60%',
-                      background: 'linear-gradient(180deg, #c4b5fd 0%, #a78bfa 100%)',
-                      borderRadius: '10px 10px 6px 6px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-                      opacity: 0.92,
-                    }}
-                  >
-                    <div className="absolute left-[28%] inset-y-1.5 w-[2.5px] bg-white/30 rounded-full" />
-                    <div className="absolute w-2 h-2 bg-white/20 rounded-full" style={{ top: '36%', left: '45%' }} />
-                    <div className="absolute w-1.5 h-1.5 bg-white/15 rounded-full" style={{ top: '52%', left: '22%' }} />
-                    <div className="absolute w-1.5 h-1.5 bg-white/15 rounded-full" style={{ top: '28%', left: '65%' }} />
-                    <div className="absolute w-1.5 h-1.5 bg-white/20 rounded-full" style={{ top: '55%', left: '72%' }} />
-                  </div>
-                )}
+
               </div>
             );
           })}
