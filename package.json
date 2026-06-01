@@ -11,8 +11,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
     "typecheck": "turbo typecheck",
     "clean": "turbo clean",
-    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
-    "docker:down": "docker compose -f docker/docker-compose.yml down"
+    "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker-compose -f docker/docker-compose.yml down"
   },
   "workspaces": [
     "packages/*"

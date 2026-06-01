@@ -59,14 +59,23 @@ export const api = {
   getPetsByCouple: (coupleId: string) =>
     request<PetState[]>(`/pets/couple/${coupleId}`),
 
-  feedPet: (id: string) =>
-    request<PetState>(`/pets/${id}/feed`, { method: 'POST' }),
+  feedPet: (id: string, itemId?: string) =>
+    request<PetState>(`/pets/${id}/feed`, {
+      method: 'POST',
+      body: JSON.stringify({ itemId }),
+    }),
 
-  playWithPet: (id: string) =>
-    request<PetState>(`/pets/${id}/play`, { method: 'POST' }),
+  playWithPet: (id: string, itemId?: string) =>
+    request<PetState>(`/pets/${id}/play`, {
+      method: 'POST',
+      body: JSON.stringify({ itemId }),
+    }),
 
-  bathePet: (id: string) =>
-    request<PetState>(`/pets/${id}/bathe`, { method: 'POST' }),
+  bathePet: (id: string, itemId?: string) =>
+    request<PetState>(`/pets/${id}/bathe`, {
+      method: 'POST',
+      body: JSON.stringify({ itemId }),
+    }),
 
   sleepPet: (id: string) =>
     request<PetState>(`/pets/${id}/sleep`, { method: 'POST' }),

@@ -3,6 +3,7 @@ import { PetController } from './controllers/pet.controller';
 import { PetService } from '../application/services/pet.service';
 import { NeedsSchedulerService } from '../application/services/needs-scheduler.service';
 import { PrismaPetRepository } from '../infrastructure/persistence/prisma-pet.repository';
+import { PrismaService } from '../infrastructure/persistence/prisma.service';
 import { PetGateway } from '../infrastructure/websockets/pet.gateway';
 import { WsModule } from './ws.module';
 
@@ -12,8 +13,8 @@ import { WsModule } from './ws.module';
   providers: [
     {
       provide: 'PetService',
-      useFactory: (petRepo: PrismaPetRepository, ws: PetGateway) => new PetService(petRepo, ws),
-      inject: [PrismaPetRepository, PetGateway],
+      useFactory: (petRepo: PrismaPetRepository, ws: PetGateway, prisma: PrismaService) => new PetService(petRepo, ws, prisma),
+      inject: [PrismaPetRepository, PetGateway, PrismaService],
     },
     {
       provide: NeedsSchedulerService,

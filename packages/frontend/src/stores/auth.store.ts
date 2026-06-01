@@ -13,6 +13,7 @@ interface AuthStore {
   register: (email: string, name: string, password: string) => Promise<boolean>;
   logout: () => void;
   init: () => Promise<void>;
+  refreshBalance: () => Promise<void>;
   updateCoins: (coins: number) => void;
 }
 
@@ -22,6 +23,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   isAuthenticated: false,
   isLoading: true,
   error: null,
+
+  refreshBalance: async () => {
+    try {
+      const { coins } = await api.getBalance();
+      set((state) => state.user ? { user: { ...state.user, coins } } : {});
+    } catch { /* ignore */ }
+  },
 
   init: async () => {
     const token = localStorage.getItem('token');

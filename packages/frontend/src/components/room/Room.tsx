@@ -5,8 +5,12 @@ import { PetSprite } from '@/components/pet/PetSprite';
 import { usePetStore } from '@/stores/pet.store';
 import { RoomScene } from './RoomScene';
 import { getSleepPositions } from './sleepTileMap';
+import { ItemSelector } from './ItemSelector';
 import type { SleepPosition } from './sleepTileMap';
-import { Sofa, UtensilsCrossed, Gamepad2, Bath, Moon, Sparkles } from 'lucide-react';
+import {
+  Sofa, UtensilsCrossed, Gamepad2, Bath, Moon,
+  Sparkles, Apple, Bed, Droplets,
+} from 'lucide-react';
 
 const ROOMS = [
   { id: 'living', label: 'Sala', icon: Sofa },
@@ -23,24 +27,24 @@ const PET_SIZE_SLEEP = 80;
 
 const ROOM_DESIGNS: Record<RoomId, { wall: string; floor: string }> = {
   living: {
-    wall: 'from-amber-50 via-orange-50 to-amber-100',
-    floor: 'from-amber-600 via-amber-700 to-amber-800',
+    wall: 'from-pastel-cream via-pastel-peach to-pastel-cream',
+    floor: 'from-pastel-walnut via-pastel-walnut to-pastel-walnut',
   },
   eat: {
-    wall: 'from-yellow-50 via-orange-50 to-rose-50',
-    floor: 'from-yellow-600 via-yellow-700 to-amber-800',
+    wall: 'from-pastel-cream via-pastel-peach to-pastel-cream',
+    floor: 'from-pastel-walnut via-pastel-walnut to-pastel-walnut',
   },
   play: {
-    wall: 'from-sky-50 via-blue-50 to-indigo-50',
-    floor: 'from-sky-500 via-sky-600 to-blue-700',
+    wall: 'from-pastel-sky via-pastel-lavender to-pastel-sky',
+    floor: 'from-pastel-mint via-pastel-mint to-pastel-mint',
   },
   bath: {
-    wall: 'from-cyan-50 via-teal-50 to-emerald-50',
-    floor: 'from-teal-500 via-teal-600 to-cyan-700',
+    wall: 'from-pastel-sky via-pastel-mint to-pastel-sky',
+    floor: 'from-pastel-aqua via-pastel-aqua to-pastel-aqua',
   },
   sleep: {
-    wall: 'from-indigo-100 via-purple-100 to-violet-100',
-    floor: 'from-indigo-600 via-purple-700 to-violet-800',
+    wall: 'from-pastel-lavender via-pastel-moon to-pastel-lavender',
+    floor: 'from-pastel-purple via-pastel-purple to-pastel-purple',
   },
 };
 
@@ -64,12 +68,22 @@ function distributePositions(count: number): PetPosition[] {
 
 type PetPosition = SleepPosition;
 
+const ROOM_ACTIONS: Record<RoomId, { category: string; label: string; emoji: string } | null> = {
+  living: null,
+  eat: { category: 'FOOD', label: '¿Qué comemos?', emoji: '🍽️' },
+  play: { category: 'TOY', label: '¿Con qué jugamos?', emoji: '🎮' },
+  bath: { category: 'SPONGE', label: '¿Con qué bañamos?', emoji: '🛁' },
+  sleep: null,
+};
+
 export function Room() {
-  const { pets, petMap, performAction } = usePetStore();
+  const { pets, petMap, performAction, activePetId } = usePetStore();
   const [room, setRoom] = useState<RoomId>('living');
   const [petPositions, setPetPositions] = useState<PetPosition[]>([]);
-  const [feedback, setFeedback] = useState(false);
+  const [feedback, setFeedback] = useState<{ emoji: string; petId: string } | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [itemSelector, setItemSelector] = useState<{ category: string; petId: string } | null>(null);
+  const [cooldowns, setCooldowns] = useState<Record<string, number>>({});
   const fbTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
@@ -110,29 +124,56 @@ export function Room() {
     return () => timers.forEach(clearInterval);
   }, [room, pets, petMap]);
 
+  const showFeedback = (emoji: string, petId: string) => {
+    setFeedback({ emoji, petId });
+    if (fbTimeout.current) clearTimeout(fbTimeout.current);
+    fbTimeout.current = setTimeout(() => setFeedback(null), 1500);
+  };
+
+  const handleRoomAction = useCallback(
+    async (petId: string, itemId?: string) => {
+      const actionMap: Record<string, 'feed' | 'play' | 'bathe' | 'sleep'> = {
+        eat: 'feed', play: 'play', bath: 'bathe', sleep: 'sleep',
+      };
+      const action = actionMap[room];
+      if (!action) return;
+
+      const feedbackEmojis: Record<string, string> = {
+        feed: '🍽️', play: '🎮', bathe: '🛁', sleep: '💤',
+      };
+
+      await performAction(petId, action, itemId);
+      showFeedback(feedbackEmojis[action] || '✨', petId);
+    },
+    [room, performAction],
+  );
+
+  const handleSleepToggle = useCallback(
+    async (petId: string) => {
+      const data = petMap[petId];
+      const action = data?.isSleeping ? 'wake' : 'sleep';
+      await performAction(petId, action);
+      showFeedback(data?.isSleeping ? '🌅' : '💤', petId);
+    },
+    [petMap, performAction],
+  );
+
+  const handleItemSelect = async (petId: string, itemId: string) => {
+    await handleRoomAction(petId, itemId);
+    setItemSelector(null);
+  };
+
   const switchRoom = useCallback(
     async (newRoom: RoomId) => {
       if (newRoom === room) return;
       setRoom(newRoom);
-      if (newRoom === 'living') return;
 
-      const actionMap: Record<string, 'feed' | 'play' | 'bathe' | 'sleep'> = {
-        eat: 'feed', play: 'play', bath: 'bathe', sleep: 'sleep',
-      };
-      const action = actionMap[newRoom];
-      if (!action) return;
-
-      const found = ROOMS.find((r) => r.id === newRoom);
-      setFeedback(true);
-      if (fbTimeout.current) clearTimeout(fbTimeout.current);
-      fbTimeout.current = setTimeout(() => setFeedback(false), 2000);
-
-      for (const p of pets) {
-        const data = petMap[p.id];
-        if (action === 'sleep') {
-          await performAction(p.id, data?.isSleeping ? 'wake' : 'sleep');
-        } else {
-          await performAction(p.id, action);
+      if (newRoom === 'sleep') {
+        for (const p of pets) {
+          const data = petMap[p.id];
+          if (!data?.isSleeping) {
+            await performAction(p.id, 'sleep');
+          }
         }
       }
     },
@@ -142,6 +183,7 @@ export function Room() {
   if (pets.length === 0) return null;
 
   const design = ROOM_DESIGNS[room];
+  const roomAction = ROOM_ACTIONS[room];
 
   return (
     <div className="space-y-2">
@@ -153,8 +195,8 @@ export function Room() {
             onClick={() => switchRoom(r.id)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
               room === r.id
-                ? 'bg-gradient-to-r from-brand-500 to-emerald-500 text-white shadow-lg shadow-brand-500/20 scale-105'
-                : 'bg-surface/60 text-slate-400 hover:bg-surface-light/60 hover:text-slate-200 border border-surface-border/30'
+                ? 'bg-gradient-to-r from-pastel-purple to-pastel-pink text-white shadow-lg shadow-pastel-purple/30 scale-105'
+                : 'bg-pastel-card/60 text-pastel-muted hover:bg-pastel-card hover:text-pastel-foreground border border-pastel-border/30'
             }`}
           >
             <r.icon size={16} />
@@ -187,31 +229,31 @@ export function Room() {
             <div
               className="absolute inset-0 opacity-[0.03]"
               style={{
-                backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(0,0,0,0.2) 1px, transparent 1px)',
+                backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px)',
                 backgroundSize: '30px 30px',
               }}
             />
-            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-b from-black/5 to-black/20" />
+            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-b from-black/5 to-black/10" />
           </div>
 
           <div
             className={`absolute bottom-0 left-0 right-0 ${room === 'sleep' ? 'h-[35%]' : 'h-[25%]'} bg-gradient-to-b ${design.floor} transition-colors duration-700`}
           >
             <div
-              className="absolute inset-0 opacity-15"
+              className="absolute inset-0 opacity-10"
               style={{
                 backgroundImage:
-                  'linear-gradient(90deg, transparent 0%, transparent 96%, rgba(255,255,255,0.06) 96%), linear-gradient(0deg, transparent 0%, transparent 96%, rgba(255,255,255,0.04) 96%)',
+                  'linear-gradient(90deg, transparent 0%, transparent 96%, rgba(255,255,255,0.08) 96%), linear-gradient(0deg, transparent 0%, transparent 96%, rgba(255,255,255,0.06) 96%)',
                 backgroundSize: '6% 20%',
               }}
             />
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-full bg-gradient-to-b from-white/5 to-transparent rounded-full" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-full bg-gradient-to-b from-white/10 to-transparent rounded-full" />
           </div>
 
           <div
             className={`absolute bottom-0 left-0 right-0 ${room === 'sleep' ? 'h-[35%]' : 'h-[25%]'} pointer-events-none`}
             style={{
-              background: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 40%, transparent 100%)',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.2) 0%, transparent 40%, transparent 100%)',
             }}
           />
 
@@ -259,7 +301,7 @@ export function Room() {
                     transform: isSleeping ? 'translate(-50%, 0)' : 'translateX(-50%)',
                   }}
                 >
-                  <div className="text-[11px] font-medium px-2 py-0.5 rounded-full shadow-lg bg-slate-900/60 text-slate-200 backdrop-blur-sm">
+                  <div className="text-[11px] font-medium px-2 py-0.5 rounded-full shadow-lg bg-white/70 text-pastel-foreground backdrop-blur-sm border border-pastel-border/20">
                     {summary.name}
                   </div>
                 </div>
@@ -271,6 +313,14 @@ export function Room() {
                   size={Math.round(size)}
                 />
 
+                {/* Feedback per pet */}
+                {feedback?.petId === summary.id && (
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none animate-float-up text-2xl">
+                    {feedback.emoji}
+                  </div>
+                )}
+
+                {/* Sleep bed */}
                 {isSleeping && room === 'sleep' && (
                   <div
                     className="absolute z-30 pointer-events-none"
@@ -279,31 +329,85 @@ export function Room() {
                       left: '-10%',
                       width: '120%',
                       height: '60%',
-                      background: 'linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%)',
+                      background: 'linear-gradient(180deg, #c4b5fd 0%, #a78bfa 100%)',
                       borderRadius: '10px 10px 6px 6px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                       opacity: 0.92,
                     }}
                   >
-                    <div className="absolute left-[28%] inset-y-1.5 w-[2.5px] bg-white/20 rounded-full" />
-                    <div className="absolute w-2 h-2 bg-white/15 rounded-full" style={{ top: '36%', left: '45%' }} />
-                    <div className="absolute w-1.5 h-1.5 bg-white/12 rounded-full" style={{ top: '52%', left: '22%' }} />
-                    <div className="absolute w-1.5 h-1.5 bg-white/12 rounded-full" style={{ top: '28%', left: '65%' }} />
-                    <div className="absolute w-1.5 h-1.5 bg-white/15 rounded-full" style={{ top: '55%', left: '72%' }} />
+                    <div className="absolute left-[28%] inset-y-1.5 w-[2.5px] bg-white/30 rounded-full" />
+                    <div className="absolute w-2 h-2 bg-white/20 rounded-full" style={{ top: '36%', left: '45%' }} />
+                    <div className="absolute w-1.5 h-1.5 bg-white/15 rounded-full" style={{ top: '52%', left: '22%' }} />
+                    <div className="absolute w-1.5 h-1.5 bg-white/15 rounded-full" style={{ top: '28%', left: '65%' }} />
+                    <div className="absolute w-1.5 h-1.5 bg-white/20 rounded-full" style={{ top: '55%', left: '72%' }} />
                   </div>
-                )}
-
-                {isSleeping && (
-                  <div className="absolute text-sm animate-pulse" style={{ top: '-10px', left: '60%' }}>💤</div>
                 )}
               </div>
             );
           })}
         </div>
 
+        {/* Interactive Action Zones inside the room */}
+        {room !== 'living' && activePetId && (
+          <div className="absolute inset-0 z-20 pointer-events-none">
+            {room === 'eat' && (
+              <button
+                onClick={() => setItemSelector({ category: 'FOOD', petId: activePetId })}
+                className="absolute pointer-events-auto bottom-[30%] left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 hover:shadow-xl active:scale-95 transition-all animate-bounce-gentle"
+              >
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400 to-orange-400 flex items-center justify-center text-white shadow-md">
+                  <Apple size={16} />
+                </div>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">¡A comer!</span>
+              </button>
+            )}
+            {room === 'play' && (
+              <button
+                onClick={() => setItemSelector({ category: 'TOY', petId: activePetId })}
+                className="absolute pointer-events-auto bottom-[30%] left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 hover:shadow-xl active:scale-95 transition-all animate-bounce-gentle"
+              >
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-400 to-purple-400 flex items-center justify-center text-white shadow-md">
+                  <Gamepad2 size={16} />
+                </div>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">¡A jugar!</span>
+              </button>
+            )}
+            {room === 'bath' && (
+              <button
+                onClick={() => setItemSelector({ category: 'SPONGE', petId: activePetId })}
+                className="absolute pointer-events-auto bottom-[30%] left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 hover:shadow-xl active:scale-95 transition-all animate-bounce-gentle"
+              >
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-400 flex items-center justify-center text-white shadow-md">
+                  <Droplets size={16} />
+                </div>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">¡A bañarse!</span>
+              </button>
+            )}
+            {room === 'sleep' && (
+              <div className="absolute pointer-events-auto bottom-[30%] left-1/2 -translate-x-1/2 flex gap-2">
+                {pets.map((p) => {
+                  const isSleeping = p.isSleeping;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => handleSleepToggle(p.id)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 hover:shadow-xl active:scale-95 transition-all"
+                    >
+                      <Bed size={14} className={isSleeping ? 'text-amber-400' : 'text-pastel-purple'} />
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                        {isSleeping ? 'Despertar' : p.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Room Label */}
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-          <div className="bg-slate-900/50 text-white text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1">
+          <div className="bg-white/60 dark:bg-slate-800/60 text-pastel-foreground text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md shadow-lg flex items-center gap-1 border border-pastel-border/20">
             {(() => {
               const roomData = ROOMS.find((r) => r.id === room);
               const Icon = roomData?.icon;
@@ -312,14 +416,19 @@ export function Room() {
             <span className="font-semibold">{ROOMS.find((r) => r.id === room)?.label}</span>
           </div>
         </div>
-
-        {/* Feedback */}
-        {feedback && (
-          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-            <Sparkles size={36} className="text-brand-400 animate-bounce drop-shadow-lg" />
-          </div>
-        )}
       </div>
+
+      {/* Item Selector Modal */}
+      {itemSelector && (
+        <ItemSelector
+          category={itemSelector.category}
+          petId={itemSelector.petId}
+          actionLabel={ROOM_ACTIONS[room]?.label ?? ''}
+          actionEmoji={ROOM_ACTIONS[room]?.emoji ?? '✨'}
+          onAction={handleItemSelect}
+          onClose={() => setItemSelector(null)}
+        />
+      )}
     </div>
   );
 }

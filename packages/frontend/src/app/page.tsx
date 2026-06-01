@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Room } from '@/components/room/Room';
 import { PetSelector } from '@/components/pet/PetSelector';
 import { PetStats } from '@/components/pet/PetStats';
-import { PetActions } from '@/components/pet/PetActions';
 import { AdoptModal } from '@/components/pet/AdoptModal';
 import { CoupleManager } from '@/components/couple/CoupleManager';
 import { ShopModal } from '@/components/shop/ShopModal';
@@ -57,10 +56,10 @@ export default function HomePage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-slate-900 via-[#0b1120] to-slate-900">
+      <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-pastel-cream via-pastel-pink/30 to-pastel-sky/30">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-[3px] border-brand-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-slate-400 animate-pulse-soft">Cargando...</p>
+          <div className="w-10 h-10 border-[3px] border-pastel-purple border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-pastel-foreground animate-pulse-soft">Cargando...</p>
         </div>
       </div>
     );
@@ -79,23 +78,23 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-dvh flex flex-col bg-gradient-to-br from-slate-900 via-[#0b1120] to-slate-900">
+    <div className="min-h-dvh flex flex-col bg-gradient-to-br from-pastel-cream via-pastel-pink/20 to-pastel-sky/20 dark:from-slate-900 dark:via-[#0b1120] dark:to-slate-900">
       {/* ===== Top Header ===== */}
-      <header className="sticky top-0 z-40 glass-strong border-b border-surface-border/50 px-4 py-3">
+      <header className="sticky top-0 z-40 glass-strong border-b border-pastel-border/50 dark:border-surface-border/50 px-4 py-3">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-gradient-to-br from-brand-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
+            <div className="w-8 h-8 bg-gradient-to-br from-pastel-purple to-pastel-pink rounded-xl flex items-center justify-center shadow-lg shadow-pastel-purple/20">
               <PawPrint size={18} className="text-white" />
             </div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-brand-400 via-emerald-300 to-brand-400 bg-clip-text text-transparent font-display">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-pastel-purple via-pastel-pink to-pastel-purple bg-clip-text text-transparent font-display">
               Amigitos
             </h1>
           </div>
           <div className="flex items-center gap-3">
             {user?.coins !== undefined && (
-              <span className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl text-sm">
-                <Coins size={16} className="text-amber-400" />
-                <span className="font-bold text-amber-400">{user.coins}</span>
+              <span className="flex items-center gap-1.5 bg-pastel-yellow/30 border border-pastel-yellow/40 px-3 py-1.5 rounded-xl text-sm">
+                <Coins size={16} className="text-pastel-orange" />
+                <span className="font-bold text-pastel-orange">{user.coins}</span>
               </span>
             )}
           </div>
@@ -118,20 +117,20 @@ export default function HomePage() {
           {/* Empty state */}
           {!loading && pets.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center space-y-5 animate-fade-in">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 bg-gradient-to-br from-brand-500/20 to-emerald-500/10 rounded-full flex items-center justify-center border-2 border-brand-500/20">
-                <Home size={56} className="text-brand-400/60 animate-bounce-gentle" />
+              <div className="w-28 h-28 sm:w-36 sm:h-36 bg-gradient-to-br from-pastel-purple/20 to-pastel-pink/10 rounded-full flex items-center justify-center border-2 border-pastel-purple/20">
+                <Home size={56} className="text-pastel-purple/60 animate-bounce-gentle" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-xl sm:text-2xl font-bold font-display text-white">
+                <h2 className="text-xl sm:text-2xl font-bold font-display text-pastel-foreground dark:text-white">
                   ¡La habitación está vacía!
                 </h2>
-                <p className="text-slate-400 max-w-xs mx-auto text-sm">
+                <p className="text-pastel-muted dark:text-slate-400 max-w-xs mx-auto text-sm">
                   Adopta una mascota para que viva aquí.
                 </p>
               </div>
               <button
                 onClick={() => setShowAdopt(true)}
-                className="px-8 py-3.5 bg-gradient-to-r from-brand-500 to-emerald-500 hover:from-brand-400 hover:to-emerald-400 rounded-2xl font-bold shadow-lg shadow-brand-500/25 active:scale-95 transition-all"
+                className="px-8 py-3.5 bg-gradient-to-r from-pastel-purple to-pastel-pink hover:brightness-110 rounded-2xl font-bold shadow-lg shadow-pastel-purple/25 active:scale-95 transition-all text-white"
               >
                 <Sparkles size={16} className="inline mr-1.5 -mt-0.5" />
                 Adoptar Mascota
@@ -160,25 +159,24 @@ export default function HomePage() {
                     <PetStats pet={activePet} />
                     <button
                       onClick={() => setShowWardrobe(!showWardrobe)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-purple-600/15 border border-purple-600/25 rounded-2xl text-sm text-purple-300 font-semibold hover:bg-purple-600/25 active:scale-[0.98] transition-all"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-pastel-purple/15 border border-pastel-purple/25 rounded-2xl text-sm text-pastel-purple font-semibold hover:bg-pastel-purple/25 active:scale-[0.98] transition-all"
                     >
                       <Shirt size={18} />
                       {showWardrobe ? 'Cerrar armario' : 'Armario'}
                     </button>
                   </div>
                   <div className="space-y-4">
-                    <PetActions petId={activePet.id} />
                     <div className="flex gap-2">
                       <button
                         onClick={() => setShowGames(true)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-purple-600/25 to-coral-500/20 border border-purple-600/25 rounded-2xl text-sm text-purple-300 font-semibold hover:from-purple-600/35 hover:to-coral-500/30 active:scale-[0.98] transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-pastel-purple/25 to-pastel-pink/20 border border-pastel-purple/25 rounded-2xl text-sm text-pastel-purple font-semibold hover:from-pastel-purple/35 hover:to-pastel-pink/30 active:scale-[0.98] transition-all"
                       >
                         <Gamepad2 size={18} />
                         Jugar
                       </button>
                       <button
                         onClick={() => setShowShop(true)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-amber-600/20 to-warm-500/20 border border-amber-600/25 rounded-2xl text-sm text-amber-300 font-semibold hover:from-amber-600/30 hover:to-warm-500/30 active:scale-[0.98] transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-pastel-coral/20 to-pastel-peach/20 border border-pastel-coral/25 rounded-2xl text-sm text-pastel-coral font-semibold hover:from-pastel-coral/30 hover:to-pastel-peach/30 active:scale-[0.98] transition-all"
                       >
                         <ShoppingBag size={18} />
                         Tienda
@@ -225,32 +223,32 @@ export default function HomePage() {
           {/* Profile tab */}
           {tab === 'profile' && (
             <div className="animate-fade-in">
-              <div className="bg-surface-card/80 rounded-3xl p-6 border border-surface-border/50 space-y-5 shadow-xl">
+              <div className="bg-white/80 dark:bg-surface-card/80 rounded-3xl p-6 border border-pastel-border/30 dark:border-surface-border/50 space-y-5 shadow-xl">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-brand-400 to-emerald-500 rounded-2xl flex items-center justify-center text-2xl font-bold text-white font-display shadow-lg">
+                  <div className="w-16 h-16 bg-gradient-to-br from-pastel-purple to-pastel-pink rounded-2xl flex items-center justify-center text-2xl font-bold text-white font-display shadow-lg">
                     {user?.name?.charAt(0)?.toUpperCase() ?? '?'}
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-lg font-bold font-display">{user?.name ?? 'Usuario'}</h2>
-                    <p className="text-sm text-slate-400">{user?.email}</p>
+                    <h2 className="text-lg font-bold font-display text-pastel-foreground dark:text-white">{user?.name ?? 'Usuario'}</h2>
+                    <p className="text-sm text-pastel-muted dark:text-slate-400">{user?.email}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-surface/50 rounded-2xl p-4 text-center space-y-1.5 border border-surface-border/30">
-                    <Coins size={24} className="mx-auto text-amber-400" />
-                    <p className="text-lg font-bold text-amber-400">{user?.coins ?? 0}</p>
-                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Monedas</p>
+                  <div className="bg-pastel-card/50 dark:bg-surface/50 rounded-2xl p-4 text-center space-y-1.5 border border-pastel-border/20 dark:border-surface-border/30">
+                    <Coins size={24} className="mx-auto text-pastel-orange" />
+                    <p className="text-lg font-bold text-pastel-orange">{user?.coins ?? 0}</p>
+                    <p className="text-[10px] text-pastel-muted dark:text-slate-500 font-medium uppercase tracking-wider">Monedas</p>
                   </div>
-                  <div className="bg-surface/50 rounded-2xl p-4 text-center space-y-1.5 border border-surface-border/30">
-                    <PawPrint size={24} className="mx-auto text-brand-400" />
-                    <p className="text-lg font-bold text-brand-400">{pets.length}</p>
-                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Mascotas</p>
+                  <div className="bg-pastel-card/50 dark:bg-surface/50 rounded-2xl p-4 text-center space-y-1.5 border border-pastel-border/20 dark:border-surface-border/30">
+                    <PawPrint size={24} className="mx-auto text-pastel-purple" />
+                    <p className="text-lg font-bold text-pastel-purple">{pets.length}</p>
+                    <p className="text-[10px] text-pastel-muted dark:text-slate-500 font-medium uppercase tracking-wider">Mascotas</p>
                   </div>
-                  <div className="bg-surface/50 rounded-2xl p-4 text-center space-y-1.5 border border-surface-border/30">
-                    <Trophy size={24} className="mx-auto text-purple-400" />
-                    <p className="text-lg font-bold text-purple-400">-</p>
-                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Logros</p>
+                  <div className="bg-pastel-card/50 dark:bg-surface/50 rounded-2xl p-4 text-center space-y-1.5 border border-pastel-border/20 dark:border-surface-border/30">
+                    <Trophy size={24} className="mx-auto text-pastel-lavender" />
+                    <p className="text-lg font-bold text-pastel-lavender">-</p>
+                    <p className="text-[10px] text-pastel-muted dark:text-slate-500 font-medium uppercase tracking-wider">Logros</p>
                   </div>
                 </div>
 
@@ -258,7 +256,7 @@ export default function HomePage() {
                 {!showCouple && (
                   <button
                     onClick={() => setShowCouple(true)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-coral-600/15 border border-coral-600/25 rounded-2xl text-sm text-coral-300 font-semibold hover:bg-coral-600/25 active:scale-[0.98] transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-pastel-coral/15 border border-pastel-coral/25 rounded-2xl text-sm text-pastel-coral font-semibold hover:bg-pastel-coral/25 active:scale-[0.98] transition-all"
                   >
                     <HeartHandshake size={18} />
                     Gestionar Pareja
@@ -267,7 +265,7 @@ export default function HomePage() {
 
                 <button
                   onClick={logout}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-surface/50 hover:bg-red-900/20 border border-surface-border/50 hover:border-red-700/30 rounded-2xl text-sm text-slate-400 hover:text-red-300 font-semibold active:scale-[0.98] transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-pastel-card/60 dark:bg-surface/50 hover:bg-pastel-rose/30 dark:hover:bg-red-900/20 border border-pastel-border/20 dark:border-surface-border/50 hover:border-pastel-coral/30 dark:hover:border-red-700/30 rounded-2xl text-sm text-pastel-muted dark:text-slate-400 hover:text-pastel-coral dark:hover:text-red-300 font-semibold active:scale-[0.98] transition-all"
                 >
                   <LogOut size={18} />
                   Cerrar Sesión
@@ -279,7 +277,7 @@ export default function HomePage() {
       </main>
 
       {/* ===== Bottom Navigation ===== */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-surface-border/50 pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-pastel-border/30 dark:border-surface-border/50 pb-safe">
         <div className="flex items-center justify-around max-w-lg mx-auto px-2 py-1">
           {navItems.map((item) => (
             <button
@@ -287,14 +285,14 @@ export default function HomePage() {
               onClick={() => setTab(item.id)}
               className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-all min-w-0 ${
                 tab === item.id
-                  ? 'text-brand-400 scale-110'
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'text-pastel-purple scale-110'
+                  : 'text-pastel-muted dark:text-slate-500 hover:text-pastel-foreground dark:hover:text-slate-300'
               }`}
             >
               <span className={`transition-transform ${tab === item.id ? 'animate-bounce-gentle' : ''}`}>
                 {item.icon}
               </span>
-              <span className={`text-[10px] font-semibold ${tab === item.id ? 'text-brand-400' : 'text-slate-500'}`}>
+              <span className={`text-[10px] font-semibold ${tab === item.id ? 'text-pastel-purple' : 'text-pastel-muted dark:text-slate-500'}`}>
                 {item.label}
               </span>
             </button>

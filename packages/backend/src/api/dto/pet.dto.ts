@@ -18,3 +18,9 @@ export class UpdatePetDto {
   @IsOptional()
   name?: string;
 }
+
+export class ActionPetDto {
+  @IsOptional()
+  @IsString()
+  itemId?: string;
+}

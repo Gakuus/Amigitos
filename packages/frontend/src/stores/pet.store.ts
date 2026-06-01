@@ -19,10 +19,10 @@ interface PetStore {
   fetchPets: () => Promise<void>;
   selectPet: (petId: string) => Promise<void>;
   adoptPet: (name: string, species: string) => Promise<string | null>;
-  performAction: (petId: string, action: PetAction) => Promise<void>;
-  feed: () => Promise<void>;
-  play: () => Promise<void>;
-  bathe: () => Promise<void>;
+  performAction: (petId: string, action: PetAction, itemId?: string) => Promise<void>;
+  feed: (itemId?: string) => Promise<void>;
+  play: (itemId?: string) => Promise<void>;
+  bathe: (itemId?: string) => Promise<void>;
   sleep: () => Promise<void>;
   wake: () => Promise<void>;
   refreshOutfit: () => Promise<void>;
@@ -144,13 +144,13 @@ export const usePetStore = create<PetStore>((set, get) => ({
     }
   },
 
-  performAction: async (petId: string, action: PetAction) => {
+  performAction: async (petId: string, action: PetAction, itemId?: string) => {
     try {
       let updated: PetState;
       switch (action) {
-        case 'feed': updated = await api.feedPet(petId); break;
-        case 'play': updated = await api.playWithPet(petId); break;
-        case 'bathe': updated = await api.bathePet(petId); break;
+        case 'feed': updated = await api.feedPet(petId, itemId); break;
+        case 'play': updated = await api.playWithPet(petId, itemId); break;
+        case 'bathe': updated = await api.bathePet(petId, itemId); break;
         case 'sleep': updated = await api.sleepPet(petId); break;
         case 'wake': updated = await api.wakePet(petId); break;
       }
@@ -169,22 +169,22 @@ export const usePetStore = create<PetStore>((set, get) => ({
     }
   },
 
-  feed: async () => {
+  feed: async (itemId?: string) => {
     const pet = get().pet;
     if (!pet) return;
-    await get().performAction(pet.id, 'feed');
+    await get().performAction(pet.id, 'feed', itemId);
   },
 
-  play: async () => {
+  play: async (itemId?: string) => {
     const pet = get().pet;
     if (!pet) return;
-    await get().performAction(pet.id, 'play');
+    await get().performAction(pet.id, 'play', itemId);
   },
 
-  bathe: async () => {
+  bathe: async (itemId?: string) => {
     const pet = get().pet;
     if (!pet) return;
-    await get().performAction(pet.id, 'bathe');
+    await get().performAction(pet.id, 'bathe', itemId);
   },
 
   sleep: async () => {

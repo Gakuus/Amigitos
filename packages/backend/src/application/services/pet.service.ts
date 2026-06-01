@@ -1,18 +1,27 @@
+import { Injectable, Inject } from '@nestjs/common';
 import { Pet, InteractionType } from '../../domain/pet/pet.entity';
 import { PetId } from '../../domain/pet/pet-id.value-object';
 import { PetSpecies } from '../../domain/pet/pet-species';
 import { PetRepositoryPort } from '../ports/pet-repository.port';
 import { WebSocketNotifierPort } from '../ports/websocket-notifier.port';
 import { DecayService } from '../../domain/services/decay.service';
-import { PetFedEvent, PetPlayedEvent, PetBathedEvent, PetSleptEvent, PetEvolvedEvent, PetMoodChangedEvent } from '../../domain/pet/pet.domain-events';
 import { MAX_PETS_PER_COUPLE } from '@amigitos/shared';
+import { PrismaService } from '../../infrastructure/persistence/prisma.service';
 
+const ACTION_CATEGORY_MAP: Record<string, string> = {
+  FEED: 'FOOD',
+  PLAY: 'TOY',
+  BATH: 'SPONGE',
+};
+
+@Injectable()
 export class PetService {
   private readonly decayService = new DecayService();
 
   constructor(
     private readonly petRepo: PetRepositoryPort,
     private readonly wsNotifier: WebSocketNotifierPort,
+    private readonly prisma: PrismaService,
   ) {}
 
   async adoptPet(name: string, species: PetSpecies, userId: string, coupleId?: string): Promise<Pet> {
@@ -41,7 +50,35 @@ export class PetService {
     return pet;
   }
 
-  async feedPet(petId: string, userId: string): Promise<Pet> {
+  private async consumeItemForAction(userId: string, action: string): Promise<void> {
+    const category = ACTION_CATEGORY_MAP[action];
+    if (!category) return;
+
+    const userItem = await this.prisma.userConsumable.findFirst({
+      where: {
+        userId,
+        consumable: { category },
+        quantity: { gt: 0 },
+      },
+      include: { consumable: true },
+      orderBy: { quantity: 'asc' },
+    });
+
+    if (!userItem) {
+      throw new Error('ITEM_REQUIRED');
+    }
+
+    if (userItem.quantity <= 1) {
+      await this.prisma.userConsumable.delete({ where: { id: userItem.id } });
+    } else {
+      await this.prisma.userConsumable.update({
+        where: { id: userItem.id },
+        data: { quantity: { decrement: 1 } },
+      });
+    }
+  }
+
+  async feedPet(petId: string, userId: string, itemId?: string): Promise<Pet> {
     const pet = await this.petRepo.findById(petId);
     if (!pet) throw new Error('PET_NOT_FOUND');
 
@@ -49,6 +86,8 @@ export class PetService {
     if (!canInteract.success) {
       throw new Error(canInteract.reason);
     }
+
+    await this.consumeItemForAction(userId, 'FEED');
 
     const oldMood = pet.mood;
     pet.feed();
@@ -71,7 +110,7 @@ export class PetService {
     return pet;
   }
 
-  async playWithPet(petId: string, userId: string): Promise<Pet> {
+  async playWithPet(petId: string, userId: string, itemId?: string): Promise<Pet> {
     const pet = await this.petRepo.findById(petId);
     if (!pet) throw new Error('PET_NOT_FOUND');
 
@@ -79,6 +118,8 @@ export class PetService {
     if (!canInteract.success) {
       throw new Error(canInteract.reason);
     }
+
+    await this.consumeItemForAction(userId, 'PLAY');
 
     const oldMood = pet.mood;
     pet.play();
@@ -101,7 +142,7 @@ export class PetService {
     return pet;
   }
 
-  async bathePet(petId: string, userId: string): Promise<Pet> {
+  async bathePet(petId: string, userId: string, itemId?: string): Promise<Pet> {
     const pet = await this.petRepo.findById(petId);
     if (!pet) throw new Error('PET_NOT_FOUND');
 
@@ -109,6 +150,8 @@ export class PetService {
     if (!canInteract.success) {
       throw new Error(canInteract.reason);
     }
+
+    await this.consumeItemForAction(userId, 'BATH');
 
     const oldMood = pet.mood;
     pet.bathe();

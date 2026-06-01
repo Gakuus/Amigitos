@@ -1,8 +1,8 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Inject,
+  Controller, Get, Post, Patch, Body, Param, UseGuards, Inject,
 } from '@nestjs/common';
 import { PetService } from '../../application/services/pet.service';
-import { AdoptPetDto, UpdatePetDto } from '../dto/pet.dto';
+import { AdoptPetDto, UpdatePetDto, ActionPetDto } from '../dto/pet.dto';
 import { JwtGuard } from '../../infrastructure/auth/jwt.guard';
 import { CurrentUser } from '../../infrastructure/auth/current-user.decorator';
 import { PetSpecies } from '../../domain/pet/pet-species';
@@ -61,9 +61,9 @@ export class PetController {
   }
 
   @Post(':id/feed')
-  async feed(@Param('id') id: string, @CurrentUser() user: { userId: string }) {
+  async feed(@Param('id') id: string, @CurrentUser() user: { userId: string }, @Body() dto: ActionPetDto) {
     try {
-      const pet = await this.petService.feedPet(id, user.userId);
+      const pet = await this.petService.feedPet(id, user.userId, dto?.itemId);
       return pet.toJSON();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'UNKNOWN';
@@ -72,9 +72,9 @@ export class PetController {
   }
 
   @Post(':id/play')
-  async play(@Param('id') id: string, @CurrentUser() user: { userId: string }) {
+  async play(@Param('id') id: string, @CurrentUser() user: { userId: string }, @Body() dto: ActionPetDto) {
     try {
-      const pet = await this.petService.playWithPet(id, user.userId);
+      const pet = await this.petService.playWithPet(id, user.userId, dto?.itemId);
       return pet.toJSON();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'UNKNOWN';
@@ -83,9 +83,9 @@ export class PetController {
   }
 
   @Post(':id/bathe')
-  async bathe(@Param('id') id: string, @CurrentUser() user: { userId: string }) {
+  async bathe(@Param('id') id: string, @CurrentUser() user: { userId: string }, @Body() dto: ActionPetDto) {
     try {
-      const pet = await this.petService.bathePet(id, user.userId);
+      const pet = await this.petService.bathePet(id, user.userId, dto?.itemId);
       return pet.toJSON();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'UNKNOWN';
@@ -127,6 +127,7 @@ export class PetController {
       PET_IS_SLEEPING: 409,
       NOT_ENOUGH_ENERGY: 409,
       COOLDOWN_ACTIVE: 429,
+      ITEM_REQUIRED: 400,
     };
     const status = statusMap[message] ?? 500;
     return { statusCode: status, code: message };
