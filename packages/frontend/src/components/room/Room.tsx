@@ -6,6 +6,8 @@ import { usePetStore } from '@/stores/pet.store';
 import { RoomScene } from './RoomScene';
 import { getSleepPositions } from './sleepTileMap';
 import { ItemSelector } from './ItemSelector';
+import { RoomNeedsOverlay } from './RoomNeedsOverlay';
+import { useSimulatedNeeds } from '@/hooks/useSimulatedNeeds';
 import type { SleepPosition } from './sleepTileMap';
 import {
   Sofa, UtensilsCrossed, Gamepad2, Bath, Moon,
@@ -55,6 +57,8 @@ const ROOM_ACTIONS: Record<RoomId, { category: string; label: string; emoji: str
 
 export function Room() {
   const { pets, petMap, performAction, activePetId } = usePetStore();
+  const activePetData = (activePetId ? petMap[activePetId] : null) ?? null;
+  const simulatedPet = useSimulatedNeeds(activePetData);
   const [room, setRoom] = useState<RoomId>('living');
   const [petPositions, setPetPositions] = useState<PetPosition[]>([]);
   const [feedback, setFeedback] = useState<{ emoji: string; petId: string } | null>(null);
@@ -324,6 +328,13 @@ export function Room() {
             <span className="font-semibold">{ROOMS.find((r) => r.id === room)?.label}</span>
           </div>
         </div>
+
+        {/* Needs overlay — top right */}
+        {simulatedPet && (
+          <div className="absolute top-2 right-2 z-30 pointer-events-auto">
+            <RoomNeedsOverlay pet={simulatedPet} />
+          </div>
+        )}
       </div>
 
       {/* Item Selector Modal */}

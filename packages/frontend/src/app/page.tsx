@@ -12,6 +12,7 @@ import { GameModal } from '@/components/games/GameModal';
 import { Wardrobe } from '@/components/pet/Wardrobe';
 import { usePetStore } from '@/stores/pet.store';
 import { useAuthStore } from '@/stores/auth.store';
+import { useSimulatedNeeds } from '@/hooks/useSimulatedNeeds';
 import {
   Home, Gamepad2, ShoppingBag, HeartHandshake, User,
   PawPrint, Sparkles, Shirt, LogOut, Trophy, Coins,
@@ -54,6 +55,9 @@ export default function HomePage() {
     }
   };
 
+  const activePet = (activePetId ? petMap[activePetId] : null) ?? null;
+  const simulatedPet = useSimulatedNeeds(activePet);
+
   if (authLoading) {
     return (
       <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-pastel-cream via-pastel-pink/30 to-pastel-sky/30">
@@ -66,8 +70,6 @@ export default function HomePage() {
   }
 
   if (!isAuthenticated) return null;
-
-  const activePet = activePetId ? petMap[activePetId] : null;
 
   const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'home', label: 'Inicio', icon: <Home size={22} /> },
@@ -156,7 +158,7 @@ export default function HomePage() {
               {activePet && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-4">
-                    <PetStats pet={activePet} />
+                    {simulatedPet && <PetStats pet={simulatedPet} simulated />}
                     <button
                       onClick={() => setShowWardrobe(!showWardrobe)}
                       className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-pastel-purple/15 border border-pastel-purple/25 rounded-2xl text-sm text-pastel-purple font-semibold hover:bg-pastel-purple/25 active:scale-[0.98] transition-all"
