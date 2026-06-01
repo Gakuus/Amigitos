@@ -2,394 +2,272 @@
 
 import type { SleepPosition } from './sleepTileMap';
 
-const VW = 1600;
-const VH = 900;
+const DECOR = [
+  '🪴', '🖼️', '🕯️', '📚', '🧸', '🎵', '🌸',
+] as const;
 
-/* ───────── Diamond tile floor ───────── */
+/* ───────── Furniture Components ───────── */
 
-function IsometricFloor() {
-  const cols = 16;
-  const rows = 12;
-  const tileW = VW / cols;
-  const tileH = tileW * 0.5;
-  const offsetX = VW / 2;
-  const offsetY = 200;
-  const tiles: JSX.Element[] = [];
+const wallBg: Record<string, string> = {
+  living: 'from-pastel-cream via-pastel-peach/40 to-pastel-cream',
+  eat: 'from-pastel-cream via-pastel-peach/50 to-pastel-cream',
+  play: 'from-pastel-sky/30 via-pastel-lavender/20 to-pastel-sky/30',
+  bath: 'from-pastel-sky/30 via-pastel-mint/20 to-pastel-sky/30',
+  sleep: 'from-pastel-lavender/30 via-pastel-moon/20 to-pastel-lavender/30',
+};
 
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const cx = (c - r) * tileW * 0.5 + offsetX;
-      const cy = (c + r) * tileH * 0.5 + offsetY;
-      const dark = (c + r) % 2 === 0;
-      tiles.push(
-        <polygon
-          key={`${r}-${c}`}
-          points={`${cx},${cy - tileH} ${cx + tileW},${cy} ${cx},${cy + tileH} ${cx - tileW},${cy}`}
-          fill={dark ? 'rgba(167,139,250,0.08)' : 'rgba(167,139,250,0.04)'}
-          stroke="rgba(167,139,250,0.12)"
-          strokeWidth="1"
-        />
-      );
-    }
-  }
-  return <g>{tiles}</g>;
-}
+const floorColor: Record<string, string> = {
+  living: 'bg-gradient-to-b from-pastel-walnut/90 to-pastel-walnut/70',
+  eat: 'bg-gradient-to-b from-pastel-walnut/90 to-pastel-walnut/70',
+  play: 'bg-gradient-to-b from-pastel-mint/80 to-pastel-mint/60',
+  bath: 'bg-gradient-to-b from-pastel-aqua/80 to-pastel-aqua/60',
+  sleep: 'bg-gradient-to-b from-pastel-purple/70 to-pastel-purple/50',
+};
 
-/* ───────── Walls ───────── */
-
-function IsometricWalls() {
+function WallDecor() {
   return (
-    <g>
-      {/* Left wall */}
-      <polygon
-        points="0,0 400,150 400,500 0,200"
-        fill="url(#wallLeft)"
-        opacity={0.35}
-      />
-      {/* Right wall */}
-      <polygon
-        points="1600,0 1200,150 1200,500 1600,200"
-        fill="url(#wallRight)"
-        opacity={0.35}
-      />
-      {/* Wall baseboards */}
-      <line x1="0" y1="200" x2="400" y2="350" stroke="rgba(167,139,250,0.2)" strokeWidth="4" />
-      <line x1="1600" y1="200" x2="1200" y2="350" stroke="rgba(167,139,250,0.2)" strokeWidth="4" />
-    </g>
+    <>
+      <div className="absolute top-[6%] left-[15%] w-0.5 h-[40%] bg-gradient-to-b from-transparent via-pastel-border/20 to-transparent" />
+      <div className="absolute top-[6%] right-[15%] w-0.5 h-[40%] bg-gradient-to-b from-transparent via-pastel-border/20 to-transparent" />
+    </>
   );
 }
 
-/* ───────── Room scenes ───────── */
+/* ───────── Living Room ───────── */
 
-function LivingScene() {
+function LivingRoom() {
   return (
-    <g>
-      {/* Window - centered, arched */}
-      <rect x={620} y={40} width={360} height={340} rx={180} ry={180} fill="url(#window)" />
-      <rect x={620} y={40} width={360} height={340} rx={180} ry={180} fill="none" stroke="#a78bfa" strokeWidth="4" />
-      <rect x={625} y={200} width={350} height={180} rx={10} fill="url(#windowsill)" />
-      <line x1={800} y1={40} x2={800} y2={380} stroke="rgba(167,139,250,0.3)" strokeWidth="3" />
-      <line x1={625} y1={190} x2={975} y2={190} stroke="rgba(167,139,250,0.3)" strokeWidth="3" />
-
-      {/* Curtains */}
-      <rect x={570} y={30} width={60} height={380} rx={10} fill="url(#curtain)" opacity={0.25} />
-      <rect x={970} y={30} width={60} height={380} rx={10} fill="url(#curtain)" opacity={0.25} />
+    <>
+      {/* Window */}
+      <div className="absolute top-[6%] left-1/2 -translate-x-1/2 w-[28%] h-[34%] rounded-[50%_50%_8px_8px] bg-gradient-to-b from-pastel-sky/40 to-white/60 border-2 border-pastel-border/20" />
+      <div className="absolute top-[6%] left-1/2 -translate-x-1/2 w-[28%] h-[34%] rounded-[50%_50%_8px_8px] flex items-center justify-center">
+        <div className="w-full h-[60%] self-end flex gap-0">
+          <div className="flex-1 border-r border-pastel-border/15" />
+          <div className="flex-1" />
+        </div>
+        <div className="absolute top-0 left-1/2 w-px h-full bg-pastel-border/15" />
+      </div>
 
       {/* Sofa */}
-      <g transform="translate(800, 530)">
-        <ellipse cx={0} cy={70} rx={220} ry={16} fill="rgba(0,0,0,0.08)" />
-        <rect x={-200} y={-60} width={400} height={90} rx={18} fill="url(#sofaBack)" />
-        <rect x={-192} y={-52} width={384} height={60} rx={12} fill="url(#sofaCushion)" />
-        <rect x={-210} y={25} width={420} height={42} rx={14} fill="url(#sofaSeat)" />
-        <rect x={-192} y={30} width={384} height={30} rx={8} fill="url(#sofaCushion)" opacity={0.5} />
-        <rect x={-240} y={-30} width={48} height={90} rx={14} fill="url(#sofaArm)" />
-        <rect x={192} y={-30} width={48} height={90} rx={14} fill="url(#sofaArm)" />
-      </g>
+      <div className="absolute bottom-[24%] left-1/2 -translate-x-1/2 w-[52%] h-[18%]">
+        <div className="absolute inset-0 bg-gradient-to-b from-pastel-purple/50 to-pastel-purple/30 rounded-2xl shadow-lg border border-pastel-border/20" />
+        <div className="absolute top-[15%] left-[8%] right-[8%] bottom-[20%] bg-pastel-cream/50 rounded-xl" />
+        <div className="absolute bottom-[10%] left-[2%] right-[2%] h-[40%] bg-gradient-to-b from-pastel-purple/40 to-pastel-purple/20 rounded-xl" />
+        {/* Arms */}
+        <div className="absolute top-[5%] left-[1%] w-[10%] bottom-[10%] bg-pastel-purple/40 rounded-xl" />
+        <div className="absolute top-[5%] right-[1%] w-[10%] bottom-[10%] bg-pastel-purple/40 rounded-xl" />
+        {/* Cushions */}
+        <div className="absolute top-[20%] left-[14%] w-[22%] h-[30%] bg-pastel-cream/60 rounded-lg shadow-sm" />
+        <div className="absolute top-[20%] left-[39%] w-[22%] h-[30%] bg-pastel-cream/60 rounded-lg shadow-sm" />
+        <div className="absolute top-[20%] right-[14%] w-[22%] h-[30%] bg-pastel-cream/60 rounded-lg shadow-sm" />
+      </div>
 
-      {/* Rug under sofa */}
-      <ellipse cx={800} cy={580} rx={300} ry={45} fill="url(#rug)" opacity={0.3} />
+      {/* Rug */}
+      <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-[60%] h-[12%] rounded-[50%] bg-gradient-to-r from-pastel-pink/20 via-pastel-purple/20 to-pastel-pink/20" />
 
       {/* Lamp */}
-      <g transform="translate(1310, 480)">
-        <rect x={-18} y={0} width={36} height={50} rx={4} fill="#c4b5fd" />
-        <rect x={-22} y={-4} width={44} height={6} rx={3} fill="#ddd6fe" />
-        <line x1={0} y1={-4} x2={0} y2={-80} stroke="#a78bfa" strokeWidth="3" />
-        <path d="M-30 -80 Q0 -130 30 -80" fill="#fef3c7" opacity={0.7} stroke="#fde68a" strokeWidth="2" />
-        <ellipse cx={0} cy={-80} rx={34} ry={10} fill="#fef3c7" opacity={0.5} />
-        {/* Lamp glow */}
-        <ellipse cx={0} cy={-40} rx={60} ry={30} fill="#fef3c7" opacity={0.06} />
-      </g>
+      <div className="absolute bottom-[26%] right-[8%] w-[6%] h-[30%]">
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[55%] bg-pastel-peach/60 rounded-t-lg" />
+        <div className="absolute bottom-[52%] left-1/2 -translate-x-1/2 w-[6px] h-[30%] bg-pastel-border/30 rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] aspect-square rounded-full bg-pastel-yellow/30" />
+      </div>
 
-      {/* Picture frame on wall */}
-      <rect x={180} y={80} width={100} height={80} rx={6} fill="#e9d5ff" stroke="#c4b5fd" strokeWidth="3" />
-      <circle cx={230} cy={120} r={20} fill="#f9a8d4" opacity={0.5} />
-      <rect x={200} y={140} width={60} height={4} rx={2} fill="#a78bfa" opacity={0.3} />
-    </g>
+      {/* Picture */}
+      <div className="absolute top-[10%] left-[6%] w-[10%] aspect-[4/3] bg-pastel-card/60 rounded-lg border border-pastel-border/20 flex items-center justify-center text-lg">
+        🌸
+      </div>
+    </>
   );
 }
 
-function EatScene() {
+/* ───────── Eat Room ───────── */
+
+function EatRoom() {
   return (
-    <g>
-      {/* Hanging lamp */}
-      <line x1={800} y1={0} x2={800} y2={100} stroke="#c4b5fd" strokeWidth="2" />
-      <path d="M740 100 Q800 150 860 100" fill="#fef3c7" opacity={0.6} stroke="#fde68a" strokeWidth="2" />
-      <line x1={760} y1={105} x2={840} y2={105} stroke="#c4b5fd" strokeWidth="2" />
-
-      {/* Dining table */}
-      <g transform="translate(800, 530)">
-        <ellipse cx={0} cy={85} rx={220} ry={18} fill="rgba(0,0,0,0.08)" />
-        <rect x={-180} y={8} width={8} height={72} rx={3} fill="#c4b5fd" />
-        <rect x={172} y={8} width={8} height={72} rx={3} fill="#c4b5fd" />
-        <ellipse cx={0} cy={6} rx={220} ry={38} fill="url(#tableTop)" stroke="#a78bfa" strokeWidth="2" />
-        <ellipse cx={0} cy={2} rx={210} ry={34} fill="url(#tableCloth)" />
-
+    <>
+      {/* Table */}
+      <div className="absolute bottom-[26%] left-1/2 -translate-x-1/2 w-[45%] h-[14%]">
+        <div className="absolute inset-0 bg-gradient-to-b from-pastel-cream to-pastel-peach/60 rounded-xl shadow-lg border border-pastel-border/20" />
+        <div className="absolute top-[8%] left-[5%] right-[5%] bottom-[8%] bg-gradient-to-b from-white/60 to-transparent rounded-lg" />
         {/* Plates */}
-        <ellipse cx={-80} cy={0} rx={32} ry={16} fill="#f8f8f8" stroke="#ddd" strokeWidth="1" />
-        <ellipse cx={-80} cy={-2} rx={24} ry={11} fill="#fff" />
-        <ellipse cx={80} cy={0} rx={32} ry={16} fill="#f8f8f8" stroke="#ddd" strokeWidth="1" />
-        <ellipse cx={80} cy={-2} rx={24} ry={11} fill="#fff" />
-        <ellipse cx={0} cy={-4} rx={32} ry={16} fill="#f8f8f8" stroke="#ddd" strokeWidth="1" />
-        <ellipse cx={0} cy={-6} rx={24} ry={11} fill="#fff" />
-
-        {/* Food on plates */}
-        <ellipse cx={-80} cy={-2} rx={8} ry={5} fill="#f9a8d4" opacity={0.7} />
-        <ellipse cx={80} cy={-2} rx={8} ry={5} fill="#a7f3d0" opacity={0.7} />
-        <ellipse cx={0} cy={-6} rx={8} ry={5} fill="#fde68a" opacity={0.7} />
-
-        {/* Glasses */}
-        <rect x={-95} y={-20} width={10} height={18} rx={3} fill="rgba(180,220,255,0.4)" stroke="rgba(150,200,240,0.5)" strokeWidth="1" />
-        <rect x={85} y={-20} width={10} height={18} rx={3} fill="rgba(180,220,255,0.4)" stroke="rgba(150,200,240,0.5)" strokeWidth="1" />
-      </g>
+        <div className="absolute top-[20%] left-[15%] w-[18%] h-[50%] rounded-full bg-white/80 border border-pastel-border/20 flex items-center justify-center text-sm">🍝</div>
+        <div className="absolute top-[20%] left-[41%] w-[18%] h-[50%] rounded-full bg-white/80 border border-pastel-border/20 flex items-center justify-center text-sm">🥗</div>
+        <div className="absolute top-[20%] right-[15%] w-[18%] h-[50%] rounded-full bg-white/80 border border-pastel-border/20 flex items-center justify-center text-sm">🍰</div>
+        {/* Legs */}
+        <div className="absolute -bottom-[6px] left-[10%] w-[8px] h-[12px] bg-pastel-walnut/60 rounded-full" />
+        <div className="absolute -bottom-[6px] right-[10%] w-[8px] h-[12px] bg-pastel-walnut/60 rounded-full" />
+      </div>
 
       {/* Chairs */}
-      <g transform="translate(540, 520)">
-        <rect x={-20} y={-30} width={40} height={50} rx={6} fill="#c4b5fd" />
-        <rect x={-24} y={-35} width={48} height={8} rx={3} fill="#ddd6fe" />
-        <line x1={-15} y1={20} x2={-15} y2={40} stroke="#a78bfa" strokeWidth="3" />
-        <line x1={15} y1={20} x2={15} y2={40} stroke="#a78bfa" strokeWidth="3" />
-      </g>
-      <g transform="translate(1060, 520)">
-        <rect x={-20} y={-30} width={40} height={50} rx={6} fill="#c4b5fd" />
-        <rect x={-24} y={-35} width={48} height={8} rx={3} fill="#ddd6fe" />
-        <line x1={-15} y1={20} x2={-15} y2={40} stroke="#a78bfa" strokeWidth="3" />
-        <line x1={15} y1={20} x2={15} y2={40} stroke="#a78bfa" strokeWidth="3" />
-      </g>
+      {[18, 58].map((left) => (
+        <div
+          key={left}
+          className="absolute bottom-[14%] w-[14%] h-[16%]"
+          style={{ left: `${left}%` }}
+        >
+          <div className="absolute inset-0 bg-pastel-purple/30 rounded-xl border border-pastel-border/15" />
+          <div className="absolute top-[10%] left-[8%] right-[8%] h-[40%] bg-pastel-card/50 rounded-lg" />
+          <div className="absolute bottom-[8%] left-1/2 -translate-x-1/2 w-[8px] h-[20%] bg-pastel-walnut/40 rounded-full" />
+        </div>
+      ))}
+
+      {/* Hanging lamp */}
+      <div className="absolute top-[2%] left-1/2 -translate-x-1/2 w-[18%] h-[16%]">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-[40%] bg-pastel-border/30" />
+        <div className="absolute top-[38%] left-1/2 -translate-x-1/2 w-full h-[60%] rounded-b-[50%] bg-pastel-yellow/40" />
+        <div className="absolute top-[38%] left-1/2 -translate-x-1/2 w-[70%] h-[30%] rounded-b-[50%] bg-pastel-yellow/20" />
+      </div>
 
       {/* Sideboard */}
-      <g transform="translate(1300, 490)">
-        <rect x={-50} y={-40} width={100} height={60} rx={6} fill="#e9d5ff" stroke="#c4b5fd" strokeWidth="2" />
-        <rect x={-42} y={-34} width={84} height={24} rx={4} fill="#fef3c7" opacity={0.4} />
-        <circle cx={-20} cy={-10} r={6} fill="#f9a8d4" opacity={0.6} />
-        <circle cx={20} cy={-10} r={6} fill="#a7f3d0" opacity={0.6} />
-      </g>
-    </g>
+      <div className="absolute bottom-[26%] right-[4%] w-[14%] h-[18%] bg-pastel-card/50 rounded-xl border border-pastel-border/20 flex items-center justify-center gap-1 text-xs">
+        🍷 🥂
+      </div>
+    </>
   );
 }
 
-function PlayScene() {
-  const toys = [
-    { x: 300, y: 560, r: 28, fill: '#f9a8d4' },
-    { x: 460, y: 530, r: 22, fill: '#a78bfa' },
-    { x: 1100, y: 545, r: 26, fill: '#a7f3d0' },
-    { x: 1260, y: 520, r: 20, fill: '#fde68a' },
-    { x: 1360, y: 555, r: 24, fill: '#c4b5fd' },
-  ];
-  return (
-    <g>
-      {/* Play mat */}
-      <rect x={250} y={500} width={1100} height={120} rx={30} fill="url(#playMat)" opacity={0.35} />
-      <rect x={260} y={508} width={1080} height={104} rx={24} fill="none" stroke="rgba(167,139,250,0.2)" strokeWidth="2" strokeDasharray="8 4" />
+/* ───────── Play Room ───────── */
 
-      {/* Shelf with toys */}
-      <rect x={200} y={220} width={280} height={14} rx={4} fill="#c4b5fd" />
-      <rect x={200} y={220} width={8} height={200} rx={3} fill="#a78bfa" />
-      <rect x={472} y={220} width={8} height={200} rx={3} fill="#a78bfa" />
+function PlayRoom() {
+  return (
+    <>
+      {/* Play mat */}
+      <div className="absolute bottom-[22%] left-1/2 -translate-x-1/2 w-[70%] h-[20%] rounded-2xl bg-gradient-to-r from-pastel-pink/25 via-pastel-purple/25 to-pastel-sky/25 border-2 border-dashed border-pastel-border/20" />
+
+      {/* Shelves */}
+      <div className="absolute top-[12%] left-[4%] w-[22%] h-[4px] bg-pastel-walnut/40 rounded-full" />
+      <div className="absolute top-[12%] left-[4%] w-[4px] h-[28%] bg-pastel-walnut/30 rounded-full" />
+      <div className="absolute top-[12%] left-[26%] w-[4px] h-[28%] bg-pastel-walnut/30 rounded-full" />
       {/* Toys on shelf */}
-      <circle cx={230} cy={210} r={14} fill="#f9a8d4" />
-      <circle cx={280} cy={212} r={12} fill="#a78bfa" />
-      <rect x={315} y={196} width={24} height={24} rx={4} fill="#a7f3d0" />
-      <circle cx={365} cy={210} r={13} fill="#fde68a" />
-      <rect x={400} y={200} width={18} height={18} rx={3} fill="#c4b5fd" />
-      <rect x={430} y={196} width={20} height={20} rx={3} fill="#f9a8d4" />
+      <div className="absolute top-[4%] left-[6%] text-lg">🧸</div>
+      <div className="absolute top-[6%] left-[14%] text-lg">🎲</div>
+      <div className="absolute top-[5%] left-[20%] text-lg">📖</div>
+
+      {/* Blocks */}
+      <div className="absolute bottom-[34%] left-[10%] w-[8%] aspect-square rounded-md bg-pastel-coral/50 rotate-12 border border-pastel-coral/30" />
+      <div className="absolute bottom-[32%] left-[18%] w-[7%] aspect-square rounded-md bg-pastel-sky/50 -rotate-6 border border-pastel-sky/30" />
+      <div className="absolute bottom-[36%] right-[12%] w-[8%] aspect-square rounded-md bg-pastel-yellow/50 rotate-8 border border-pastel-yellow/30" />
+      <div className="absolute bottom-[33%] right-[20%] w-[6%] aspect-square rounded-md bg-pastel-mint/50 -rotate-12 border border-pastel-mint/30" />
 
       {/* Toy box */}
-      <g transform="translate(1380, 480)">
-        <rect x={-30} y={-30} width={60} height={50} rx={6} fill="#e9d5ff" stroke="#a78bfa" strokeWidth="2" />
-        <rect x={-30} y={-35} width={60} height={8} rx={4} fill="#c4b5fd" />
-        <text x={0} y={-5} textAnchor="middle" fill="#a78bfa" fontSize="16" fontFamily="sans-serif">🧸</text>
-      </g>
+      <div className="absolute bottom-[22%] right-[4%] w-[14%] h-[16%] bg-pastel-card/60 rounded-xl border border-pastel-border/20 flex items-center justify-center text-xl">
+        🧸
+      </div>
 
-      {/* Scattered toys on floor */}
-      {toys.map((t, i) => (
-        <g key={i}>
-          <ellipse cx={t.x} cy={t.y + t.r + 4} rx={t.r} ry={6} fill="rgba(0,0,0,0.08)" />
-          <circle cx={t.x} cy={t.y} r={t.r} fill={t.fill} opacity={0.55} />
-          <circle cx={t.x - 4} cy={t.y - 4} r={t.r * 0.25} fill="rgba(255,255,255,0.35)" />
-        </g>
-      ))}
-
-      {/* Building blocks */}
-      <rect x={650} y={535} width={36} height={36} rx={4} fill="#fdba74" opacity={0.55} stroke="#fb923c" strokeWidth="2" />
-      <rect x={700} y={518} width={32} height={32} rx={4} fill="#67e8f9" opacity={0.55} stroke="#22d3ee" strokeWidth="2" transform="rotate(12 716 534)" />
-      <rect x={920} y={530} width={34} height={34} rx={4} fill="#f9a8d4" opacity={0.55} stroke="#e879b9" strokeWidth="2" />
-    </g>
+      {/* Scattered toys */}
+      <div className="absolute bottom-[28%] left-[28%] text-base animate-bounce-gentle" style={{ animationDelay: '0.2s' }}>⚽</div>
+      <div className="absolute bottom-[30%] right-[32%] text-base animate-bounce-gentle" style={{ animationDelay: '0.6s' }}>🎾</div>
+      <div className="absolute bottom-[26%] left-[50%] text-sm animate-bounce-gentle" style={{ animationDelay: '1s' }}>🪀</div>
+    </>
   );
 }
 
-function BathScene() {
+/* ───────── Bath Room ───────── */
+
+function BathRoom() {
   return (
-    <g>
+    <>
       {/* Mirror */}
-      <circle cx={800} cy={180} r={110} fill="url(#mirror)" stroke="#c4b5fd" strokeWidth="4" />
-      <circle cx={800} cy={180} r={105} fill="url(#mirrorGlass)" />
-      <ellipse cx={780} cy={162} rx={35} ry={18} fill="rgba(255,255,255,0.12)" transform="rotate(-20 780 162)" />
-
-      {/* Mirror shelf */}
-      <rect x={720} y={295} width={160} height={8} rx={4} fill="#c4b5fd" />
-
-      {/* Towel rack */}
-      <g transform="translate(120, 280)">
-        <line x1={0} y1={0} x2={180} y2={0} stroke="#c4b5fd" strokeWidth="5" strokeLinecap="round" />
-        <rect x={16} y={2} width={30} height={110} rx={6} fill="url(#towel1)" />
-        <rect x={56} y={2} width={30} height={90} rx={6} fill="url(#towel2)" />
-        <rect x={120} y={2} width={30} height={100} rx={6} fill="url(#towel1)" />
-      </g>
+      <div className="absolute top-[6%] left-1/2 -translate-x-1/2 w-[18%] aspect-[3/4] rounded-2xl bg-gradient-to-b from-pastel-sky/20 to-pastel-mint/20 border-2 border-pastel-border/20 flex items-center justify-center">
+        <div className="w-[85%] h-[85%] rounded-xl bg-gradient-to-br from-white/80 to-pastel-sky/30" />
+      </div>
 
       {/* Bathtub */}
-      <g transform="translate(800, 570)">
-        <ellipse cx={0} cy={65} rx={240} ry={16} fill="rgba(0,0,0,0.08)" />
-        <path d="M-220 -8 Q-230 54 -198 58 L198 58 Q230 54 220 -8 Z" fill="url(#tubFill)" stroke="#c4b5fd" strokeWidth="2" />
-        <path d="M-205 -4 Q-210 46 -188 50 L188 50 Q210 46 205 -4 Z" fill="url(#tubWater)" opacity={0.75} />
-        <path d="M-220 -8 Q0 -18 220 -8" fill="none" stroke="#ddd6fe" strokeWidth="6" strokeLinecap="round" />
-
+      <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-[55%] h-[24%]">
+        <div className="absolute inset-0 bg-gradient-to-b from-white/80 to-pastel-sky/20 rounded-[50%_50%_16px_16px] border-2 border-pastel-border/20 shadow-inner" />
+        {/* Water */}
+        <div className="absolute top-[15%] left-[4%] right-[4%] bottom-[8%] rounded-[50%_50%_8px_8px] bg-gradient-to-b from-pastel-sky/40 to-pastel-sky/20" />
         {/* Bubbles */}
-        <circle cx={-70} cy={16} r={12} fill="rgba(255,255,255,0.55)" />
-        <circle cx={-42} cy={6} r={8} fill="rgba(255,255,255,0.45)" />
-        <circle cx={-98} cy={5} r={9} fill="rgba(255,255,255,0.45)" />
-        <circle cx={0} cy={10} r={14} fill="rgba(255,255,255,0.55)" />
-        <circle cx={50} cy={5} r={8} fill="rgba(255,255,255,0.45)" />
-        <circle cx={90} cy={16} r={10} fill="rgba(255,255,255,0.45)" />
+        <div className="absolute top-[10%] left-[10%] w-4 h-4 rounded-full bg-white/60" />
+        <div className="absolute top-[14%] left-[20%] w-3 h-3 rounded-full bg-white/50" />
+        <div className="absolute top-[8%] left-[35%] w-5 h-5 rounded-full bg-white/60" />
+        <div className="absolute top-[12%] left-[55%] w-3 h-3 rounded-full bg-white/50" />
+        <div className="absolute top-[9%] right-[15%] w-4 h-4 rounded-full bg-white/60" />
+        {/* Feet */}
+        <div className="absolute -bottom-[4px] left-[8%] w-3 h-3 rounded-full bg-pastel-border/30" />
+        <div className="absolute -bottom-[4px] right-[8%] w-3 h-3 rounded-full bg-pastel-border/30" />
+      </div>
 
-        {/* Bathtub feet */}
-        <circle cx={-200} cy={58} r={9} fill="#ddd6fe" />
-        <circle cx={200} cy={58} r={9} fill="#ddd6fe" />
-      </g>
+      {/* Towel rack */}
+      <div className="absolute top-[12%] left-[5%] w-[14%] h-[2px] bg-pastel-border/40 rounded-full" />
+      <div className="absolute top-[14%] left-[6%] w-[6%] h-[18%] bg-pastel-sky/40 rounded-md" />
+      <div className="absolute top-[14%] left-[12%] w-[6%] h-[14%] bg-pastel-pink/40 rounded-md" />
 
       {/* Shower */}
-      <g transform="translate(1400, 230)">
-        <line x1={0} y1={0} x2={0} y2={200} stroke="#c4b5fd" strokeWidth="3" />
-        <ellipse cx={0} cy={-4} rx={18} ry={9} fill="#ddd6fe" />
-        <path d="M-10 200 L10 200" stroke="#c4b5fd" strokeWidth="4" strokeLinecap="round" />
-        {/* Water drops */}
-        <circle cx={-18} cy={210} r={5} fill="rgba(100,200,255,0.3)" />
-        <circle cx={10} cy={220} r={4} fill="rgba(100,200,255,0.3)" />
-        <circle cx={-6} cy={230} r={5} fill="rgba(100,200,255,0.3)" />
-        <circle cx={18} cy={218} r={3} fill="rgba(100,200,255,0.3)" />
-      </g>
-    </g>
+      <div className="absolute bottom-[26%] right-[5%] w-[8%] h-[28%]">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[8px] h-[60%] bg-pastel-border/30 rounded-full" />
+        <div className="absolute top-[58%] left-1/2 -translate-x-1/2 w-[80%] h-[8px] bg-pastel-border/30 rounded-full" />
+        <div className="absolute top-[65%] left-1/2 -translate-x-1/2 w-[60%] h-[35%] rounded-[50%] bg-pastel-sky/20" />
+        {/* Drops */}
+        <div className="absolute top-[68%] left-[10%] w-1 h-2 rounded-full bg-pastel-sky/30" />
+        <div className="absolute top-[72%] right-[15%] w-1 h-1.5 rounded-full bg-pastel-sky/30" />
+        <div className="absolute top-[78%] left-[20%] w-1 h-2 rounded-full bg-pastel-sky/30" />
+      </div>
+    </>
   );
 }
 
-function SleepScene({ petPositions }: { petPositions: SleepPosition[] }) {
+/* ───────── Sleep Room ───────── */
+
+function SleepRoom({ petPositions }: { petPositions: SleepPosition[] }) {
   return (
-    <g>
+    <>
       {/* Moon */}
-      <circle cx={1280} cy={80} r={48} fill="#fef3c7" opacity={0.65} />
-      <circle cx={1300} cy={72} r={44} fill="#2e1065" />
+      <div className="absolute top-[4%] right-[10%] w-[10%] aspect-square">
+        <div className="w-full h-full rounded-full bg-pastel-yellow/50" />
+        <div className="absolute top-[6%] left-[12%] w-[85%] h-[85%] rounded-full bg-pastel-lavender/40" style={{ boxShadow: 'inset 0 0 20px rgba(0,0,0,0.15)' }} />
+      </div>
 
       {/* Stars */}
-      <circle cx={200} cy={60} r={3} fill="#fef3c7" opacity={0.5} />
-      <circle cx={380} cy={110} r={2.5} fill="#fef3c7" opacity={0.4} />
-      <circle cx={540} cy={45} r={3} fill="#fef3c7" opacity={0.6} />
-      <circle cx={1080} cy={95} r={2} fill="#fef3c7" opacity={0.35} />
-      <circle cx={500} cy={160} r={2} fill="#fef3c7" opacity={0.45} />
-      <circle cx={740} cy={55} r={2.5} fill="#fef3c7" opacity={0.55} />
-      <circle cx={160} cy={150} r={2} fill="#fef3c7" opacity={0.4} />
-      <circle cx={1450} cy={120} r={2.5} fill="#fef3c7" opacity={0.45} />
-      <circle cx={460} cy={80} r={1.8} fill="#fef3c7" opacity={0.5} />
-      <circle cx={1000} cy={50} r={2.8} fill="#fef3c7" opacity={0.5} />
+      <div className="absolute top-[6%] left-[8%] w-1.5 h-1.5 rounded-full bg-pastel-yellow/50" />
+      <div className="absolute top-[10%] left-[22%] w-1 h-1 rounded-full bg-pastel-yellow/40" />
+      <div className="absolute top-[4%] left-[40%] w-1.5 h-1.5 rounded-full bg-pastel-yellow/50" />
+      <div className="absolute top-[8%] left-[55%] w-1 h-1 rounded-full bg-pastel-yellow/35" />
+      <div className="absolute top-[3%] left-[70%] w-1 h-1 rounded-full bg-pastel-yellow/40" />
 
-      {/* Sleep area */}
-      <rect x={80} y={610} width={1440} height={260} rx={40} fill="rgba(167,139,250,0.15)" />
-      <rect x={100} y={620} width={1400} height={240} rx={30} fill="rgba(167,139,250,0.08)" />
+      {/* Sleep zone */}
+      <div className="absolute bottom-[8%] left-[4%] right-[4%] h-[40%] rounded-2xl bg-pastel-purple/8 border border-pastel-purple/10" />
 
-      {/* Nightstand left */}
-      <g transform="translate(250, 530)">
-        <rect x={-20} y={-30} width={40} height={50} rx={4} fill="#c4b5fd" />
-        <rect x={-16} y={-26} width={32} height={20} rx={3} fill="#e9d5ff" opacity={0.5} />
-        {/* Small lamp */}
-        <line x1={0} y1={-30} x2={0} y2={-50} stroke="#a78bfa" strokeWidth="2" />
-        <circle cx={0} cy={-55} r={6} fill="#fde68a" opacity={0.8} />
-        <circle cx={0} cy={-55} r={15} fill="#fde68a" opacity={0.08} />
-      </g>
+      {/* Nightstands */}
+      <div className="absolute bottom-[20%] left-[4%] w-[10%] h-[14%] bg-pastel-card/60 rounded-xl border border-pastel-border/20">
+        <div className="absolute top-[2%] left-1/2 -translate-x-1/2 w-[8px] h-[40%] bg-pastel-border/20 rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-pastel-yellow/50" />
+      </div>
+      <div className="absolute bottom-[20%] right-[4%] w-[10%] h-[14%] bg-pastel-card/60 rounded-xl border border-pastel-border/20">
+        <div className="absolute top-[2%] left-1/2 -translate-x-1/2 w-[8px] h-[40%] bg-pastel-border/20 rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-pastel-yellow/50" />
+      </div>
 
-      {/* Nightstand right */}
-      <g transform="translate(1350, 530)">
-        <rect x={-20} y={-30} width={40} height={50} rx={4} fill="#c4b5fd" />
-        <rect x={-16} y={-26} width={32} height={20} rx={3} fill="#e9d5ff" opacity={0.5} />
-        <line x1={0} y1={-30} x2={0} y2={-50} stroke="#a78bfa" strokeWidth="2" />
-        <circle cx={0} cy={-55} r={6} fill="#fde68a" opacity={0.8} />
-        <circle cx={0} cy={-55} r={15} fill="#fde68a" opacity={0.08} />
-      </g>
-
-      {/* Pet beds */}
+      {/* Beds positioned to align with sleep positions */}
       {petPositions.map((pos, i) => (
-        <Bed2D
+        <div
           key={i}
-          cx={(pos.x / 100) * VW}
-          cy={(pos.top / 100) * VH}
-          depth={pos.depth}
-          index={i}
-        />
+          className="absolute"
+          style={{
+            left: `calc(${pos.x}% - 10%)`,
+            top: `calc(${pos.top}% - 4%)`,
+            width: '20%',
+            aspectRatio: '2/1',
+          }}
+        >
+          {/* Shadow */}
+          <div className="absolute -bottom-[2px] left-[2%] right-[2%] h-[6px] rounded-full bg-black/8" />
+          {/* Bed frame */}
+          <div className="absolute inset-0 bg-gradient-to-b from-pastel-purple/50 to-pastel-purple/30 rounded-xl border border-pastel-border/20" />
+          {/* Headboard */}
+          <div className="absolute -top-[6px] left-[4%] right-[4%] h-[10px] bg-pastel-purple/40 rounded-t-lg" />
+          {/* Sheet */}
+          <div className="absolute top-[12%] left-[4%] right-[4%] bottom-[10%] bg-white/60 rounded-lg" />
+          {/* Pillow */}
+          <div className="absolute top-[14%] left-[6%] w-[22%] h-[28%] bg-pastel-yellow/40 rounded-lg" />
+          {/* Blanket */}
+          <div className="absolute bottom-[10%] left-[24%] right-[4%] h-[55%] bg-gradient-to-b from-pastel-pink/50 to-pastel-pink/30 rounded-lg" />
+          <div className="absolute bottom-[9%] left-[24%] right-[4%] h-[3px] bg-white/20 rounded-full" />
+          {/* Fold detail */}
+          <div className="absolute top-[40%] left-[28%] w-[2px] h-[35%] bg-white/10 rounded-full" />
+        </div>
       ))}
-    </g>
-  );
-}
-
-/* ───────── Bed (2D isometric style) ───────── */
-
-function Bed2D({ cx, cy, depth, index }: { cx: number; cy: number; depth: number; index: number }) {
-  // Beds closer together and larger
-  const scale = 0.65 + depth * 0.5;
-  const bw = 200 * scale;       // wider
-  const bh = 100 * scale;       // taller
-  const sideH = 8 * scale;
-  const x = cx - bw / 2;
-  const y = cy - bh / 2 - sideH;
-
-  // Alternate colors per bed
-  const colors = [
-    { frame: '#a78bfa', frameDark: '#8b5cf6', head: '#c4b5fd', pillow: '#fef3c7', blanket: '#f9a8d4' },
-    { frame: '#f9a8d4', frameDark: '#e879b9', head: '#fecdd3', pillow: '#fef3c7', blanket: '#a78bfa' },
-  ];
-  const c = colors[index % colors.length]!;
-
-  return (
-    <g>
-      {/* Shadow */}
-      <ellipse cx={cx} cy={y + bh + sideH + 6 * scale} rx={bw * 0.5} ry={6 * scale} fill="rgba(0,0,0,0.12)" />
-
-      {/* Headboard */}
-      <rect x={x + bw * 0.04} y={y - 14 * scale} width={bw * 0.92} height={14 * scale} rx={4 * scale} fill={c.head} />
-      <rect x={x + bw * 0.04} y={y - 14 * scale} width={bw * 0.92} height={3 * scale} rx={1.5 * scale} fill="rgba(255,255,255,0.15)" />
-
-      {/* Base */}
-      <rect x={x} y={y + bh} width={bw} height={sideH} rx={0} fill={c.frameDark} />
-
-      {/* Mattress */}
-      <rect x={x} y={y} width={bw} height={bh} rx={8 * scale} fill={c.frame} stroke={c.frameDark} strokeWidth={1.5 * scale} />
-
-      {/* Sheet */}
-      <rect x={x + 6 * scale} y={y + 5 * scale} width={bw - 12 * scale} height={bh * 0.42} rx={5 * scale} fill="#f1f5f9" />
-
-      {/* Pillow */}
-      <rect x={x + 8 * scale} y={y + 7 * scale} width={bw * 0.22} height={bh * 0.3} rx={4 * scale} fill={c.pillow} />
-
-      {/* Blanket */}
-      <rect x={x + bw * 0.22} y={y + bh * 0.35} width={bw * 0.7} height={bh * 0.55} rx={5 * scale} fill={c.blanket} opacity={0.92} />
-
-      {/* Blanket fold line */}
-      <rect x={x + bw * 0.22} y={y + bh * 0.36} width={bw * 0.7} height={2 * scale} rx={1 * scale} fill="rgba(255,255,255,0.12)" />
-
-      {/* If no depth (foreground bed), add extra detail */}
-      {depth < 0.3 && (
-        <>
-          <rect x={x + bw * 0.1} y={y + bh * 0.38} width={2 * scale} height={bh * 0.35} rx={1 * scale} fill="rgba(255,255,255,0.08)" />
-        </>
-      )}
-    </g>
-  );
-}
-
-/* ───────── Floor vignette ───────── */
-
-function FloorVignette() {
-  return (
-    <g>
-      <rect x={0} y={672} width={VW} height={3} fill="rgba(0,0,0,0.08)" />
-      <rect x={0} y={675} width={VW} height={2} fill="rgba(0,0,0,0.05)" />
-    </g>
+    </>
   );
 }
 
@@ -399,113 +277,59 @@ type RoomId = 'living' | 'eat' | 'play' | 'bath' | 'sleep';
 
 export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: SleepPosition[] }) {
   return (
-    <svg
-      viewBox={`0 0 ${VW} ${VH}`}
-      className="absolute inset-0 w-full h-full pointer-events-none z-0"
-      preserveAspectRatio="xMidYMid meet"
+    <div
+      className="absolute inset-0 w-full h-full"
+      style={{
+        perspective: '1000px',
+        perspectiveOrigin: 'center 40%',
+      }}
     >
-      <defs>
-        <linearGradient id="wallLeft" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="100%" stopColor="#c4b5fd" />
-        </linearGradient>
-        <linearGradient id="wallRight" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#c4b5fd" />
-          <stop offset="100%" stopColor="#a78bfa" />
-        </linearGradient>
-        <linearGradient id="curtain" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#f9a8d4" />
-          <stop offset="100%" stopColor="transparent" />
-        </linearGradient>
-        <linearGradient id="window" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#bae6fd" />
-          <stop offset="100%" stopColor="#e0f2fe" />
-        </linearGradient>
-        <linearGradient id="windowsill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ddd6fe" />
-          <stop offset="100%" stopColor="#c4b5fd" />
-        </linearGradient>
-        <linearGradient id="sofaBack" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#c4b5fd" />
-          <stop offset="100%" stopColor="#a78bfa" />
-        </linearGradient>
-        <linearGradient id="sofaCushion" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ddd6fe" />
-          <stop offset="100%" stopColor="#c4b5fd" />
-        </linearGradient>
-        <linearGradient id="sofaSeat" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="100%" stopColor="#8b5cf6" />
-        </linearGradient>
-        <linearGradient id="sofaArm" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#c4b5fd" />
-          <stop offset="100%" stopColor="#a78bfa" />
-        </linearGradient>
-        <radialGradient id="tableTop">
-          <stop offset="0%" stopColor="#e9d5ff" />
-          <stop offset="100%" stopColor="#c4b5fd" />
-        </radialGradient>
-        <radialGradient id="tableCloth">
-          <stop offset="0%" stopColor="#fef3c7" />
-          <stop offset="100%" stopColor="#fde68a" />
-        </radialGradient>
-        <linearGradient id="playMat" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="25%" stopColor="#a7f3d0" />
-          <stop offset="50%" stopColor="#fde68a" />
-          <stop offset="75%" stopColor="#f9a8d4" />
-          <stop offset="100%" stopColor="#c4b5fd" />
-        </linearGradient>
-        <radialGradient id="mirror">
-          <stop offset="0%" stopColor="#c4b5fd" />
-          <stop offset="100%" stopColor="#a78bfa" />
-        </radialGradient>
-        <radialGradient id="mirrorGlass">
-          <stop offset="0%" stopColor="#e0f2fe" />
-          <stop offset="100%" stopColor="#bae6fd" />
-        </radialGradient>
-        <linearGradient id="towel1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7dd3fc" />
-          <stop offset="100%" stopColor="#38bdf8" />
-        </linearGradient>
-        <linearGradient id="towel2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f9a8d4" />
-          <stop offset="100%" stopColor="#e879b9" />
-        </linearGradient>
-        <linearGradient id="tubFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f8fafc" />
-          <stop offset="100%" stopColor="#e2e8f0" />
-        </linearGradient>
-        <linearGradient id="tubWater" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7dd3fc" />
-          <stop offset="100%" stopColor="#0ea5e9" />
-        </linearGradient>
-        <radialGradient id="rug">
-          <stop offset="0%" stopColor="#c4b5fd" />
-          <stop offset="100%" stopColor="#a78bfa" />
-        </radialGradient>
-        <linearGradient id="roomBg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fdf2f8" />
-          <stop offset="100%" stopColor="#fef3c7" />
-        </linearGradient>
-      </defs>
+      <div
+        className="absolute inset-0 w-full h-full overflow-hidden"
+        style={{
+          transform: 'rotateX(58deg) rotateZ(45deg)',
+          transformOrigin: 'center 60%',
+          transformStyle: 'preserve-3d',
+        }}
+      >
+        {/* Room background */}
+        <div
+          className={`absolute inset-0 bg-gradient-to-b ${wallBg[room] ?? wallBg.living} transition-colors duration-700`}
+        />
 
-      {/* Background */}
-      <rect width={VW} height={VH} fill="url(#roomBg)" />
+        {/* Floor */}
+        <div
+          className={`absolute bottom-0 left-0 right-0 h-[45%] ${floorColor[room] ?? floorColor.living} transition-colors duration-700`}
+        >
+          {/* Floor grid pattern */}
+          <div
+            className="absolute inset-0 opacity-[0.06]"
+            style={{
+              backgroundImage:
+                'linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+              backgroundSize: '7% 14%',
+            }}
+          />
+          {/* Floor accent */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[30%] bg-gradient-to-b from-white/5 to-transparent rounded-full" />
+        </div>
 
-      {/* Isometric floor */}
-      <IsometricFloor />
-      <IsometricWalls />
+        {/* Wall base line */}
+        <div className="absolute bottom-[45%] left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-pastel-border/20 to-transparent" />
 
-      {/* Room scenes */}
-      {room === 'living' && <LivingScene />}
-      {room === 'eat' && <EatScene />}
-      {room === 'play' && <PlayScene />}
-      {room === 'bath' && <BathScene />}
-      {room === 'sleep' && <SleepScene petPositions={petPositions} />}
+        {/* Wall decorations */}
+        <WallDecor />
 
-      {/* Final vignette */}
-      <FloorVignette />
-    </svg>
+        {/* Room-specific furniture */}
+        {room === 'living' && <LivingRoom />}
+        {room === 'eat' && <EatRoom />}
+        {room === 'play' && <PlayRoom />}
+        {room === 'bath' && <BathRoom />}
+        {room === 'sleep' && <SleepRoom petPositions={petPositions} />}
+
+        {/* Floor vignette */}
+        <div className="absolute bottom-0 left-0 right-0 h-[8%] bg-gradient-to-b from-transparent to-black/10 pointer-events-none" />
+      </div>
+    </div>
   );
 }

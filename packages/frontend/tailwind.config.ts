@@ -81,6 +81,8 @@ const config: Config = {
         'bounce-gentle': 'bounce-gentle 1s ease-in-out infinite',
         'glow': 'glow 2s ease-in-out infinite alternate',
         'float': 'float 3s ease-in-out infinite',
+        'bounce-idle': 'bounce-idle 2.5s ease-in-out infinite',
+        'breathe-sleep': 'breathe-sleep 3s ease-in-out infinite',
       },
       keyframes: {
         wiggle: {
@@ -116,6 +118,14 @@ const config: Config = {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-6px)' },
+        },
+        'bounce-idle': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-4px)' },
+        },
+        'breathe-sleep': {
+          '0%, 100%': { transform: 'scaleY(1) translateY(0)' },
+          '50%': { transform: 'scaleY(1.03) translateY(-2px)' },
         },
       },
     },
