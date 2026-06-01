@@ -1,6 +1,13 @@
 'use client';
 
 import type { SleepPosition } from './sleepTileMap';
+import {
+  SofaSVG, LampSVG, CoffeeTableSVG, WallArtSVG, PlantSVG, BookshelfSVG,
+  DiningTableSVG, DiningChairSVG, HangingLampSVG, SideboardSVG,
+  PlayMatSVG, BlockSVG, ToyBoxSVG, BallSVG,
+  BathtubSVG, ShowerSVG, MirrorSVG, TowelsSVG, BathMatSVG,
+  MoonSVG, BedSVG, NightstandSVG,
+} from './FurnitureSVG';
 
 /* ───────── Room config ───────── */
 
@@ -18,25 +25,41 @@ type RoomId = keyof typeof roomTheme;
 
 function WallSection({ room }: { room: RoomId }) {
   const t = roomTheme[room]!;
+  const isSleep = room === 'sleep';
+  const isBath = room === 'bath';
+  const isPlay = room === 'play';
 
   return (
-    <div className="absolute top-0 left-0 right-0 h-[58%] bg-gradient-to-b overflow-hidden" style={{ backgroundImage: `linear-gradient(to bottom, ${['from-pastel-cream', 'from-pastel-sky/20'].some(x => t.wall.includes(x)) ? '#fef3c7' : '#e9d5ff'}11, transparent)` }}>
+    <div className={`absolute top-0 left-0 right-0 h-[58%] overflow-hidden ${isSleep ? 'bg-gradient-to-b from-[#0a0a1a] via-[#12122a] to-[#1a1a3a]' : 'bg-gradient-to-b'}`}>
       <div className={`absolute inset-0 bg-gradient-to-b ${t.wall}`}>
         {/* Wallpaper pattern */}
         <div
           className="absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-            color: 'inherit',
+            backgroundImage: isBath
+              ? 'repeating-linear-gradient(90deg, currentColor 0px, currentColor 1px, transparent 1px, transparent 24px), repeating-linear-gradient(0deg, currentColor 0px, currentColor 1px, transparent 1px, transparent 24px)'
+              : 'radial-gradient(circle, currentColor 1px, transparent 1px)',
+            backgroundSize: isBath ? '24px 24px' : '24px 24px',
+            color: isSleep ? '#6b5b95' : 'inherit',
           }}
         />
 
+        {/* Additional wallpaper for play room */}
+        {isPlay && (
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(60deg, transparent, transparent 20px, currentColor 20px, currentColor 21px)',
+              backgroundSize: '40px 40px',
+            }}
+          />
+        )}
+
         {/* Crown molding */}
-        <div className="absolute bottom-0 left-0 right-0 h-[6px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+        <div className={`absolute bottom-0 left-0 right-0 h-[6px] bg-gradient-to-r from-transparent via-white/40 to-transparent ${isSleep ? 'opacity-20' : ''}`} />
 
         {/* Baseboard */}
-        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-pastel-border/30 to-transparent" />
+        <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-pastel-border/30 to-transparent ${isSleep ? 'opacity-20' : ''}`} />
       </div>
     </div>
   );
@@ -46,18 +69,32 @@ function WallSection({ room }: { room: RoomId }) {
 
 function FloorSection({ room }: { room: RoomId }) {
   const t = roomTheme[room]!;
+  const isPlay = room === 'play';
+  const isBath = room === 'bath';
+  const isSleep = room === 'sleep';
 
   return (
     <div className="absolute bottom-0 left-0 right-0 h-[42%] overflow-hidden">
       {/* Floor gradient */}
       <div className={`absolute inset-0 bg-gradient-to-b ${t.floor}`} />
 
+      {/* Play room: colorful circles */}
+      {isPlay && (
+        <div className="absolute inset-0 opacity-[0.08]">
+          <div className="absolute bottom-[20%] left-[10%] w-12 h-12 rounded-full bg-pastel-pink" />
+          <div className="absolute bottom-[40%] left-[30%] w-8 h-8 rounded-full bg-pastel-sky" />
+          <div className="absolute bottom-[15%] right-[20%] w-10 h-10 rounded-full bg-pastel-yellow" />
+          <div className="absolute bottom-[50%] right-[8%] w-6 h-6 rounded-full bg-pastel-green" />
+        </div>
+      )}
+
       {/* Perspective grid */}
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage:
-            'linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
+          backgroundImage: isSleep
+            ? 'linear-gradient(90deg, rgba(100,80,180,0.08) 1px, transparent 1px), linear-gradient(0deg, rgba(100,80,180,0.05) 1px, transparent 1px)'
+            : 'linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
           backgroundSize: '6% 8%',
           maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)',
@@ -65,7 +102,7 @@ function FloorSection({ room }: { room: RoomId }) {
       />
 
       {/* Depth fade at back of floor */}
-      <div className="absolute top-0 left-0 right-0 h-[30%] bg-gradient-to-b from-black/[var(--floor-fade)] to-transparent" style={{ '--floor-fade': '0.08' } as React.CSSProperties} />
+      <div className="absolute top-0 left-0 right-0 h-[30%] bg-gradient-to-b from-black/[var(--floor-fade)] to-transparent" style={{ '--floor-fade': isSleep ? '0.15' : '0.08' } as React.CSSProperties} />
 
       {/* Front edge shadow */}
       <div className="absolute bottom-0 left-0 right-0 h-[8%] bg-gradient-to-b from-transparent to-black/10 pointer-events-none" />
@@ -76,7 +113,15 @@ function FloorSection({ room }: { room: RoomId }) {
 /* ───────── Window ───────── */
 
 function Window({ room }: { room: RoomId }) {
-  const isDark = ['sleep'].includes(room);
+  const isDark = room === 'sleep';
+  const isBath = room === 'bath';
+
+  // No window in bathroom (has mirror instead)
+  if (isBath) return null;
+
+  const curtainColor = room === 'sleep' ? 'from-pastel-purple/20 to-pastel-purple/10'
+    : room === 'play' ? 'from-pastel-sky/20 to-pastel-sky/10'
+    : 'from-pastel-pink/20 to-pastel-pink/10';
 
   return (
     <div className="absolute top-[4%] left-1/2 -translate-x-1/2 w-[30%] h-[42%]">
@@ -100,8 +145,8 @@ function Window({ room }: { room: RoomId }) {
         </div>
       </div>
       {/* Curtains */}
-      <div className="absolute top-0 left-[-6%] w-[12%] h-full rounded-b-lg bg-gradient-to-b from-pastel-pink/20 to-pastel-pink/10" />
-      <div className="absolute top-0 right-[-6%] w-[12%] h-full rounded-b-lg bg-gradient-to-b from-pastel-pink/20 to-pastel-pink/10" />
+      <div className={`absolute top-0 left-[-6%] w-[12%] h-full rounded-b-lg bg-gradient-to-b ${curtainColor}`} />
+      <div className={`absolute top-0 right-[-6%] w-[12%] h-full rounded-b-lg bg-gradient-to-b ${curtainColor}`} />
     </div>
   );
 }
@@ -113,39 +158,39 @@ function LivingFurniture({ depth }: { depth: (d: number) => React.CSSProperties 
     <>
       {/* Sofa */}
       <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2" style={depth(0.55)}>
-        <div className="w-[52vw] max-w-[320px] h-[80px] rounded-2xl bg-gradient-to-b from-pastel-purple/45 to-pastel-purple/25 shadow-lg border border-pastel-border/15">
-          <div className="absolute top-[14%] left-[6%] right-[6%] bottom-[22%] bg-pastel-cream/40 rounded-xl" />
-          <div className="absolute bottom-[10%] left-[3%] right-[3%] h-[35%] bg-pastel-purple/30 rounded-xl" />
-          <div className="absolute top-[6%] left-[2%] w-[10%] bottom-[12%] bg-pastel-purple/35 rounded-xl" />
-          <div className="absolute top-[6%] right-[2%] w-[10%] bottom-[12%] bg-pastel-purple/35 rounded-xl" />
-          <div className="absolute top-[18%] left-[14%] w-[20%] h-[28%] bg-pastel-cream/50 rounded-lg" />
-          <div className="absolute top-[18%] left-[40%] w-[20%] h-[28%] bg-pastel-cream/50 rounded-lg" />
-          <div className="absolute top-[18%] right-[14%] w-[20%] h-[28%] bg-pastel-cream/50 rounded-lg" />
+        <div className="w-[52vw] max-w-[320px] h-[80px]">
+          <SofaSVG />
         </div>
-        {/* Shadow */}
-        <div className="absolute -bottom-[6px] left-[4%] right-[4%] h-[6px] rounded-full bg-black/8" />
       </div>
 
-      {/* Rug */}
-      <div className="absolute bottom-[14%] left-1/2 -translate-x-1/2 w-[65%] max-w-[380px] h-[40px] rounded-[50%] bg-gradient-to-r from-pastel-pink/15 via-pastel-purple/15 to-pastel-pink/15" />
+      {/* Coffee Table */}
+      <div className="absolute bottom-[11%] left-1/2 -translate-x-1/2" style={depth(0.45)}>
+        <div className="w-[38vw] max-w-[220px] h-[55px]">
+          <CoffeeTableSVG />
+        </div>
+      </div>
 
       {/* Lamp */}
       <div className="absolute bottom-[22%] right-[6%]" style={depth(0.7)}>
-        <div className="relative w-[40px] h-[100px]">
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[50%] bg-pastel-peach/50 rounded-t-lg" />
-          <div className="absolute bottom-[48%] left-1/2 -translate-x-1/2 w-[4px] h-[35%] bg-pastel-border/25 rounded-full" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60px] aspect-square rounded-full bg-pastel-yellow/25" />
+        <div className="w-[36px] h-[100px]">
+          <LampSVG />
         </div>
-        <div className="absolute -bottom-[4px] left-1/2 -translate-x-1/2 w-[50px] h-[4px] rounded-full bg-black/8" />
       </div>
 
-      {/* Picture frame */}
-      <div className="absolute top-[8%] left-[5%] w-[80px] aspect-[4/3] rounded-lg bg-pastel-card/50 border border-pastel-border/20 flex items-center justify-center text-xl shadow-sm">
-        🌸
+      {/* Wall Art */}
+      <div className="absolute top-[8%] left-[5%] w-[72px] h-[54px]">
+        <WallArtSVG />
       </div>
 
       {/* Plant */}
-      <div className="absolute top-[38%] left-[4%] text-2xl">🪴</div>
+      <div className="absolute top-[38%] left-[4%] w-[42px] h-[68px]">
+        <PlantSVG />
+      </div>
+
+      {/* Bookshelf */}
+      <div className="absolute top-[6%] right-[3%] w-[52px] h-[120px]">
+        <BookshelfSVG />
+      </div>
     </>
   );
 }
@@ -157,42 +202,30 @@ function EatFurniture({ depth }: { depth: (d: number) => React.CSSProperties }) 
     <>
       {/* Table */}
       <div className="absolute bottom-[22%] left-1/2 -translate-x-1/2" style={depth(0.5)}>
-        <div className="w-[50vw] max-w-[300px] h-[60px] rounded-xl bg-gradient-to-b from-pastel-cream to-pastel-peach/50 shadow-lg border border-pastel-border/15">
-          <div className="absolute top-[10%] left-[6%] right-[6%] bottom-[10%] bg-white/40 rounded-lg" />
-          <div className="absolute top-[18%] left-[12%] w-[18%] h-[55%] rounded-full bg-white/70 border border-pastel-border/15 flex items-center justify-center text-sm">🍝</div>
-          <div className="absolute top-[18%] left-[41%] w-[18%] h-[55%] rounded-full bg-white/70 border border-pastel-border/15 flex items-center justify-center text-sm">🥗</div>
-          <div className="absolute top-[18%] right-[12%] w-[18%] h-[55%] rounded-full bg-white/70 border border-pastel-border/15 flex items-center justify-center text-sm">🍰</div>
+        <div className="w-[52vw] max-w-[320px] h-[65px]">
+          <DiningTableSVG />
         </div>
-        <div className="absolute -bottom-[4px] left-[8%] w-[6px] h-[10px] bg-pastel-walnut/40 rounded-full" />
-        <div className="absolute -bottom-[4px] right-[8%] w-[6px] h-[10px] bg-pastel-walnut/40 rounded-full" />
-        <div className="absolute -bottom-[3px] left-[4%] right-[4%] h-[4px] rounded-full bg-black/8" />
       </div>
 
       {/* Chairs */}
-      {[14, 58].map((left) => (
-        <div key={left} className="absolute bottom-[12%] w-[12%] max-w-[70px]" style={{ left: `${left}%`, ...depth(0.4) }}>
-          <div className="w-full aspect-[3/4] rounded-xl bg-pastel-purple/25 border border-pastel-border/12">
-            <div className="absolute top-[12%] left-[10%] right-[10%] h-[35%] bg-pastel-card/40 rounded-lg" />
+      {[14, 60].map((left) => (
+        <div key={left} className="absolute bottom-[11%]" style={{ left: `${left}%`, ...depth(0.4) }}>
+          <div className="w-[14vw] max-w-[80px] h-[90px]">
+            <DiningChairSVG />
           </div>
-          <div className="absolute -bottom-[3px] left-[10%] right-[10%] h-[3px] rounded-full bg-black/8" />
         </div>
       ))}
 
       {/* Hanging lamp */}
-      <div className="absolute top-[1%] left-1/2 -translate-x-1/2">
-        <div className="relative w-[80px] h-[70px]">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-[35px] bg-pastel-border/25" />
-          <div className="absolute top-[34px] left-1/2 -translate-x-1/2 w-full h-[36px] rounded-b-[50%] bg-pastel-yellow/35 shadow-lg" />
-          <div className="absolute top-[38px] left-1/2 -translate-x-1/2 w-[60%] h-[20px] rounded-b-[50%] bg-pastel-yellow/15" />
-        </div>
+      <div className="absolute top-[1%] left-1/2 -translate-x-1/2 w-[64px] h-[80px]">
+        <HangingLampSVG />
       </div>
 
       {/* Sideboard */}
       <div className="absolute bottom-[22%] right-[3%]" style={depth(0.45)}>
-        <div className="w-[70px] h-[60px] rounded-xl bg-pastel-card/50 border border-pastel-border/15 flex items-center justify-center gap-1 text-sm shadow-sm">
-          🍷🥂
+        <div className="w-[60px] h-[48px]">
+          <SideboardSVG />
         </div>
-        <div className="absolute -bottom-[3px] left-[8%] right-[8%] h-[3px] rounded-full bg-black/8" />
       </div>
     </>
   );
@@ -204,40 +237,50 @@ function PlayFurniture({ depth }: { depth: (d: number) => React.CSSProperties })
   return (
     <>
       {/* Play mat */}
-      <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-[72%] max-w-[420px] h-[70px] rounded-2xl bg-gradient-to-r from-pastel-pink/20 via-pastel-purple/20 to-pastel-sky/20 border-2 border-dashed border-pastel-border/15 shadow-inner" />
+      <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-[72%] max-w-[420px] h-[50px]">
+        <PlayMatSVG />
+      </div>
 
-      {/* Shelves */}
-      <div className="absolute top-[10%] left-[3%] w-[24%] max-w-[140px]">
-        <div className="h-[3px] bg-pastel-walnut/30 rounded-full" />
-        <div className="absolute top-0 left-0 w-[3px] h-[80px] bg-pastel-walnut/20 rounded-full" />
-        <div className="absolute top-0 right-0 w-[3px] h-[80px] bg-pastel-walnut/20 rounded-full" />
-        <div className="absolute top-[-20px] left-[8px] text-lg">🧸</div>
-        <div className="absolute top-[-16px] left-[45px] text-lg">🎲</div>
-        <div className="absolute top-[-18px] right-[8px] text-lg">📖</div>
+      {/* Bookshelf */}
+      <div className="absolute top-[10%] left-[3%] w-[48px] h-[110px]">
+        <BookshelfSVG />
       </div>
 
       {/* Blocks */}
       <div className="absolute bottom-[28%] left-[8%]" style={depth(0.6)}>
-        <div className="w-[35px] h-[35px] rounded-md bg-pastel-coral/50 rotate-12 border border-pastel-coral/25 shadow-sm" />
+        <div className="w-[32px] h-[32px]">
+          <BlockSVG color="#d88aa0" />
+        </div>
       </div>
       <div className="absolute bottom-[26%] left-[16%]" style={depth(0.55)}>
-        <div className="w-[30px] h-[30px] rounded-md bg-pastel-sky/50 -rotate-6 border border-pastel-sky/25 shadow-sm" />
+        <div className="w-[28px] h-[28px]">
+          <BlockSVG color="#78b8d0" />
+        </div>
       </div>
       <div className="absolute bottom-[30%] right-[10%]" style={depth(0.53)}>
-        <div className="w-[32px] h-[32px] rounded-md bg-pastel-yellow/50 rotate-8 border border-pastel-yellow/25 shadow-sm" />
+        <div className="w-[30px] h-[30px]">
+          <BlockSVG color="#d0b850" />
+        </div>
       </div>
 
       {/* Toy box */}
       <div className="absolute bottom-[18%] right-[3%]" style={depth(0.55)}>
-        <div className="w-[60px] h-[55px] rounded-xl bg-pastel-card/50 border border-pastel-border/15 flex items-center justify-center text-xl shadow-sm">
-          🧸
+        <div className="w-[54px] h-[44px]">
+          <ToyBoxSVG />
         </div>
-        <div className="absolute -bottom-[3px] left-[10%] right-[10%] h-[3px] rounded-full bg-black/8" />
       </div>
 
-      {/* Scattered toys */}
-      <div className="absolute bottom-[22%] left-[28%] text-lg animate-bounce-gentle" style={{ animationDelay: '0.2s' }}>⚽</div>
-      <div className="absolute bottom-[24%] right-[28%] text-lg animate-bounce-gentle" style={{ animationDelay: '0.6s' }}>🎾</div>
+      {/* Scattered balls */}
+      <div className="absolute bottom-[22%] left-[28%]" style={depth(0.5)}>
+        <div className="w-[22px] h-[22px] animate-bounce-gentle" style={{ animationDelay: '0.2s' }}>
+          <BallSVG color="#e8a0a0" />
+        </div>
+      </div>
+      <div className="absolute bottom-[24%] right-[28%]" style={depth(0.48)}>
+        <div className="w-[20px] h-[20px] animate-bounce-gentle" style={{ animationDelay: '0.6s' }}>
+          <BallSVG color="#78b8d0" />
+        </div>
+      </div>
     </>
   );
 }
@@ -248,46 +291,32 @@ function BathFurniture({ depth }: { depth: (d: number) => React.CSSProperties })
   return (
     <>
       {/* Mirror */}
-      <div className="absolute top-[4%] left-1/2 -translate-x-1/2 w-[15%] max-w-[90px] aspect-[3/4] rounded-2xl bg-gradient-to-b from-pastel-sky/15 to-pastel-mint/15 border-2 border-pastel-border/15 flex items-center justify-center shadow-sm">
-        <div className="w-[85%] h-[85%] rounded-xl bg-gradient-to-br from-white/70 to-pastel-sky/20" />
+      <div className="absolute top-[4%] left-1/2 -translate-x-1/2 w-[15%] max-w-[90px] h-[110px]">
+        <MirrorSVG />
       </div>
 
       {/* Bathtub */}
       <div className="absolute bottom-[14%] left-1/2 -translate-x-1/2" style={depth(0.5)}>
-        <div className="w-[58vw] max-w-[340px] h-[80px] rounded-[50%_50%_16px_16px] bg-gradient-to-b from-white/70 to-pastel-sky/15 border-2 border-pastel-border/15 shadow-inner">
-          {/* Water */}
-          <div className="absolute top-[18%] left-[5%] right-[5%] bottom-[10%] rounded-[50%_50%_8px_8px] bg-gradient-to-b from-pastel-sky/35 to-pastel-sky/15" />
-          {/* Bubbles */}
-          <div className="absolute top-[12%] left-[10%] w-4 h-4 rounded-full bg-white/50" />
-          <div className="absolute top-[16%] left-[22%] w-3 h-3 rounded-full bg-white/40" />
-          <div className="absolute top-[10%] left-[38%] w-5 h-5 rounded-full bg-white/50" />
-          <div className="absolute top-[14%] left-[58%] w-3 h-3 rounded-full bg-white/40" />
-          <div className="absolute top-[11%] right-[12%] w-4 h-4 rounded-full bg-white/50" />
+        <div className="w-[60vw] max-w-[350px] h-[90px]">
+          <BathtubSVG />
         </div>
-        {/* Feet */}
-        <div className="absolute -bottom-[3px] left-[8%] w-2.5 h-2.5 rounded-full bg-pastel-border/25" />
-        <div className="absolute -bottom-[3px] right-[8%] w-2.5 h-2.5 rounded-full bg-pastel-border/25" />
-        <div className="absolute -bottom-[3px] left-[5%] right-[5%] h-[3px] rounded-full bg-black/8" />
       </div>
 
       {/* Towels */}
-      <div className="absolute top-[10%] left-[4%] w-[15%] max-w-[80px]">
-        <div className="h-[2px] bg-pastel-border/30 rounded-full mb-1" />
-        <div className="flex gap-1">
-          <div className="w-[30%] h-[50px] rounded-md bg-pastel-sky/35" />
-          <div className="w-[30%] h-[40px] rounded-md bg-pastel-pink/35" />
-        </div>
+      <div className="absolute top-[10%] left-[4%] w-[24px] h-[44px]">
+        <TowelsSVG />
       </div>
 
       {/* Shower */}
       <div className="absolute bottom-[22%] right-[4%]" style={depth(0.65)}>
-        <div className="relative w-[30px] h-[90px]">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[4px] h-[60%] bg-pastel-border/25 rounded-full" />
-          <div className="absolute top-[58%] left-1/2 -translate-x-1/2 w-[24px] h-[6px] bg-pastel-border/25 rounded-full" />
-          <div className="absolute top-[64%] left-1/2 -translate-x-1/2 w-[18px] h-[35%] rounded-[50%] bg-pastel-sky/15" />
-          <div className="absolute top-[68%] left-[2px] w-1 h-2 rounded-full bg-pastel-sky/25" />
-          <div className="absolute top-[74%] right-[2px] w-1 h-1.5 rounded-full bg-pastel-sky/25" />
+        <div className="w-[28px] h-[90px]">
+          <ShowerSVG />
         </div>
+      </div>
+
+      {/* Bath mat */}
+      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 w-[45%] max-w-[260px] h-[18px]">
+        <BathMatSVG />
       </div>
     </>
   );
@@ -299,34 +328,27 @@ function SleepFurniture({ petPositions, depth: _depth }: { petPositions: SleepPo
   return (
     <>
       {/* Moon */}
-      <div className="absolute top-[2%] right-[8%]">
-        <div className="relative w-[50px] h-[50px]">
-          <div className="w-full h-full rounded-full bg-pastel-yellow/40 shadow-lg shadow-pastel-yellow/20" />
-          <div className="absolute top-[8%] left-[14%] w-[85%] h-[85%] rounded-full bg-pastel-lavender/35" style={{ boxShadow: 'inset 0 0 15px rgba(0,0,0,0.12)' }} />
-        </div>
+      <div className="absolute top-[2%] right-[8%] w-[44px] h-[44px]">
+        <MoonSVG />
       </div>
 
       {/* Stars */}
-      <div className="absolute top-[5%] left-[8%] w-1.5 h-1.5 rounded-full bg-pastel-yellow/50" />
-      <div className="absolute top-[9%] left-[22%] w-1 h-1 rounded-full bg-pastel-yellow/40" />
-      <div className="absolute top-[3%] left-[40%] w-1.5 h-1.5 rounded-full bg-pastel-yellow/50" />
-      <div className="absolute top-[7%] left-[55%] w-1 h-1 rounded-full bg-pastel-yellow/35" />
-      <div className="absolute top-[2%] left-[70%] w-1 h-1 rounded-full bg-pastel-yellow/40" />
+      <div className="absolute top-[5%] left-[8%] w-1.5 h-1.5 rounded-full bg-pastel-yellow/50 animate-pulse-soft" style={{ animationDelay: '0.3s' }} />
+      <div className="absolute top-[9%] left-[22%] w-1 h-1 rounded-full bg-pastel-yellow/40 animate-pulse-soft" style={{ animationDelay: '0.7s' }} />
+      <div className="absolute top-[3%] left-[40%] w-1.5 h-1.5 rounded-full bg-pastel-yellow/50 animate-pulse-soft" style={{ animationDelay: '1.2s' }} />
+      <div className="absolute top-[7%] left-[55%] w-1 h-1 rounded-full bg-pastel-yellow/35 animate-pulse-soft" style={{ animationDelay: '0.5s' }} />
+      <div className="absolute top-[2%] left-[70%] w-1 h-1 rounded-full bg-pastel-yellow/40 animate-pulse-soft" style={{ animationDelay: '0.9s' }} />
 
       {/* Nightstands */}
       <div className="absolute bottom-[18%] left-[3%]" style={_depth(0.55)}>
-        <div className="w-[50px] h-[50px] rounded-xl bg-pastel-card/50 border border-pastel-border/15 shadow-sm">
-          <div className="absolute top-[4%] left-1/2 -translate-x-1/2 w-[4px] h-[35%] bg-pastel-border/15 rounded-full" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-pastel-yellow/50" />
+        <div className="w-[46px] h-[56px]">
+          <NightstandSVG />
         </div>
-        <div className="absolute -bottom-[3px] left-[10%] right-[10%] h-[3px] rounded-full bg-black/8" />
       </div>
       <div className="absolute bottom-[18%] right-[3%]" style={_depth(0.55)}>
-        <div className="w-[50px] h-[50px] rounded-xl bg-pastel-card/50 border border-pastel-border/15 shadow-sm">
-          <div className="absolute top-[4%] left-1/2 -translate-x-1/2 w-[4px] h-[35%] bg-pastel-border/15 rounded-full" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-pastel-yellow/50" />
+        <div className="w-[46px] h-[56px]">
+          <NightstandSVG />
         </div>
-        <div className="absolute -bottom-[3px] left-[10%] right-[10%] h-[3px] rounded-full bg-black/8" />
       </div>
 
       {/* Sleep zone background */}
@@ -345,13 +367,8 @@ function SleepFurniture({ petPositions, depth: _depth }: { petPositions: SleepPo
             aspectRatio: '2/1',
           }}
         >
-          <div className="absolute -bottom-[2px] left-[3%] right-[3%] h-[4px] rounded-full bg-black/8" />
-          <div className="absolute inset-0 bg-gradient-to-b from-pastel-purple/40 to-pastel-purple/25 rounded-xl border border-pastel-border/15 shadow-sm">
-            <div className="absolute -top-[4px] left-[5%] right-[5%] h-[7px] bg-pastel-purple/35 rounded-t-lg" />
-            <div className="absolute top-[14%] left-[5%] right-[5%] bottom-[12%] bg-white/50 rounded-lg" />
-            <div className="absolute top-[16%] left-[7%] w-[20%] h-[25%] bg-pastel-yellow/35 rounded-lg" />
-            <div className="absolute bottom-[12%] left-[26%] right-[5%] h-[50%] bg-gradient-to-b from-pastel-pink/40 to-pastel-pink/25 rounded-lg" />
-            <div className="absolute top-[38%] left-[30%] w-[2px] h-[35%] bg-white/10 rounded-full" />
+          <div className="w-full h-full">
+            <BedSVG />
           </div>
         </div>
       ))}
@@ -382,6 +399,23 @@ export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: 
       </div>
 
       <Window room={room} />
+
+      {/* Room ambient overlays */}
+      {room === 'sleep' && (
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Moonbeam */}
+          <div className="absolute top-0 right-[8%] w-[20%] h-[70%] bg-gradient-to-b from-pastel-yellow/[0.03] via-pastel-yellow/[0.02] to-transparent" style={{ clipPath: 'polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)', transform: 'skewX(-8deg)' }} />
+        </div>
+      )}
+
+      {room === 'living' && (
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Warm glow from lamp */}
+          <div className="absolute bottom-[22%] right-[6%] w-[120px] h-[120px] rounded-full bg-pastel-yellow/[0.04]" />
+        </div>
+      )}
+
+      {/* Ambient fade */}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/[0.04] via-transparent to-black/[0.02]" />
     </div>
   );

@@ -35,10 +35,12 @@
 - Colocación y funcionalidad de objetos en la habitación
 - Muebles interactivos (cama para dormir, comedero para comer, etc.)
 
-### 2.6 Fondos y Escenarios Mejorados
+### 2.6 Fondos y Escenarios Mejorados ✅
 - Fondos mucho mejores para cada habitación (living, eat, play, bath, sleep)
 - Decoraciones detalladas alineadas con perspectiva isométrica
 - Camas de mascotas más juntas y mejor diseñadas
+- Muebles SVG reemplazan CSS divs (SofaSVG, DiningTableSVG, BathtubSVG, BedSVG, etc.)
+- Atmósfera única por habitación: dormitorio nocturno con luna/estrellas, living con brillo cálido, baño con patrón azulejos, play con círculos coloridos
 
 ### 2.7 Rediseño de Mascotas
 - Representación SVG mucho mejor que emojis
