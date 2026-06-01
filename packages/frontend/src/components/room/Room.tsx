@@ -11,7 +11,7 @@ import { useSimulatedNeeds } from '@/hooks/useSimulatedNeeds';
 import type { SleepPosition } from './sleepTileMap';
 import {
   Sofa, UtensilsCrossed, Gamepad2, Bath, Moon,
-  Sparkles, Apple, Bed, Droplets,
+  Sparkles, Apple, Bed, Droplets, Plus,
 } from 'lucide-react';
 
 const ROOMS = [
@@ -60,11 +60,11 @@ export function Room() {
   const activePetData = (activePetId ? petMap[activePetId] : null) ?? null;
   const simulatedPet = useSimulatedNeeds(activePetData);
   const [room, setRoom] = useState<RoomId>('living');
+  const [petRooms, setPetRooms] = useState<Record<string, RoomId>>({});
   const [petPositions, setPetPositions] = useState<PetPosition[]>([]);
   const [feedback, setFeedback] = useState<{ emoji: string; petId: string } | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [itemSelector, setItemSelector] = useState<{ category: string; petId: string } | null>(null);
-  const [cooldowns, setCooldowns] = useState<Record<string, number>>({});
   const fbTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
@@ -74,24 +74,52 @@ export function Room() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Init all pets in living room
   useEffect(() => {
-    if (room === 'sleep') {
-      setPetPositions(getSleepPositions(pets.length));
-    } else {
-      setPetPositions(distributePositions(pets.length));
+    if (pets.length > 0 && Object.keys(petRooms).length === 0) {
+      const initial: Record<string, RoomId> = {};
+      for (const p of pets) {
+        initial[p.id] = p.isSleeping ? 'sleep' : 'living';
+      }
+      setPetRooms(initial);
     }
-  }, [room, pets.length]);
+  }, [pets, petRooms]);
 
+  // Update positions when room changes or petRooms change
+  useEffect(() => {
+    const currentPets = pets.filter((p) => petRooms[p.id] === room);
+    if (room === 'sleep') {
+      const sleeping = currentPets.filter((p) => p.isSleeping);
+      const awake = currentPets.filter((p) => !p.isSleeping);
+      const bedPos = getSleepPositions(sleeping.length);
+      const floorPos = distributePositions(awake.length);
+      let bi = 0;
+      let fi = 0;
+      const positions: PetPosition[] = currentPets.map((p) => {
+        if (p.isSleeping) {
+          return bedPos[bi++] ?? { x: 50, depth: 0.35, top: 65 };
+        }
+        // Convert floorPos (decimal 0-1) to sleep position format (percentage 0-100)
+        const fp = floorPos[fi++] ?? { x: 0.5, depth: 0.5, top: 82 };
+        return { x: fp.x * 100, depth: fp.depth, top: fp.top };
+      });
+      setPetPositions(positions);
+    } else {
+      setPetPositions(distributePositions(currentPets.length));
+    }
+  }, [room, petRooms, pets]);
+
+  // Living room random movement
   useEffect(() => {
     if (room !== 'living') return;
+    const currentPets = pets.filter((p) => petRooms[p.id] === 'living');
+    if (currentPets.length === 0) return;
     const timers: ReturnType<typeof setInterval>[] = [];
-    for (let i = 0; i < pets.length; i++) {
+    for (let i = 0; i < currentPets.length; i++) {
       const t = setInterval(() => {
-        const data = petMap[pets[i]?.id ?? ''];
-        if (data?.isSleeping) return;
         setPetPositions((prev) => {
           const next = [...prev];
-          const rangeX = Math.min(0.72, 0.22 + (pets.length - 2) * 0.16);
+          const rangeX = Math.min(0.72, 0.22 + (currentPets.length - 2) * 0.16);
           next[i] = {
             x: 0.5 - rangeX / 2 + Math.random() * rangeX,
             depth: next[i]?.depth ?? 0.5,
@@ -103,7 +131,7 @@ export function Room() {
       timers.push(t);
     }
     return () => timers.forEach(clearInterval);
-  }, [room, pets, petMap]);
+  }, [room, petRooms, pets]);
 
   const showFeedback = (emoji: string, petId: string) => {
     setFeedback({ emoji, petId });
@@ -139,29 +167,37 @@ export function Room() {
     [petMap, performAction],
   );
 
+  const handleCallPet = useCallback(
+    async (petId: string) => {
+      const data = petMap[petId];
+      if (data?.isSleeping) {
+        await performAction(petId, 'wake');
+        showFeedback('🌅', petId);
+      }
+      setPetRooms((prev) => ({ ...prev, [petId]: room }));
+    },
+    [room, petMap, performAction],
+  );
+
   const handleItemSelect = async (petId: string, itemId: string) => {
     await handleRoomAction(petId, itemId);
     setItemSelector(null);
   };
 
   const switchRoom = useCallback(
-    async (newRoom: RoomId) => {
+    (newRoom: RoomId) => {
       if (newRoom === room) return;
       setRoom(newRoom);
-
-      if (newRoom === 'sleep') {
-        for (const p of pets) {
-          const data = petMap[p.id];
-          if (!data?.isSleeping) {
-            await performAction(p.id, 'sleep');
-          }
-        }
-      }
     },
-    [room, pets, petMap, performAction],
+    [room],
   );
 
   if (pets.length === 0) return null;
+
+  // Pets in current room + sleeping pets that belong here (in sleep room)
+  const currentPets = pets.filter((p) => petRooms[p.id] === room);
+  // Pets NOT in this room (available to call)
+  const otherPets = pets.filter((p) => petRooms[p.id] !== room);
 
   return (
     <div className="space-y-2">
@@ -195,7 +231,7 @@ export function Room() {
 
         {/* Pets Layer */}
         <div className="absolute inset-0 z-10 pointer-events-none">
-          {pets.map((summary, i) => {
+          {currentPets.map((summary, i) => {
             const pos = petPositions[i];
             if (!pos) return null;
             const data = petMap[summary.id];
@@ -252,70 +288,54 @@ export function Room() {
                     {feedback.emoji}
                   </div>
                 )}
-
-
               </div>
             );
           })}
         </div>
 
-        {/* Interactive Action Zones inside the room */}
-        {room !== 'living' && activePetId && (
-          <div className="absolute inset-0 z-20 pointer-events-none">
-            {room === 'eat' && (
-              <button
-                onClick={() => setItemSelector({ category: 'FOOD', petId: activePetId })}
-                className="absolute pointer-events-auto bottom-[30%] left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 hover:shadow-xl active:scale-95 transition-all animate-bounce-gentle"
-              >
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400 to-orange-400 flex items-center justify-center text-white shadow-md">
-                  <Apple size={16} />
-                </div>
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">¡A comer!</span>
-              </button>
-            )}
-            {room === 'play' && (
-              <button
-                onClick={() => setItemSelector({ category: 'TOY', petId: activePetId })}
-                className="absolute pointer-events-auto bottom-[30%] left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 hover:shadow-xl active:scale-95 transition-all animate-bounce-gentle"
-              >
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-400 to-purple-400 flex items-center justify-center text-white shadow-md">
-                  <Gamepad2 size={16} />
-                </div>
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">¡A jugar!</span>
-              </button>
-            )}
-            {room === 'bath' && (
-              <button
-                onClick={() => setItemSelector({ category: 'SPONGE', petId: activePetId })}
-                className="absolute pointer-events-auto bottom-[30%] left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 hover:shadow-xl active:scale-95 transition-all animate-bounce-gentle"
-              >
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-400 flex items-center justify-center text-white shadow-md">
-                  <Droplets size={16} />
-                </div>
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">¡A bañarse!</span>
-              </button>
-            )}
-            {room === 'sleep' && (
-              <div className="absolute pointer-events-auto bottom-[30%] left-1/2 -translate-x-1/2 flex gap-2">
-                {pets.map((p) => {
-                  const isSleeping = p.isSleeping;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => handleSleepToggle(p.id)}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 hover:shadow-xl active:scale-95 transition-all"
-                    >
-                      <Bed size={14} className={isSleeping ? 'text-amber-400' : 'text-pastel-purple'} />
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                        {isSleeping ? 'Despertar' : p.name}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Action buttons */}
+        <div className="absolute inset-x-0 bottom-2 z-20 flex flex-wrap gap-1.5 justify-center px-2 pointer-events-none">
+          {/* Room-specific action */}
+          {room !== 'living' && room !== 'sleep' && activePetId && currentPets.some((p) => p.id === activePetId) && (
+            <button
+              onClick={() => {
+                const config = ROOM_ACTIONS[room];
+                if (config) setItemSelector({ category: config.category, petId: activePetId });
+              }}
+              className="pointer-events-auto flex items-center gap-1.5 px-3 py-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 active:scale-95 transition-all text-xs font-semibold text-slate-700 dark:text-slate-200"
+            >
+              {ROOM_ACTIONS[room]?.emoji} {ROOM_ACTIONS[room]?.label}
+            </button>
+          )}
+
+          {/* Sleep/wake toggles */}
+          {room === 'sleep' && currentPets.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => handleSleepToggle(p.id)}
+              className="pointer-events-auto flex items-center gap-1.5 px-3 py-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-pastel-border/20 hover:bg-white dark:hover:bg-slate-700/90 active:scale-95 transition-all text-xs font-semibold"
+            >
+              <Bed size={14} className={p.isSleeping ? 'text-amber-400' : 'text-pastel-purple'} />
+              {p.isSleeping ? `Despertar ${p.name}` : `Dormir ${p.name}`}
+            </button>
+          ))}
+
+          {/* Call pet buttons */}
+          {otherPets.length > 0 && (
+            <div className="pointer-events-auto flex flex-wrap gap-1.5 justify-center">
+              {otherPets.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => handleCallPet(p.id)}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-pastel-purple/80 to-pastel-pink/80 backdrop-blur-md rounded-2xl shadow-lg hover:brightness-110 active:scale-95 transition-all text-xs font-semibold text-white"
+                >
+                  <Plus size={12} />
+                  Llamar {p.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Room Label */}
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
@@ -329,7 +349,7 @@ export function Room() {
           </div>
         </div>
 
-        {/* Needs overlay — top right */}
+        {/* Needs overlay */}
         {simulatedPet && (
           <div className="absolute top-2 right-2 z-30 pointer-events-auto">
             <RoomNeedsOverlay pet={simulatedPet} />

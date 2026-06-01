@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PetMood, PetSpecies } from '@amigitos/shared';
+import { loadPetImage } from '@/lib/petImageLoader';
 
 interface PetSpriteProps {
   species: PetSpecies;
   mood: PetMood;
   isSleeping?: boolean;
   size?: number;
+  customImageUrl?: string;
 }
 
 /* ─── Pixel palette ─── */
@@ -443,9 +445,22 @@ function draw(species: PetSpecies, mood: PetMood, sleep: boolean): Grid {
 }
 
 /* ─── Render ─── */
-export function PetSprite({ species, mood, isSleeping, size = 200 }: PetSpriteProps) {
+export function PetSprite({ species, mood, isSleeping, size = 200, customImageUrl }: PetSpriteProps) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const [externalGrid, setExternalGrid] = useState<string[][] | null>(null);
   const scale = Math.max(4, Math.round(size / SZ));
+
+  useEffect(() => {
+    if (!customImageUrl) {
+      setExternalGrid(null);
+      return;
+    }
+    let cancelled = false;
+    loadPetImage(customImageUrl).then((grid) => {
+      if (!cancelled) setExternalGrid(grid);
+    });
+    return () => { cancelled = true; };
+  }, [customImageUrl]);
 
   useEffect(() => {
     const c = ref.current;
@@ -453,6 +468,19 @@ export function PetSprite({ species, mood, isSleeping, size = 200 }: PetSpritePr
     const ctx = c.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, c.width, c.height);
+
+    if (externalGrid) {
+      for (let y = 0; y < Math.min(SZ, externalGrid.length); y++) {
+        for (let x = 0; x < Math.min(SZ, externalGrid[y]?.length ?? 0); x++) {
+          const v = externalGrid[y]![x]!;
+          if (v && v !== '_') {
+            ctx.fillStyle = v;
+            ctx.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+      return;
+    }
 
     const grid = draw(species, mood, isSleeping ?? false);
     for (let y = 0; y < SZ; y++) {
@@ -464,7 +492,7 @@ export function PetSprite({ species, mood, isSleeping, size = 200 }: PetSpritePr
         }
       }
     }
-  }, [species, mood, isSleeping]);
+  }, [species, mood, isSleeping, externalGrid]);
 
   const displaySize = SZ * scale;
 
