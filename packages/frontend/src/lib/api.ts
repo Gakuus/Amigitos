@@ -35,16 +35,16 @@ async function refreshAuthToken(): Promise<boolean> {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+  const timeout = setTimeout(() => controller.abort(), 5000);
 
-  const doFetch = (authToken: string | null) => {
+  const doFetch = (authToken: string | null, signal?: AbortSignal) => {
     return fetch(`${API_URL}${path}`, {
       headers: {
         'Content-Type': 'application/json',
         ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         ...options.headers,
       },
-      signal: controller.signal,
+      signal: signal ?? controller.signal,
       ...options,
     });
   };
@@ -56,8 +56,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     if (res.status === 401 && token) {
       const refreshed = await refreshAuthToken();
       if (refreshed) {
+        clearTimeout(timeout);
         token = localStorage.getItem('token');
-        res = await doFetch(token);
+        const retryController = new AbortController();
+        const retryTimeout = setTimeout(() => retryController.abort(), 5000);
+        res = await doFetch(token, retryController.signal);
+        clearTimeout(retryTimeout);
       }
     }
 

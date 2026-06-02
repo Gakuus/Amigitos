@@ -29,7 +29,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated) router.push('/login');
+    if (!isAuthenticated) router.replace('/login');
   }, [authLoading, isAuthenticated, router]);
 
   useEffect(() => {
@@ -51,18 +51,19 @@ export default function HomePage() {
     }
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-pastel-cream via-pastel-pink/30 to-pastel-sky/30">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-[3px] border-pastel-purple border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-pastel-foreground animate-pulse-soft">Cargando...</p>
+  if (authLoading || !isAuthenticated) {
+    if (authLoading) {
+      return (
+        <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-pastel-cream via-pastel-pink/30 to-pastel-sky/30">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-[3px] border-pastel-purple border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm text-pastel-foreground animate-pulse-soft">Cargando...</p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+    return null;
   }
-
-  if (!isAuthenticated) return null;
 
   return (
     <div className="min-h-dvh flex flex-col bg-gradient-to-br from-pastel-cream via-pastel-pink/20 to-pastel-sky/20 dark:from-slate-900 dark:via-[#0b1120] dark:to-slate-900">
