@@ -3,19 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Room } from '@/components/room/Room';
-import { PetSelector } from '@/components/pet/PetSelector';
-import { PetStats } from '@/components/pet/PetStats';
 import { AdoptModal } from '@/components/pet/AdoptModal';
 import { CoupleManager } from '@/components/couple/CoupleManager';
 import { ShopModal } from '@/components/shop/ShopModal';
 import { GameModal } from '@/components/games/GameModal';
-import { Wardrobe } from '@/components/pet/Wardrobe';
 import { usePetStore } from '@/stores/pet.store';
 import { useAuthStore } from '@/stores/auth.store';
-import { useSimulatedNeeds } from '@/hooks/useSimulatedNeeds';
+
 import {
-  Home, Gamepad2, ShoppingBag, HeartHandshake, User,
-  PawPrint, Sparkles, Shirt, LogOut, Trophy, Coins,
+  Home, PawPrint, Sparkles, Shirt, LogOut, Trophy, Coins, HeartHandshake, User,
 } from 'lucide-react';
 
 type Tab = 'home' | 'games' | 'shop' | 'couple' | 'profile';
@@ -55,9 +51,6 @@ export default function HomePage() {
     }
   };
 
-  const activePet = (activePetId ? petMap[activePetId] : null) ?? null;
-  const simulatedPet = useSimulatedNeeds(activePet);
-
   if (authLoading) {
     return (
       <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-pastel-cream via-pastel-pink/30 to-pastel-sky/30">
@@ -70,14 +63,6 @@ export default function HomePage() {
   }
 
   if (!isAuthenticated) return null;
-
-  const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: 'home', label: 'Inicio', icon: <Home size={22} /> },
-    { id: 'games', label: 'Juegos', icon: <Gamepad2 size={22} /> },
-    { id: 'shop', label: 'Tienda', icon: <ShoppingBag size={22} /> },
-    { id: 'couple', label: 'Pareja', icon: <HeartHandshake size={22} /> },
-    { id: 'profile', label: 'Perfil', icon: <User size={22} /> },
-  ];
 
   return (
     <div className="min-h-dvh flex flex-col bg-gradient-to-br from-pastel-cream via-pastel-pink/20 to-pastel-sky/20 dark:from-slate-900 dark:via-[#0b1120] dark:to-slate-900">
@@ -92,20 +77,12 @@ export default function HomePage() {
               Amigitos
             </h1>
           </div>
-          <div className="flex items-center gap-3">
-            {user?.coins !== undefined && (
-              <span className="flex items-center gap-1.5 bg-pastel-yellow/30 border border-pastel-yellow/40 px-3 py-1.5 rounded-xl text-sm">
-                <Coins size={16} className="text-pastel-orange" />
-                <span className="font-bold text-pastel-orange">{user.coins}</span>
-              </span>
-            )}
-          </div>
         </div>
       </header>
 
       {/* ===== Main Content ===== */}
-      <main className="flex-1 overflow-y-auto pb-20">
-        <div className="max-w-4xl mx-auto p-3 sm:p-4 space-y-4">
+      <main className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col">
 
           {loading && (
             <div className="flex items-center justify-center py-20">
@@ -140,65 +117,23 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Pet Selector */}
-          {!loading && pets.length > 0 && (
-            <PetSelector
-              pets={pets}
-              activePetId={activePetId}
-              onSelect={selectPet}
-              onAdopt={() => setShowAdopt(true)}
-            />
-          )}
-
           {/* Home tab */}
           {tab === 'home' && !loading && pets.length > 0 && (
-            <>
-              <Room />
-
-              {activePet && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-4">
-                    {simulatedPet && <PetStats pet={simulatedPet} simulated />}
-                    <button
-                      onClick={() => setShowWardrobe(!showWardrobe)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-pastel-purple/15 border border-pastel-purple/25 rounded-2xl text-sm text-pastel-purple font-semibold hover:bg-pastel-purple/25 active:scale-[0.98] transition-all"
-                    >
-                      <Shirt size={18} />
-                      {showWardrobe ? 'Cerrar armario' : 'Armario'}
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setShowGames(true)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-pastel-purple/25 to-pastel-pink/20 border border-pastel-purple/25 rounded-2xl text-sm text-pastel-purple font-semibold hover:from-pastel-purple/35 hover:to-pastel-pink/30 active:scale-[0.98] transition-all"
-                      >
-                        <Gamepad2 size={18} />
-                        Jugar
-                      </button>
-                      <button
-                        onClick={() => setShowShop(true)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-pastel-coral/20 to-pastel-peach/20 border border-pastel-coral/25 rounded-2xl text-sm text-pastel-coral font-semibold hover:from-pastel-coral/30 hover:to-pastel-peach/30 active:scale-[0.98] transition-all"
-                      >
-                        <ShoppingBag size={18} />
-                        Tienda
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {showWardrobe && activePet && (
-                <div className="animate-slide-down">
-                  <Wardrobe
-                    petId={activePet.id}
-                    species={activePet.species}
-                    outfit={outfit}
-                    onEquip={refreshOutfit}
-                  />
-                </div>
-              )}
-            </>
+            <div className="flex-1 flex flex-col">
+              <Room
+                userCoins={user?.coins}
+                userName={user?.name}
+                showWardrobe={showWardrobe}
+                outfit={outfit}
+                onWardrobeToggle={() => setShowWardrobe(!showWardrobe)}
+                onWardrobeEquip={refreshOutfit}
+                onOpenShop={() => setTab('shop')}
+                onOpenGames={() => setTab('games')}
+                onOpenCouple={() => setTab('couple')}
+                onOpenProfile={() => setTab('profile')}
+                onOpenAdopt={() => setShowAdopt(true)}
+              />
+            </div>
           )}
 
           {/* Shop tab */}
@@ -277,30 +212,6 @@ export default function HomePage() {
           )}
         </div>
       </main>
-
-      {/* ===== Bottom Navigation ===== */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-pastel-border/30 dark:border-surface-border/50 pb-safe">
-        <div className="flex items-center justify-around max-w-lg mx-auto px-2 py-1">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setTab(item.id)}
-              className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-all min-w-0 ${
-                tab === item.id
-                  ? 'text-pastel-purple scale-110'
-                  : 'text-pastel-muted dark:text-slate-500 hover:text-pastel-foreground dark:hover:text-slate-300'
-              }`}
-            >
-              <span className={`transition-transform ${tab === item.id ? 'animate-bounce-gentle' : ''}`}>
-                {item.icon}
-              </span>
-              <span className={`text-[10px] font-semibold ${tab === item.id ? 'text-pastel-purple' : 'text-pastel-muted dark:text-slate-500'}`}>
-                {item.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      </nav>
 
       {/* ===== Modals ===== */}
       {showAdopt && (

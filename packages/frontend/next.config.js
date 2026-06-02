@@ -7,6 +7,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'storage.amigitos.app' },
     ],
   },
+  allowedDevOrigins: ['http://127.0.0.1', 'http://localhost'],
 };
 
 module.exports = nextConfig;

@@ -18,13 +18,6 @@ const config: Config = {
           50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af',
           400: '#fb7185', 500: '#f43f5e', 600: '#e11d48',
         },
-        pet: {
-          happy: '#fbbf24',
-          neutral: '#94a3b8',
-          sad: '#60a5fa',
-          sleeping: '#a78bfa',
-          sick: '#f87171',
-        },
         surface: {
           DEFAULT: '#1e293b',
           light: '#334155',
@@ -71,25 +64,15 @@ const config: Config = {
         '4xl': '2rem',
       },
       animation: {
-        'wiggle': 'wiggle 0.8s ease-in-out infinite',
-        'bounce-in': 'bounce-in 0.4s ease-out',
-        'float-up': 'float-up 0.8s ease-out forwards',
         'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
         'slide-up': 'slide-up 0.3s ease-out',
         'fade-in': 'fade-in 0.2s ease-out',
         'pop': 'pop 0.3s ease-out',
         'bounce-gentle': 'bounce-gentle 1s ease-in-out infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
-        'float': 'float 3s ease-in-out infinite',
         'bounce-idle': 'bounce-idle 2.5s ease-in-out infinite',
         'breathe-sleep': 'breathe-sleep 3s ease-in-out infinite',
       },
       keyframes: {
-        wiggle: {
-          '0%, 100%': { transform: 'rotate(0deg)' },
-          '25%': { transform: 'rotate(-3deg)' },
-          '75%': { transform: 'rotate(3deg)' },
-        },
         'pulse-soft': {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.7' },
@@ -110,14 +93,6 @@ const config: Config = {
         'bounce-gentle': {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-4px)' },
-        },
-        glow: {
-          '0%': { boxShadow: '0 0 5px rgba(167, 139, 250, 0.3)' },
-          '100%': { boxShadow: '0 0 20px rgba(167, 139, 250, 0.6)' },
-        },
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-6px)' },
         },
         'bounce-idle': {
           '0%, 100%': { transform: 'translateY(0)' },

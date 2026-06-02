@@ -1,9 +1,10 @@
 'use client';
 
 import type { SleepPosition } from './sleepTileMap';
+import { getBedPositions } from './sleepTileMap';
 import {
   SofaSVG, LampSVG, CoffeeTableSVG, WallArtSVG, PlantSVG, BookshelfSVG,
-  DiningTableSVG, DiningChairSVG, HangingLampSVG, SideboardSVG,
+  HangingLampSVG, SideboardSVG,
   PlayMatSVG, BlockSVG, ToyBoxSVG, BallSVG,
   BathtubSVG, ShowerSVG, MirrorSVG, TowelsSVG, BathMatSVG,
   MoonSVG, BedSVG, NightstandSVG,
@@ -197,44 +198,17 @@ function LivingFurniture({ depth }: { depth: (d: number) => React.CSSProperties 
 
 /* ───────── Eat Room ───────── */
 
-function EatFurniture({ petPositions, depth }: { petPositions: SleepPosition[]; depth: (d: number) => React.CSSProperties }) {
+function EatFurniture() {
   return (
     <>
-      {/* Table */}
-      <div className="absolute bottom-[22%] left-1/2 -translate-x-1/2" style={depth(0.5)}>
-        <div className="w-[52vw] max-w-[320px] h-[65px]">
-          <DiningTableSVG />
-        </div>
-      </div>
-
-      {/* Chairs — one per pet, positioned around the table */}
-      {petPositions.map((pos, i) => (
-        <div
-          key={i}
-          className="absolute"
-          style={{
-            left: `${pos.x * 100}%`,
-            bottom: `calc(16% + ${(1 - pos.depth) * 40}px)`,
-            transform: `translateX(-50%) scale(${0.5 + pos.depth * 0.55})`,
-            transformOrigin: 'bottom center',
-          }}
-        >
-          <div className="w-[14vw] max-w-[80px] h-[90px]">
-            <DiningChairSVG />
-          </div>
-        </div>
-      ))}
-
       {/* Hanging lamp */}
       <div className="absolute top-[1%] left-1/2 -translate-x-1/2 w-[64px] h-[80px]">
         <HangingLampSVG />
       </div>
 
       {/* Sideboard */}
-      <div className="absolute bottom-[22%] right-[6%]" style={depth(0.45)}>
-        <div className="w-[60px] h-[48px]">
-          <SideboardSVG />
-        </div>
+      <div className="absolute bottom-[22%] right-[6%] w-[60px] h-[48px]">
+        <SideboardSVG />
       </div>
     </>
   );
@@ -333,7 +307,8 @@ function BathFurniture({ depth }: { depth: (d: number) => React.CSSProperties })
 
 /* ───────── Sleep Room ───────── */
 
-function SleepFurniture({ petPositions, depth: _depth }: { petPositions: SleepPosition[]; depth: (d: number) => React.CSSProperties }) {
+function SleepFurniture({ petCount, depth: _depth }: { petCount: number; depth: (d: number) => React.CSSProperties }) {
+  const beds = getBedPositions(petCount);
   return (
     <>
       {/* Moon */}
@@ -363,8 +338,8 @@ function SleepFurniture({ petPositions, depth: _depth }: { petPositions: SleepPo
       {/* Sleep zone background */}
       <div className="absolute bottom-[6%] left-[3%] right-[3%] h-[38%] rounded-2xl bg-pastel-purple/8 border border-pastel-purple/10" />
 
-      {/* Beds aligned with sleep positions */}
-      {petPositions.map((pos, i) => (
+      {/* Dynamic beds — always visible, close together */}
+      {beds.map((pos, i) => (
         <div
           key={i}
           className="absolute"
@@ -373,10 +348,11 @@ function SleepFurniture({ petPositions, depth: _depth }: { petPositions: SleepPo
             top: `calc(${pos.top}% - 4%)`,
             width: '20%',
             maxWidth: '120px',
-            aspectRatio: '2/1',
+            aspectRatio: '200/150',
+            zIndex: i + 1,
           }}
         >
-          <div className="w-full h-full">
+          <div className="w-full h-full pointer-events-none drop-shadow-lg">
             <BedSVG />
           </div>
         </div>
@@ -387,7 +363,7 @@ function SleepFurniture({ petPositions, depth: _depth }: { petPositions: SleepPo
 
 /* ───────── Main export ───────── */
 
-export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: SleepPosition[] }) {
+export function RoomScene({ room, petPositions, totalPets }: { room: RoomId; petPositions: SleepPosition[]; totalPets: number }) {
   const depth = (d: number): React.CSSProperties => ({
     transform: `scale(${0.5 + d * 0.55})`,
     transformOrigin: 'bottom center',
@@ -401,10 +377,10 @@ export function RoomScene({ room, petPositions }: { room: RoomId; petPositions: 
 
       <div className="absolute inset-0">
         {room === 'living' && <LivingFurniture depth={depth} />}
-        {room === 'eat' && <EatFurniture petPositions={petPositions} depth={depth} />}
+        {room === 'eat' && <EatFurniture />}
         {room === 'play' && <PlayFurniture depth={depth} />}
         {room === 'bath' && <BathFurniture depth={depth} />}
-        {room === 'sleep' && <SleepFurniture petPositions={petPositions} depth={depth} />}
+        {room === 'sleep' && <SleepFurniture petCount={totalPets} depth={depth} />}
       </div>
 
       <Window room={room} />

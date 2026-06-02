@@ -8,7 +8,7 @@ import { useGameStore } from '@/stores/game.store';
 import { useShopStore } from '@/stores/shop.store';
 import { useAuthStore } from '@/stores/auth.store';
 import {
-  Gamepad2, X, ArrowLeft, Coins, Sparkles, Trophy,
+  Gamepad2, X, ArrowLeft, Coins,
   MemoryStickIcon as Memory, Pizza, Puzzle, Heart,
   Frown,
 } from 'lucide-react';

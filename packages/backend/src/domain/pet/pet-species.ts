@@ -8,5 +8,6 @@ export enum PetSpecies {
   PENGUIN = 'PENGUIN',
   DRAGON = 'DRAGON',
   UNICORN = 'UNICORN',
+  MONKEY = 'MONKEY',
   CUSTOM = 'CUSTOM',
 }

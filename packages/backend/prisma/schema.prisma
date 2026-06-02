@@ -17,6 +17,7 @@ enum PetSpecies {
   PENGUIN
   DRAGON
   UNICORN
+  MONKEY
   CUSTOM
 }
 

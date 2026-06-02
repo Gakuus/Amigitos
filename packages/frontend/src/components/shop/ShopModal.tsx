@@ -8,7 +8,7 @@ import {
   ShoppingBag, Backpack, Coins, X,
   Beef, Droplets, Puzzle, Pill, Crown,
   Glasses, Shirt, Footprints, Sparkles, Feather,
-  Cat, Star, Search, ScrollText,
+  Cat, Search, ScrollText,
 } from 'lucide-react';
 
 interface ShopModalProps {

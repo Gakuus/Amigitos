@@ -47,10 +47,12 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
   const [combo, setCombo] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const idRef = useRef(0);
-  const spawnRateRef = useRef(500);
+  const finishedRef = useRef(false);
+  const timeLeftRef = useRef(GAME_DURATION);
 
   const spawnItem = useCallback(() => {
-    const isBad = Math.random() < 0.2 + (GAME_DURATION - timeLeft) * 0.005;
+    const elapsed = GAME_DURATION - timeLeftRef.current;
+    const isBad = Math.random() < 0.2 + elapsed * 0.005;
     const pool = isBad ? BAD : GOOD;
     const item = pool[Math.floor(Math.random() * pool.length)]!;
     const x = Math.random() * 85 + 5;
@@ -63,16 +65,17 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
       bad: isBad,
     };
     setItems(prev => [...prev, newItem]);
-  }, [timeLeft]);
+  }, []);
 
   useEffect(() => {
     if (!started || finished) return;
+    finishedRef.current = false;
 
-    spawnRateRef.current = Math.max(200, 500 - (GAME_DURATION - timeLeft) * 10);
+    const spawnRate = () => Math.max(200, 500 - (GAME_DURATION - timeLeftRef.current) * 10);
 
     const spawnInterval = setInterval(() => {
       if (Math.random() < 0.65) spawnItem();
-    }, spawnRateRef.current);
+    }, spawnRate());
 
     const moveInterval = setInterval(() => {
       setItems(prev => {
@@ -91,7 +94,10 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
         if (hitGround.length > 0) {
           setMissed(m => {
             const newMissed = m + hitGround.length;
-            if (newMissed >= MAX_LIVES) setFinished(true);
+            if (newMissed >= MAX_LIVES && !finishedRef.current) {
+              finishedRef.current = true;
+              setFinished(true);
+            }
             return newMissed;
           });
           setCombo(0);
@@ -103,11 +109,13 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
 
     const timer = setInterval(() => {
       setTimeLeft(t => {
-        if (t <= 1) {
+        const next = t - 1;
+        timeLeftRef.current = next;
+        if (next <= 0 && !finishedRef.current) {
+          finishedRef.current = true;
           setFinished(true);
-          return 0;
         }
-        return t - 1;
+        return next;
       });
     }, 1000);
 
@@ -116,12 +124,13 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
       clearInterval(moveInterval);
       clearInterval(timer);
     };
-  }, [started, finished, spawnItem, timeLeft]);
+  }, [started, finished, spawnItem]);
 
   useEffect(() => {
     if (finished && started) {
       const finalScore = Math.min(200, Math.max(0, score));
-      setTimeout(() => onFinish(finalScore), 600);
+      const timer = setTimeout(() => onFinish(finalScore), 600);
+      return () => clearTimeout(timer);
     }
   }, [finished, started, score, onFinish]);
 

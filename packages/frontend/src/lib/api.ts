@@ -2,7 +2,7 @@ import type { PetState, UserProfile, CoupleInfo, WardrobeItemInfo, PetOutfitInfo
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(
     public statusCode: number,
     public code: string,
@@ -13,22 +13,53 @@ class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+async function refreshAuthToken(): Promise<boolean> {
+  const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+  if (!refreshToken) return false;
 
+  try {
+    const res = await fetch(`${API_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) return false;
+    const { accessToken, refreshToken: newRefreshToken } = await res.json();
+    localStorage.setItem('token', accessToken);
+    localStorage.setItem('refreshToken', newRefreshToken);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
 
-  try {
-    const res = await fetch(`${API_URL}${path}`, {
+  const doFetch = (authToken: string | null) => {
+    return fetch(`${API_URL}${path}`, {
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         ...options.headers,
       },
       signal: controller.signal,
       ...options,
     });
+  };
+
+  try {
+    let token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    let res = await doFetch(token);
+
+    if (res.status === 401 && token) {
+      const refreshed = await refreshAuthToken();
+      if (refreshed) {
+        token = localStorage.getItem('token');
+        res = await doFetch(token);
+      }
+    }
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));

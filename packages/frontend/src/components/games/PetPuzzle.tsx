@@ -44,6 +44,7 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
   const [won, setWon] = useState(false);
   const [lastMoved, setLastMoved] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const finishTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isComplete = grid.every((n, i) => n === (i + 1) % (SIZE * SIZE));
   const lost = (timeLeft <= 0 || moves >= MAX_MOVES) && !isComplete && !finished;
@@ -52,13 +53,15 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
     setFinished(true);
     setWon(win);
     if (timerRef.current) clearInterval(timerRef.current);
-    if (win) {
-      const score = Math.max(10, Math.min(100, (MAX_MOVES - moves) * 3 + Math.max(0, TIMER - timeLeft) * 0.5));
-      setTimeout(() => onFinish(score), 600);
-    } else {
-      setTimeout(() => onFinish(0), 600);
-    }
+    const score = win
+      ? Math.max(10, Math.min(100, (MAX_MOVES - moves) * 3 + Math.max(0, TIMER - timeLeft) * 0.5))
+      : 0;
+    finishTimeoutRef.current = setTimeout(() => onFinish(score), 600);
   }, [moves, timeLeft, onFinish]);
+
+  useEffect(() => {
+    return () => { if (finishTimeoutRef.current) clearTimeout(finishTimeoutRef.current); };
+  }, []);
 
   useEffect(() => {
     if (isComplete && !finished) finish(true);

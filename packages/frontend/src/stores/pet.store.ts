@@ -74,6 +74,8 @@ export const usePetStore = create<PetStore>((set, get) => ({
     const prevId = get().activePetId;
     if (prevId) {
       disconnectFromPetRoom(prevId);
+      const prevSocket = getSocket();
+      if (prevSocket) prevSocket.off('pet:state');
     }
 
     if (pollInterval) {
@@ -93,12 +95,11 @@ export const usePetStore = create<PetStore>((set, get) => ({
       socket.on('pet:state', (eventData: Record<string, unknown>) => {
         if (eventData.petId === petId) {
           set((state) => {
-            const updatedPet = state.pet ? { ...state.pet, ...eventData } as PetState : state.pet;
             const updatedPetFromMap = state.petMap[petId]
               ? { ...state.petMap[petId], ...eventData } as PetState
               : state.petMap[petId];
             return {
-              pet: updatedPet,
+              pet: state.pet?.id === petId ? (state.pet ? { ...state.pet, ...eventData } as PetState : state.pet) : state.pet,
               petMap: updatedPetFromMap
                 ? { ...state.petMap, [petId]: updatedPetFromMap }
                 : state.petMap,
@@ -162,7 +163,7 @@ export const usePetStore = create<PetStore>((set, get) => ({
             : p,
         ),
         pet: state.pet?.id === petId ? updated : state.pet,
-        outfitMap: state.activePetId === petId ? state.outfitMap : state.outfitMap,
+        outfitMap: state.outfitMap,
       }));
     } catch (err) {
       set({ error: err instanceof Error ? err.message : `Failed to ${action}` });

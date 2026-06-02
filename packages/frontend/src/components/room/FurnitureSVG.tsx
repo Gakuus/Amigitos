@@ -422,31 +422,36 @@ export function MoonSVG() {
 
 export function BedSVG() {
   return (
-    <svg viewBox="0 0 200 120" className="w-full h-full" fill="none">
+    <svg viewBox="0 0 200 150" className="w-full h-full" fill="none">
       <defs>
-        <linearGradient id="bed-frame" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={C.purpleL} /><stop offset="1" stopColor={C.purple} /></linearGradient>
-        <linearGradient id="bed-blanket" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={C.pinkL} /><stop offset="1" stopColor={C.pink} /></linearGradient>
+        <linearGradient id="bd-head" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={C.woodL} /><stop offset="1" stopColor={C.wood} /></linearGradient>
+        <linearGradient id="bd-frame" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={C.wood} /><stop offset="1" stopColor={C.woodD} /></linearGradient>
+        <linearGradient id="bd-matt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={C.cream} /><stop offset="1" stopColor={C.creamD} /></linearGradient>
+        <linearGradient id="bd-blanket" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={C.skyL} /><stop offset="1" stopColor={C.sky} /></linearGradient>
+        <linearGradient id="bd-pillow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffffff" /><stop offset="1" stopColor={C.cream} /></linearGradient>
       </defs>
-      <ellipse cx="100" cy="116" rx="94" ry="5" fill="rgba(0,0,0,0.1)" />
-      <rect x="16" y="100" width="8" height="16" rx="4" fill={C.woodS} />
-      <rect x="176" y="100" width="8" height="16" rx="4" fill={C.woodS} />
-      <rect x="42" y="102" width="8" height="14" rx="4" fill={C.woodS} />
-      <rect x="150" y="102" width="8" height="14" rx="4" fill={C.woodS} />
-      <rect x="6" y="52" width="188" height="54" rx="12" fill="url(#bed-frame)" stroke={C.purpleD} strokeWidth="0.5" />
-      <rect x="8" y="54" width="184" height="8" rx="4" fill="rgba(255,255,255,0.12)" />
-      <rect x="14" y="64" width="172" height="38" rx="8" fill={C.cream} />
-      <rect x="14" y="64" width="172" height="38" rx="8" fill="rgba(255,255,255,0.25)" />
-      <rect x="14" y="64" width="124" height="38" rx="8" fill="url(#bed-blanket)" />
-      <rect x="14" y="64" width="124" height="8" rx="4" fill="rgba(255,255,255,0.2)" />
-      <path d="M20 80 L130 80" stroke={C.pinkD} strokeWidth="0.5" strokeDasharray="4 4" opacity="0.3" />
-      <rect x="134" y="90" width="10" height="10" rx="5" fill={C.yellowL} opacity="0.5" />
-      <rect x="148" y="92" width="8" height="8" rx="4" fill={C.skyL} opacity="0.5" />
-      <rect x="160" y="90" width="10" height="10" rx="5" fill={C.pinkL} opacity="0.5" />
-      <rect x="174" y="92" width="8" height="8" rx="4" fill={C.greenL} opacity="0.5" />
-      <rect x="12" y="44" width="176" height="12" rx="6" fill={C.purpleD} stroke={C.purple} strokeWidth="0.5" />
-      <rect x="14" y="46" width="172" height="4" rx="2" fill="rgba(255,255,255,0.1)" />
-      <ellipse cx="52" cy="76" rx="16" ry="11" fill="rgba(255,255,255,0.5)" />
-      <ellipse cx="52" cy="76" rx="10" ry="6" fill="rgba(255,255,255,0.2)" />
+      <ellipse cx="100" cy="145" rx="88" ry="5" fill="rgba(0,0,0,0.1)" />
+      <rect x="24" y="130" width="8" height="14" rx="4" fill={C.woodS} />
+      <rect x="168" y="130" width="8" height="14" rx="4" fill={C.woodS} />
+      <rect x="44" y="132" width="6" height="12" rx="3" fill={C.woodS} />
+      <rect x="150" y="132" width="6" height="12" rx="3" fill={C.woodS} />
+      <rect x="10" y="66" width="180" height="66" rx="8" fill="url(#bd-frame)" stroke={C.woodD} strokeWidth="0.5" />
+      <rect x="12" y="68" width="176" height="4" rx="2" fill="rgba(255,255,255,0.12)" />
+      <rect x="10" y="128" width="180" height="4" rx="2" fill="rgba(0,0,0,0.06)" />
+      <rect x="14" y="16" width="172" height="52" rx="8" fill="url(#bd-head)" stroke={C.woodD} strokeWidth="0.5" />
+      <rect x="14" y="16" width="172" height="6" rx="3" fill="rgba(255,255,255,0.12)" />
+      <rect x="14" y="62" width="172" height="6" rx="3" fill="rgba(0,0,0,0.06)" />
+      <rect x="16" y="74" width="168" height="52" rx="4" fill="url(#bd-matt)" />
+      <rect x="16" y="74" width="168" height="5" rx="2.5" fill="rgba(255,255,255,0.2)" />
+      <rect x="16" y="122" width="168" height="4" rx="2" fill="rgba(0,0,0,0.06)" />
+      <rect x="18" y="80" width="116" height="44" rx="5" fill="url(#bd-blanket)" />
+      <rect x="18" y="80" width="116" height="5" rx="2.5" fill="rgba(255,255,255,0.12)" />
+      <rect x="18" y="120" width="116" height="4" rx="2" fill={C.skyD} />
+      <rect x="16" y="68" width="52" height="14" rx="7" fill="url(#bd-pillow)" stroke={C.creamD} strokeWidth="0.3" />
+      <rect x="18" y="70" width="48" height="3" rx="1.5" fill="rgba(255,255,255,0.35)" />
+      <line x1="28" y1="92" x2="126" y2="92" stroke={C.skyD} strokeWidth="0.5" strokeDasharray="4 4" opacity="0.2" />
+      <line x1="28" y1="104" x2="126" y2="104" stroke={C.skyD} strokeWidth="0.5" strokeDasharray="4 4" opacity="0.2" />
+      <line x1="28" y1="116" x2="126" y2="116" stroke={C.skyD} strokeWidth="0.5" strokeDasharray="4 4" opacity="0.2" />
     </svg>
   );
 }

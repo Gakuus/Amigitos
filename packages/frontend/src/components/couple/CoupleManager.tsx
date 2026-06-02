@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth.store';
 import type { CoupleInfo } from '@amigitos/shared';
-import { HeartHandshake, Send, Check, X, UserPlus, Heart, ArrowLeft } from 'lucide-react';
+import { Send, Check, X, UserPlus, Heart, ArrowLeft } from 'lucide-react';
 
 interface CoupleManagerProps {
   onClose?: () => void;

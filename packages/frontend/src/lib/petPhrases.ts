@@ -69,3 +69,25 @@ export function getActionPhrase(action: string): string {
   if (!list || list.length === 0) return '...';
   return list[Math.floor(Math.random() * list.length)]!;
 }
+
+export const LOVE_PHRASES = [
+  'Te quiero mucho 💕',
+  'Eres mi persona favorita',
+  'Gracias por cuidarme ✨',
+  'Contigo todo es mejor 🌈',
+  'No sabes cuánto te quiero 🥰',
+  '¿Sabes qué? Eres increíble',
+  'Gracias por existir 🌟',
+  'Eres mi mejor amigo 🫶',
+  'Qué lindo día porque estás vos',
+  'Me encanta pasar tiempo contigo',
+  'Eres mi tesoro 💖',
+  'Hueles bien... te quiero',
+  'No te vayas nunca 🤗',
+  'Eres todo lo que tengo y me basta',
+  'Te elijo a vos, siempre 💗',
+];
+
+export function getLovingPhrase(): string {
+  return LOVE_PHRASES[Math.floor(Math.random() * LOVE_PHRASES.length)]!;
+}
