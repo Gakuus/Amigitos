@@ -29,12 +29,14 @@ export const PET_SPECIES_LABELS: Record<string, string> = {
   DRAGON: 'Dragón 🐉',
   UNICORN: 'Unicornio 🦄',
   MONKEY: 'Mono 🐵',
+  PIG: 'Cerdo 🐷',
   CUSTOM: 'Personalizado ✨',
 };
 
 export const CUSTOM_SPECIES_IMAGES: Record<string, string> = {
   MONKEY: '/pets/Monito.png',
   PENGUIN: '/pets/pinguino.png',
+  PIG: '/pets/cerdo.png',
 };
 
 export const CLOTHING_SLOT_LABELS: Record<string, string> = {

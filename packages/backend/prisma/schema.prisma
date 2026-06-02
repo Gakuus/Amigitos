@@ -18,6 +18,7 @@ enum PetSpecies {
   DRAGON
   UNICORN
   MONKEY
+  PIG
   CUSTOM
 }
 
