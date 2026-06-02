@@ -6,6 +6,8 @@ const SIZE = 3;
 const MAX_MOVES = 30;
 const TIMER = 90;
 
+const EMOJIS = ['🐱', '🐶', '🐰', '🐹', '🦊', '🐼', '🐧', '🐉'];
+
 function isSolvable(grid: number[]): boolean {
   let inversions = 0;
   const flat = grid.filter(n => n !== 0);
@@ -34,17 +36,6 @@ function createPuzzle(): number[] {
 interface PetPuzzleProps {
   onFinish: (score: number) => void;
 }
-
-const TILE_COLORS = [
-  'from-rose-400 to-pink-500',
-  'from-orange-400 to-amber-500',
-  'from-amber-400 to-yellow-500',
-  'from-lime-400 to-green-500',
-  'from-emerald-400 to-teal-500',
-  'from-cyan-400 to-sky-500',
-  'from-blue-400 to-indigo-500',
-  'from-violet-400 to-purple-500',
-];
 
 export function PetPuzzle({ onFinish }: PetPuzzleProps) {
   const [grid, setGrid] = useState<number[]>(createPuzzle());
@@ -131,7 +122,6 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* HUD */}
       <div className="flex items-center justify-between w-full text-xs">
         <span className={`font-semibold ${remainingMoves <= 5 ? 'text-rose-500' : 'text-pastel-muted dark:text-slate-400'}`}>
           Mov: {moves}/{MAX_MOVES}
@@ -157,7 +147,7 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
             <span className="text-3xl">🧩</span>
           </div>
           <p className="text-pastel-muted dark:text-slate-400 text-sm text-center max-w-xs">
-            Ordena las piezas del 1 al 8 ({SIZE}x{SIZE}).<br />
+            Ordena las mascotas en el orden correcto.<br />
             Tienes {MAX_MOVES} movimientos y {TIMER} segundos.
           </p>
           <button
@@ -175,23 +165,22 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
           >
             {grid.map((n, i) => {
               const isLast = n !== 0 && n === lastMoved;
-              const colorIndex = n > 0 ? (n - 1) % TILE_COLORS.length : 0;
               return (
                 <button
                   key={i}
                   onClick={() => moveTile(i)}
                   disabled={finished || n === 0}
-                  className={`w-14 h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center text-lg font-bold transition-all duration-200 select-none ${
+                  className={`w-14 h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center text-xl transition-all duration-200 select-none ${
                     n === 0
                       ? 'bg-transparent'
                       : isLast
-                        ? `bg-gradient-to-br ${TILE_COLORS[colorIndex]!} scale-95 ring-2 ring-white/50 shadow-lg animate-bounce-in text-white`
+                        ? 'bg-gradient-to-br from-green-300 to-emerald-400 scale-95 ring-2 ring-white/50 shadow-lg animate-bounce-in'
                         : finished && won
-                          ? `bg-gradient-to-br ${TILE_COLORS[colorIndex]!} text-white shadow-md`
-                          : `bg-gradient-to-br ${TILE_COLORS[colorIndex]!} text-white shadow-md hover:brightness-110 hover:scale-105 active:scale-95`
+                          ? 'bg-gradient-to-br from-pastel-purple/60 to-pastel-pink/60 shadow-md'
+                          : 'bg-gradient-to-br from-pastel-purple to-pastel-pink text-white shadow-md hover:brightness-110 hover:scale-105 active:scale-95'
                   }`}
                 >
-                  {n !== 0 && n}
+                  {n !== 0 && (EMOJIS[n - 1] ?? n)}
                 </button>
               );
             })}
@@ -205,7 +194,7 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
               🔄 Reiniciar
             </button>
             {finished && (
-              <span className={`text-sm font-bold ${won ? 'text-green-500' : 'text-rose-500'}`}>
+              <span className={`text-sm font-bold ${won ? 'text-green-500' : 'text-rose-500'} animate-bounce-in`}>
                 {won ? '🎉 ¡Completado!' : '💔 Has perdido'}
               </span>
             )}

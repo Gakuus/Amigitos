@@ -35,6 +35,18 @@ interface MemoryMatchProps {
   onFinish: (score: number) => void;
 }
 
+function CardBack() {
+  return (
+    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-pastel-purple to-pastel-pink shadow-lg shadow-pastel-purple/20 flex items-center justify-center">
+      <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center">
+        <div className="w-3 h-3 rounded-full bg-white/20" />
+      </div>
+      <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-white/10" />
+      <div className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-white/10" />
+    </div>
+  );
+}
+
 export function MemoryMatch({ onFinish }: MemoryMatchProps) {
   const [cards, setCards] = useState<Card[]>(createBoard);
   const [flipped, setFlipped] = useState<number[]>([]);
@@ -57,9 +69,9 @@ export function MemoryMatch({ onFinish }: MemoryMatchProps) {
     if (win) {
       const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
       const score = Math.max(10, Math.min(100, (MAX_MOVES - moves) * 5 + Math.max(0, 60 - elapsed)));
-      setTimeout(() => onFinish(score), 800);
+      setTimeout(() => onFinish(score), 900);
     } else {
-      setTimeout(() => onFinish(0), 800);
+      setTimeout(() => onFinish(0), 900);
     }
   }, [moves, onFinish]);
 
@@ -109,7 +121,7 @@ export function MemoryMatch({ onFinish }: MemoryMatchProps) {
           setFlipped([]);
           setLocked(false);
           setWrongPair([]);
-        }, 700);
+        }, 800);
       }
     }
   }, [flipped, cards]);
@@ -131,7 +143,6 @@ export function MemoryMatch({ onFinish }: MemoryMatchProps) {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* HUD */}
       <div className="flex items-center justify-between w-full text-xs">
         <span className={`font-semibold ${remainingMoves <= 3 ? 'text-rose-500' : 'text-pastel-muted dark:text-slate-400'}`}>
           Movimientos: {moves}/{MAX_MOVES}
@@ -154,33 +165,26 @@ export function MemoryMatch({ onFinish }: MemoryMatchProps) {
       <div className="grid grid-cols-4 gap-2.5">
         {cards.map(card => {
           const isWrong = wrongPair.includes(card.id);
-          const isVisible = card.flipped || card.matched;
+          const isFlipped = card.flipped || card.matched;
           return (
             <button
               key={card.id}
               onClick={() => handleFlip(card.id)}
-              disabled={finished || lost || isVisible}
-              className={`relative w-14 h-14 md:w-16 md:h-16 rounded-xl text-2xl flex items-center justify-center transition-all duration-300 select-none ${
-                isVisible
-                  ? card.matched
-                    ? 'bg-pastel-cream dark:bg-slate-600 shadow-sm scale-95 ring-2 ring-green-300 dark:ring-green-500/50'
-                    : 'bg-white dark:bg-slate-700 shadow-md'
-                  : 'bg-gradient-to-br from-pastel-purple to-pastel-pink hover:from-pastel-purple/90 hover:to-pastel-pink/90 hover:scale-105 active:scale-95 shadow-lg shadow-pastel-purple/20'
-              } ${isWrong ? 'animate-shake ring-2 ring-rose-400' : ''}`}
-              style={{ perspective: '200px' }}
+              disabled={finished || lost || card.matched}
+              className={`relative w-14 h-14 md:w-16 md:h-16 [perspective:200px] bg-transparent border-0 p-0 cursor-pointer ${isWrong ? 'animate-shake' : ''}`}
             >
-              <span
-                className="transition-all duration-300"
-                style={{
-                  opacity: isVisible ? 1 : 0,
-                  transform: isVisible ? 'scale(1)' : 'scale(0.3)',
-                }}
+              <div
+                className={`relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] ${
+                  isFlipped ? '[transform:rotateY(180deg)]' : ''
+                } ${card.matched ? 'after:absolute after:inset-0 after:rounded-xl after:ring-2 after:ring-green-400 after:ring-offset-2 after:ring-offset-transparent after:animate-pulse-soft' : ''}`}
               >
-                {card.emoji}
-              </span>
-              {!isVisible && (
-                <span className="absolute text-white/60 text-sm font-bold" style={{ opacity: 1 }}>?</span>
-              )}
+                <div className="absolute inset-0 [backface-visibility:hidden] rounded-xl bg-white dark:bg-slate-700 shadow-md flex items-center justify-center text-2xl [transform:rotateY(180deg)]">
+                  <span className={card.matched ? 'animate-bounce-in' : ''}>{card.emoji}</span>
+                </div>
+                <div className="absolute inset-0 [backface-visibility:hidden] rounded-xl">
+                  <CardBack />
+                </div>
+              </div>
             </button>
           );
         })}
@@ -194,7 +198,7 @@ export function MemoryMatch({ onFinish }: MemoryMatchProps) {
           🔄 Reiniciar
         </button>
         {finished && (
-          <span className={`text-sm font-bold ${won ? 'text-green-500' : 'text-rose-500'}`}>
+          <span className={`text-sm font-bold ${won ? 'text-green-500' : 'text-rose-500'} animate-bounce-in`}>
             {won ? '🎉 ¡Completado!' : '💔 Has perdido'}
           </span>
         )}

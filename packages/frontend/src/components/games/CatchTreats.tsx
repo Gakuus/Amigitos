@@ -11,6 +11,13 @@ interface FallingItem {
   bad: boolean;
 }
 
+interface CatchEffect {
+  id: number;
+  x: number;
+  y: number;
+  emoji: string;
+}
+
 const GOOD = [
   { emoji: '🍎', points: 10 },
   { emoji: '🍕', points: 15 },
@@ -45,17 +52,19 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [combo, setCombo] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [effects, setEffects] = useState<CatchEffect[]>([]);
   const idRef = useRef(0);
+  const effectIdRef = useRef(0);
   const finishedRef = useRef(false);
   const timeLeftRef = useRef(GAME_DURATION);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const spawnItem = useCallback(() => {
     const elapsed = GAME_DURATION - timeLeftRef.current;
     const isBad = Math.random() < 0.2 + elapsed * 0.005;
     const pool = isBad ? BAD : GOOD;
     const item = pool[Math.floor(Math.random() * pool.length)]!;
-    const x = Math.random() * 85 + 5;
+    const x = Math.random() * 80 + 10;
     const newItem: FallingItem = {
       id: idRef.current++,
       x,
@@ -129,7 +138,7 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
   useEffect(() => {
     if (finished && started) {
       const finalScore = Math.min(200, Math.max(0, score));
-      const timer = setTimeout(() => onFinish(finalScore), 600);
+      const timer = setTimeout(() => onFinish(finalScore), 800);
       return () => clearTimeout(timer);
     }
   }, [finished, started, score, onFinish]);
@@ -140,11 +149,16 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
     if (!item) return;
 
     setItems(prev => prev.filter(i => i.id !== id));
-    setCombo(c => (item.bad ? 0 : c + 1));
+
+    const effectId = effectIdRef.current++;
+    setEffects(prev => [...prev, { id: effectId, x: item.x, y: item.y, emoji: item.bad ? '💥' : '✨' }]);
+    setTimeout(() => setEffects(prev => prev.filter(e => e.id !== effectId)), 500);
 
     if (item.bad) {
+      setCombo(0);
       setScore(s => Math.max(0, s + item.points));
     } else {
+      setCombo(c => c + 1);
       const comboBonus = Math.min(combo, 10);
       setScore(s => s + item.points + comboBonus);
     }
@@ -155,11 +169,10 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
 
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* HUD */}
       <div className="flex items-center justify-between w-full text-xs">
         <div className="flex gap-0.5">
           {Array.from({ length: MAX_LIVES }).map((_, i) => (
-            <span key={i} className={`text-sm transition-all duration-300 ${i < lives ? '' : 'grayscale opacity-30'}`}>
+            <span key={i} className={`text-sm transition-all duration-300 ${i < lives ? '' : 'grayscale opacity-30'} ${i === lives && missed > 0 ? 'animate-bounce-in' : ''}`}>
               {i < lives ? '❤️' : '🖤'}
             </span>
           ))}
@@ -171,7 +184,7 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
       </div>
 
       {combo >= 3 && (
-        <div className="text-xs text-amber-500 font-bold animate-bounce-in bg-amber-50 dark:bg-amber-900/20 px-3 py-1 rounded-full">
+        <div className="text-xs text-amber-500 font-bold animate-bounce-in bg-amber-50 dark:bg-amber-900/20 px-3 py-1 rounded-full border border-amber-200/50 dark:border-amber-700/30">
           🔥 Combo x{combo}!
         </div>
       )}
@@ -182,8 +195,8 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
             <span className="text-3xl">🍕</span>
           </div>
           <p className="text-pastel-muted dark:text-slate-400 text-sm text-center max-w-xs">
-            ¡Atrapa comida 🍎, evita bombas 💣!<br />
-            Si dejas caer 3 alimentos buenos, pierdes.
+            ¡Toca los alimentos para atraparlos! 🍎<br />
+            Evita las bombas 💣 y no dejes caer 3.
           </p>
           <button
             onClick={() => setStarted(true)}
@@ -195,17 +208,16 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
       ) : (
         <div
           ref={containerRef}
-          className="relative w-full h-72 md:h-80 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl overflow-hidden border border-pastel-border/20 dark:border-slate-700/50 cursor-pointer select-none"
+          className="relative w-full h-72 md:h-80 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl overflow-hidden border border-pastel-border/20 dark:border-slate-700/50 select-none"
         >
-          {/* Danger zone indicator */}
           <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-rose-500/10 to-transparent pointer-events-none" />
 
           {items.map(item => (
             <button
               key={item.id}
-              onPointerDown={() => handleCatch(item.id)}
-              className={`absolute text-2xl md:text-3xl transition-transform active:scale-125 pointer-events-auto ${
-                item.bad ? 'active:rotate-12' : ''
+              onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleCatch(item.id); }}
+              className={`absolute text-2xl md:text-3xl transition-transform duration-100 active:scale-125 pointer-events-auto cursor-pointer bg-transparent border-0 p-0 ${
+                item.bad ? 'hover:rotate-6' : 'hover:scale-110'
               }`}
               style={{
                 left: `${item.x}%`,
@@ -218,13 +230,23 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
             </button>
           ))}
 
+          {effects.map(e => (
+            <div
+              key={e.id}
+              className="absolute text-xl pointer-events-none animate-float-up"
+              style={{ left: `${e.x}%`, top: `${e.y}%`, transform: 'translate(-50%, -50%)' }}
+            >
+              {e.emoji}
+            </div>
+          ))}
+
           {finished && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-10">
               <div className="text-center space-y-2 animate-bounce-in bg-white/80 dark:bg-slate-800/80 rounded-2xl p-6 shadow-xl">
                 <p className="text-4xl">{missed >= MAX_LIVES ? '💔' : '⏰'}</p>
                 <p className="text-lg font-bold text-pastel-foreground dark:text-white">{missed >= MAX_LIVES ? '¡Perdiste!' : '¡Tiempo!'}</p>
                 <p className="text-amber-500 font-bold text-lg">⭐ {Math.max(0, score)} pts</p>
-                <p className="text-xs text-pastel-muted dark:text-slate-400">Atrapados: {caught} | Fallados: {missed}</p>
+                <p className="text-xs text-pastel-muted dark:text-slate-400">Atrapados: {caught} | Escapados: {missed}</p>
               </div>
             </div>
           )}
