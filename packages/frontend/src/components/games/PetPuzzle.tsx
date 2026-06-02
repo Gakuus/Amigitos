@@ -35,6 +35,17 @@ interface PetPuzzleProps {
   onFinish: (score: number) => void;
 }
 
+const TILE_COLORS = [
+  'from-rose-400 to-pink-500',
+  'from-orange-400 to-amber-500',
+  'from-amber-400 to-yellow-500',
+  'from-lime-400 to-green-500',
+  'from-emerald-400 to-teal-500',
+  'from-cyan-400 to-sky-500',
+  'from-blue-400 to-indigo-500',
+  'from-violet-400 to-purple-500',
+];
+
 export function PetPuzzle({ onFinish }: PetPuzzleProps) {
   const [grid, setGrid] = useState<number[]>(createPuzzle());
   const [moves, setMoves] = useState(0);
@@ -122,18 +133,18 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
     <div className="flex flex-col items-center gap-4">
       {/* HUD */}
       <div className="flex items-center justify-between w-full text-xs">
-        <span className={`font-medium ${remainingMoves <= 5 ? 'text-red-400' : 'text-slate-400'}`}>
+        <span className={`font-semibold ${remainingMoves <= 5 ? 'text-rose-500' : 'text-pastel-muted dark:text-slate-400'}`}>
           Mov: {moves}/{MAX_MOVES}
         </span>
-        <span className={`font-bold ${timeLeft <= 15 ? 'text-red-400 animate-pulse' : 'text-slate-400'}`}>
+        <span className={`font-bold ${timeLeft <= 15 ? 'text-rose-500 animate-pulse' : 'text-pastel-muted dark:text-slate-400'}`}>
           ⏱ {timeLeft}s
         </span>
         <div className="flex gap-1">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className={`w-1.5 h-1.5 rounded-full ${
-                remainingMoves > (i + 1) * 6 ? 'bg-green-500' : remainingMoves > 0 ? 'bg-yellow-500' : 'bg-red-500'
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                remainingMoves > (i + 1) * 6 ? 'bg-green-400' : remainingMoves > 0 ? 'bg-amber-400' : 'bg-rose-400'
               }`}
             />
           ))}
@@ -142,14 +153,16 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
 
       {!started ? (
         <div className="flex flex-col items-center gap-4 py-8">
-          <span className="text-5xl">🧩</span>
-          <p className="text-slate-400 text-sm text-center max-w-xs">
-            Ordena las piezas del 1 al 8 ({SIZE}x{SIZE}).
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-300/30">
+            <span className="text-3xl">🧩</span>
+          </div>
+          <p className="text-pastel-muted dark:text-slate-400 text-sm text-center max-w-xs">
+            Ordena las piezas del 1 al 8 ({SIZE}x{SIZE}).<br />
             Tienes {MAX_MOVES} movimientos y {TIMER} segundos.
           </p>
           <button
             onClick={handleStart}
-            className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-xl font-medium transition-colors"
+            className="px-6 py-3 bg-gradient-to-r from-violet-400 to-indigo-500 hover:brightness-110 text-white rounded-2xl font-semibold shadow-lg shadow-violet-400/25 active:scale-95 transition-all"
           >
             ¡Comenzar!
           </button>
@@ -157,24 +170,25 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
       ) : (
         <div className="flex flex-col items-center gap-3">
           <div
-            className="grid gap-1.5 bg-slate-800/50 p-2 rounded-xl"
+            className="grid gap-1.5 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-2xl shadow-inner"
             style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}
           >
             {grid.map((n, i) => {
               const isLast = n !== 0 && n === lastMoved;
+              const colorIndex = n > 0 ? (n - 1) % TILE_COLORS.length : 0;
               return (
                 <button
                   key={i}
                   onClick={() => moveTile(i)}
                   disabled={finished || n === 0}
-                  className={`w-14 h-14 md:w-16 md:h-16 rounded-lg flex items-center justify-center text-lg font-bold transition-all duration-200 ${
+                  className={`w-14 h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center text-lg font-bold transition-all duration-200 select-none ${
                     n === 0
-                      ? 'bg-slate-900/50'
+                      ? 'bg-transparent'
                       : isLast
-                        ? 'bg-green-600 scale-95 ring-2 ring-green-400 animate-bounce-in'
+                        ? `bg-gradient-to-br ${TILE_COLORS[colorIndex]!} scale-95 ring-2 ring-white/50 shadow-lg animate-bounce-in text-white`
                         : finished && won
-                          ? 'bg-green-600/80'
-                          : 'bg-slate-700 hover:bg-slate-600 hover:scale-105 active:scale-95'
+                          ? `bg-gradient-to-br ${TILE_COLORS[colorIndex]!} text-white shadow-md`
+                          : `bg-gradient-to-br ${TILE_COLORS[colorIndex]!} text-white shadow-md hover:brightness-110 hover:scale-105 active:scale-95`
                   }`}
                 >
                   {n !== 0 && n}
@@ -186,12 +200,12 @@ export function PetPuzzle({ onFinish }: PetPuzzleProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={reset}
-              className="text-xs px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+              className="text-xs px-4 py-2 bg-pastel-lavender/30 dark:bg-slate-700/50 hover:bg-pastel-lavender/50 dark:hover:bg-slate-600/50 text-pastel-foreground dark:text-slate-200 rounded-xl transition-all active:scale-95 font-medium"
             >
               🔄 Reiniciar
             </button>
             {finished && (
-              <span className={`text-sm font-bold ${won ? 'text-green-400' : 'text-red-400'}`}>
+              <span className={`text-sm font-bold ${won ? 'text-green-500' : 'text-rose-500'}`}>
                 {won ? '🎉 ¡Completado!' : '💔 Has perdido'}
               </span>
             )}

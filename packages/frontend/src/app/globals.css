@@ -111,6 +111,13 @@ body::before {
 .animate-walk { animation: walk-bob 0.6s ease-in-out infinite; }
 .animate-walk-bob { animation: walk-bob 0.6s ease-in-out infinite; }
 
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float-slow { animation: float-slow 4s ease-in-out infinite; }
+
 /* ===== Glass effect ===== */
 .glass {
   background: rgba(255, 255, 255, 0.7);

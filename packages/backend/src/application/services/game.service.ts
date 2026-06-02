@@ -7,6 +7,7 @@ const GAME_CONFIGS: Record<string, GameConfig> = {
   memory:    { minScore: 0, maxScore: 100, coinPerPoint: 3,  maxCoins: 80,  cooldownMs: 30_000, minWinScore: 1, baseReward: 20 },
   catch:     { minScore: 0, maxScore: 200, coinPerPoint: 1,  maxCoins: 80,  cooldownMs: 20_000, minWinScore: 10, baseReward: 15 },
   puzzle:    { minScore: 0, maxScore: 100, coinPerPoint: 3,  maxCoins: 80,  cooldownMs: 30_000, minWinScore: 1, baseReward: 20 },
+  flappy:    { minScore: 0, maxScore: 100, coinPerPoint: 3,  maxCoins: 80,  cooldownMs: 30_000, minWinScore: 1, baseReward: 20 },
 };
 
 @Injectable()

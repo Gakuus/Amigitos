@@ -322,15 +322,17 @@ export function Room({
             const petScale = isSleeping ? 'scaleY(0.75)' : 'scaleY(1)';
             const dir = petDirection.current[summary.id];
             const flipX = dir === 'left' ? 'scaleX(-1)' : '';
+            const sleepTransform = `translate(-50%, -50%) ${petScale}`;
+            const awakeTransform = `translateX(-50%) ${petScale}`;
 
             const posStyle: Record<string, string | number | undefined> = room === 'sleep' ? {
               left: `${pos.x}%`,
               top: `${(pos as SleepPosition).top}%`,
-              transform: `translate(-50%, -50%) ${petScale} ${flipX}`,
+              transform: sleepTransform,
             } : {
               left: `${pos.x * 100}%`,
               bottom: `calc(16% + ${(1 - depth) * 40}px)`,
-              transform: `translateX(-50%) ${petScale} ${flipX}`,
+              transform: awakeTransform,
             };
 
             return (
@@ -344,7 +346,7 @@ export function Room({
                   filter: `brightness(${0.75 + depth * 0.3})`,
                 }}
               >
-                {/* Name label */}
+                {/* Name label (not flipped) */}
                 <div
                   className="absolute whitespace-nowrap pointer-events-none"
                   style={{
@@ -358,12 +360,13 @@ export function Room({
                   </div>
                 </div>
 
+                {/* Speech bubble (not flipped) */}
                 {speech[summary.id] && (
                   <SpeechBubble text={speech[summary.id]!} />
                 )}
 
-                {/* Walking bob */}
-                <div className={dir && !isSleeping ? 'animate-walk-bob' : ''}>
+                {/* Pet sprite with direction flip */}
+                <div style={{ transform: flipX }} className={dir && !isSleeping ? 'animate-walk-bob' : ''}>
                   <PetSprite
                     species={summary.species}
                     mood={data?.mood ?? summary.mood}
@@ -373,7 +376,7 @@ export function Room({
                   />
                 </div>
 
-                {/* Room-based stat bar */}
+                {/* Room-based stat bar (not flipped) */}
                 {!isSleeping && (() => {
                   const stat = ROOM_STAT[room];
                   const val = data?.[stat.key];
@@ -398,7 +401,7 @@ export function Room({
                   );
                 })()}
 
-                {/* Feedback per pet */}
+                {/* Feedback per pet (not flipped) */}
                 {feedback?.petId === summary.id && (
                   <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none animate-float-up text-2xl">
                     {feedback.emoji}

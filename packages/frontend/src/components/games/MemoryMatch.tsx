@@ -133,47 +133,54 @@ export function MemoryMatch({ onFinish }: MemoryMatchProps) {
     <div className="flex flex-col items-center gap-4">
       {/* HUD */}
       <div className="flex items-center justify-between w-full text-xs">
-        <span className={`font-medium ${remainingMoves <= 3 ? 'text-red-400' : 'text-slate-400'}`}>
+        <span className={`font-semibold ${remainingMoves <= 3 ? 'text-rose-500' : 'text-pastel-muted dark:text-slate-400'}`}>
           Movimientos: {moves}/{MAX_MOVES}
         </span>
-        <span className="text-slate-400">
+        <span className="text-pastel-muted dark:text-slate-400 font-medium">
           Pares: {pairsFound}/{EMOJIS.length}
         </span>
-        <div className="flex gap-1">
+        <div className="flex gap-1.5">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full ${
-                remainingMoves > i + 1 ? 'bg-green-500' : remainingMoves > i ? 'bg-yellow-500' : 'bg-red-500'
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                remainingMoves > i + 1 ? 'bg-green-400 shadow-sm shadow-green-400/50' : remainingMoves > i ? 'bg-amber-400' : 'bg-rose-400'
               }`}
             />
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-2.5">
         {cards.map(card => {
           const isWrong = wrongPair.includes(card.id);
+          const isVisible = card.flipped || card.matched;
           return (
             <button
               key={card.id}
               onClick={() => handleFlip(card.id)}
-              disabled={finished || lost}
-              className={`w-14 h-14 md:w-16 md:h-16 rounded-xl text-2xl flex items-center justify-center transition-all duration-300 ${
-                card.flipped || card.matched
-                  ? 'bg-slate-600'
-                  : 'bg-gradient-to-br from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 hover:scale-105'
-              } ${card.matched ? 'ring-2 ring-green-400/50 scale-95' : ''} ${
-                isWrong ? 'animate-shake ring-2 ring-red-400' : ''
-              }`}
-              style={{
-                transform: card.flipped || card.matched ? 'rotateY(0deg)' : 'rotateY(180deg)',
-                transformStyle: 'preserve-3d',
-              }}
+              disabled={finished || lost || isVisible}
+              className={`relative w-14 h-14 md:w-16 md:h-16 rounded-xl text-2xl flex items-center justify-center transition-all duration-300 select-none ${
+                isVisible
+                  ? card.matched
+                    ? 'bg-pastel-cream dark:bg-slate-600 shadow-sm scale-95 ring-2 ring-green-300 dark:ring-green-500/50'
+                    : 'bg-white dark:bg-slate-700 shadow-md'
+                  : 'bg-gradient-to-br from-pastel-purple to-pastel-pink hover:from-pastel-purple/90 hover:to-pastel-pink/90 hover:scale-105 active:scale-95 shadow-lg shadow-pastel-purple/20'
+              } ${isWrong ? 'animate-shake ring-2 ring-rose-400' : ''}`}
+              style={{ perspective: '200px' }}
             >
-              <span style={{ opacity: card.flipped || card.matched ? 1 : 0 }}>
+              <span
+                className="transition-all duration-300"
+                style={{
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? 'scale(1)' : 'scale(0.3)',
+                }}
+              >
                 {card.emoji}
               </span>
+              {!isVisible && (
+                <span className="absolute text-white/60 text-sm font-bold" style={{ opacity: 1 }}>?</span>
+              )}
             </button>
           );
         })}
@@ -182,17 +189,17 @@ export function MemoryMatch({ onFinish }: MemoryMatchProps) {
       <div className="flex items-center gap-3">
         <button
           onClick={reset}
-          className="text-xs px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+          className="text-xs px-4 py-2 bg-pastel-lavender/30 dark:bg-slate-700/50 hover:bg-pastel-lavender/50 dark:hover:bg-slate-600/50 text-pastel-foreground dark:text-slate-200 rounded-xl transition-all active:scale-95 font-medium"
         >
           🔄 Reiniciar
         </button>
         {finished && (
-          <span className={`text-sm font-bold ${won ? 'text-green-400' : 'text-red-400'}`}>
+          <span className={`text-sm font-bold ${won ? 'text-green-500' : 'text-rose-500'}`}>
             {won ? '🎉 ¡Completado!' : '💔 Has perdido'}
           </span>
         )}
         {lost && !finished && (
-          <span className="text-sm text-red-400 font-bold animate-pulse">
+          <span className="text-sm text-rose-500 font-bold animate-pulse">
             ⚠️ ¡Último movimiento!
           </span>
         )}

@@ -159,33 +159,35 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
       <div className="flex items-center justify-between w-full text-xs">
         <div className="flex gap-0.5">
           {Array.from({ length: MAX_LIVES }).map((_, i) => (
-            <span key={i} className={i < lives ? '' : 'opacity-30'}>
+            <span key={i} className={`text-sm transition-all duration-300 ${i < lives ? '' : 'grayscale opacity-30'}`}>
               {i < lives ? '❤️' : '🖤'}
             </span>
           ))}
         </div>
-        <span className="font-bold text-yellow-400">⭐ {score}</span>
-        <span className={`font-bold ${timeLeft <= 5 ? 'text-red-400 animate-pulse' : 'text-slate-400'}`}>
+        <span className="font-bold text-amber-500">⭐ {score}</span>
+        <span className={`font-bold ${timeLeft <= 5 ? 'text-rose-500 animate-pulse' : 'text-pastel-muted dark:text-slate-400'}`}>
           ⏱ {timeLeft}s
         </span>
       </div>
 
       {combo >= 3 && (
-        <div className="text-xs text-yellow-400 font-bold animate-bounce-in">
+        <div className="text-xs text-amber-500 font-bold animate-bounce-in bg-amber-50 dark:bg-amber-900/20 px-3 py-1 rounded-full">
           🔥 Combo x{combo}!
         </div>
       )}
 
       {!started ? (
         <div className="flex flex-col items-center gap-4 py-8">
-          <span className="text-5xl">🍕</span>
-          <p className="text-slate-400 text-sm text-center max-w-xs">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-300/30">
+            <span className="text-3xl">🍕</span>
+          </div>
+          <p className="text-pastel-muted dark:text-slate-400 text-sm text-center max-w-xs">
             ¡Atrapa comida 🍎, evita bombas 💣!<br />
-            Si dejas caer 3 items, pierdes.
+            Si dejas caer 3 alimentos buenos, pierdes.
           </p>
           <button
             onClick={() => setStarted(true)}
-            className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-xl font-medium transition-colors"
+            className="px-6 py-3 bg-gradient-to-r from-orange-400 to-amber-500 hover:brightness-110 text-white rounded-2xl font-semibold shadow-lg shadow-orange-400/25 active:scale-95 transition-all"
           >
             ¡Comenzar!
           </button>
@@ -193,10 +195,10 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
       ) : (
         <div
           ref={containerRef}
-          className="relative w-full h-72 md:h-80 bg-slate-900/50 rounded-xl overflow-hidden border border-slate-700/50 cursor-pointer select-none"
+          className="relative w-full h-72 md:h-80 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl overflow-hidden border border-pastel-border/20 dark:border-slate-700/50 cursor-pointer select-none"
         >
           {/* Danger zone indicator */}
-          <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-red-900/20 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-rose-500/10 to-transparent pointer-events-none" />
 
           {items.map(item => (
             <button
@@ -216,20 +218,13 @@ export function CatchTreats({ onFinish }: CatchTreatsProps) {
             </button>
           ))}
 
-          {/* Lost lives flash */}
-          {missed > 0 && (
-            <div className="absolute top-2 right-2 text-xs text-red-400 font-bold animate-float-up pointer-events-none">
-              ❌
-            </div>
-          )}
-
           {finished && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-              <div className="text-center space-y-2 animate-bounce-in">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+              <div className="text-center space-y-2 animate-bounce-in bg-white/80 dark:bg-slate-800/80 rounded-2xl p-6 shadow-xl">
                 <p className="text-4xl">{missed >= MAX_LIVES ? '💔' : '⏰'}</p>
-                <p className="text-lg font-bold">{missed >= MAX_LIVES ? '¡Perdiste!' : '¡Tiempo!'}</p>
-                <p className="text-yellow-400 font-medium text-lg">⭐ {Math.max(0, score)} pts</p>
-                <p className="text-xs text-slate-400">Atrapados: {caught} | Fallados: {missed}</p>
+                <p className="text-lg font-bold text-pastel-foreground dark:text-white">{missed >= MAX_LIVES ? '¡Perdiste!' : '¡Tiempo!'}</p>
+                <p className="text-amber-500 font-bold text-lg">⭐ {Math.max(0, score)} pts</p>
+                <p className="text-xs text-pastel-muted dark:text-slate-400">Atrapados: {caught} | Fallados: {missed}</p>
               </div>
             </div>
           )}
